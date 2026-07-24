@@ -160,3 +160,85 @@ function md5(bytes){
  a=a+oa|0;b=b+ob|0;c=c+oc|0;d=d+od|0}
  return [a,b,c,d].map(x=>[0,8,16,24].map(s=>('0'+((x>>>s)&255).toString(16)).slice(-2)).join('')).join('').toUpperCase();
 }
+
+/* ======================================================
+   SSOCAC Reply Knowledge Builder V2.2
+   ประมวลผลไฟล์ตอบกลับใน Browser และเก็บเฉพาะ Error Code
+====================================================== */
+const replyKnowledgeState={fileName:'',items:[]};
+const ssocacSeedKnowledge={
+  CD1:{description:'ไม่มีรหัสวินิจฉัยที่สอดคล้องกับ Protocol',cause:'ตรวจสอบรหัสวินิจฉัยและ Protocol ที่ใช้ในรายการ',solution:'ตรวจ OPDx และรหัส Protocol ให้สัมพันธ์กับเงื่อนไข SSOCAC'},
+  CE3:{description:'มีการเบิก CAC แต่รหัส Protocol (Billtran.Vercode) ไม่ถูกต้อง',cause:'Billtran.VerCode ไม่ตรงกับ Protocol ที่ได้รับอนุมัติ',solution:'ตรวจและแก้ Billtran.VerCode ให้เป็น Protocol Code ที่ถูกต้อง'}
+};
+function decodeReplyFile(bytes){
+  const decoders=['windows-874','utf-8'];
+  for(const enc of decoders){try{const t=new TextDecoder(enc).decode(bytes).replace(/\u0000/g,'');if(t.includes('CheckCode')||t.includes('เอกสารตอบรับ'))return t}catch(e){}}
+  return new TextDecoder('windows-874').decode(bytes).replace(/\u0000/g,'');
+}
+function parseSSOCACReplyKnowledge(text){
+  const lines=text.replace(/\r/g,'').split('\n');
+  const descriptions=new Map();
+  let inCheckSection=false;
+  for(const raw of lines){
+    const line=raw.trim();
+    if(/คำอธิบายรหัส\s*:\s*CheckCode/i.test(line)){inCheckSection=true;continue}
+    if(inCheckSection){
+      if(/^หมายเหตุ/.test(line))break;
+      const m=line.match(/^([A-Z]{1,4}\d{1,4})\s*[:：]\s*(.+)$/i);
+      if(m)descriptions.set(m[1].toUpperCase(),m[2].trim());
+    }
+  }
+  const counts=new Map();
+  const dataPart=text.split(/คำอธิบายรหัส\s*:\s*CheckCode/i)[0];
+  const codeTokens=dataPart.match(/\b[A-Z]{1,4}\d{1,4}\b/g)||[];
+  for(const code of codeTokens){
+    const c=code.toUpperCase();
+    if(/^C\d+$/.test(c) || /^S\d+$/.test(c) || /^R\d+$/.test(c) || /^CD\d+$/.test(c) || /^CE\d+$/.test(c)) counts.set(c,(counts.get(c)||0)+1);
+  }
+  for(const code of descriptions.keys())if(!counts.has(code))counts.set(code,1);
+  return [...counts.entries()].map(([code,count])=>({
+    module:'SSOCAC',code,count,
+    description:descriptions.get(code)||ssocacSeedKnowledge[code]?.description||'ไม่พบคำอธิบายในไฟล์ตอบกลับ',
+    cause:ssocacSeedKnowledge[code]?.cause||'',
+    solution:ssocacSeedKnowledge[code]?.solution||''
+  })).sort((a,b)=>a.code.localeCompare(b.code));
+}
+async function analyzeSSOCACReply(){
+  const input=document.getElementById('replyFileInput');
+  const file=input?.files?.[0];
+  if(!file){toast('ยังไม่ได้เลือกไฟล์','กรุณาเลือกไฟล์ตอบกลับ .BIL หรือ .txt','warning');return}
+  try{
+    const bytes=new Uint8Array(await file.arrayBuffer());
+    const text=decodeReplyFile(bytes);
+    if(!/SSOCAC/i.test(text)){
+      const ok=await showDialog('ตรวจไม่พบคำว่า SSOCAC','ไฟล์นี้อาจไม่ใช่ไฟล์ตอบกลับ Cancer Care ต้องการวิเคราะห์ต่อหรือไม่','warning',[{text:'ยกเลิก',value:false,className:'soft'},{text:'วิเคราะห์ต่อ',value:true,className:'primary'}]);
+      if(!ok)return;
+    }
+    replyKnowledgeState.fileName=file.name;
+    replyKnowledgeState.items=parseSSOCACReplyKnowledge(text);
+    renderReplyKnowledge();
+    if(replyKnowledgeState.items.length)toast('วิเคราะห์สำเร็จ',`พบ Error Code ${replyKnowledgeState.items.length} รหัส โดยไม่จัดเก็บข้อมูลผู้ป่วย`,'success');
+    else toast('ไม่พบ Error Code','ยังไม่พบรูปแบบ CheckCode ที่ระบบรองรับในไฟล์นี้','warning');
+  }catch(err){showDialog('อ่านไฟล์ไม่สำเร็จ',err?.message||String(err),'error')}
+}
+function renderReplyKnowledge(){
+  const items=replyKnowledgeState.items;
+  const summary=document.getElementById('replySummary'),wrap=document.getElementById('replyKnowledgeWrap'),body=document.getElementById('replyKnowledgeBody');
+  summary.classList.remove('hidden');wrap.classList.toggle('hidden',!items.length);
+  const total=items.reduce((s,x)=>s+x.count,0),known=items.filter(x=>x.cause||x.solution).length;
+  summary.innerHTML=`<div class="reply-summary-card"><div class="reply-stat"><b>${items.length}</b><span>Error Code ไม่ซ้ำ</span></div><div class="reply-stat"><b>${total}</b><span>จำนวนที่ตรวจพบ</span></div><div class="reply-stat"><b>${known}</b><span>มีแนวทางแก้เริ่มต้น</span></div></div>`;
+  body.innerHTML=items.map((x,i)=>`<tr><td>${escapeHtml(x.code)}<div class="meta">SSOCAC</div></td><td>${escapeHtml(x.description)}</td><td><textarea data-reply-index="${i}" data-field="cause" placeholder="เพิ่มสาเหตุหรือข้อสังเกต...">${escapeHtml(x.cause)}</textarea></td><td><textarea data-reply-index="${i}" data-field="solution" placeholder="เพิ่มแนวทางแก้...">${escapeHtml(x.solution)}</textarea></td><td>${x.count}</td></tr>`).join('');
+  body.querySelectorAll('textarea').forEach(el=>el.addEventListener('input',()=>{const i=Number(el.dataset.replyIndex);replyKnowledgeState.items[i][el.dataset.field]=el.value}));
+}
+function csvCell(v){return `"${String(v??'').replace(/"/g,'""')}"`}
+function exportReplyKnowledgeCSV(){
+  if(!replyKnowledgeState.items.length){toast('ไม่มีข้อมูล','กรุณาวิเคราะห์ไฟล์ตอบกลับก่อน','warning');return}
+  const headers=['Module','ErrorCode','Description','Cause','Solution','Count','SourceFile'];
+  const rows=replyKnowledgeState.items.map(x=>[x.module,x.code,x.description,x.cause,x.solution,x.count,replyKnowledgeState.fileName]);
+  const csv='\uFEFF'+[headers,...rows].map(r=>r.map(csvCell).join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=`SSOCAC_Error_Knowledge_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  toast('ส่งออกแล้ว','ไฟล์ CSV มีเฉพาะ Error Code และองค์ความรู้ ไม่มีข้อมูลผู้ป่วย','success');
+}
+document.getElementById('analyzeReplyBtn')?.addEventListener('click',analyzeSSOCACReply);
+document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportReplyKnowledgeCSV);
