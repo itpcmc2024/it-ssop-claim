@@ -1,12 +1,12 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V2.3.3
+SSOP Toolkit Professional Edition V2.3.4
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
 */
 const state={file:null,fileName:'',originalText:'',doc:null,activeSection:'',originalDoc:null,selected:new Set()};
-window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),900);loadDocumentLinks();loadFieldGuideOverrides();});
+window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),900);loadDocumentLinks();});
 const aboutModal=document.getElementById('aboutModal');
 document.querySelectorAll('[data-open-about]').forEach(btn=>btn.addEventListener('click',()=>{aboutModal.classList.add('show');aboutModal.setAttribute('aria-hidden','false')}));
 document.getElementById('aboutClose').addEventListener('click',()=>{aboutModal.classList.remove('show');aboutModal.setAttribute('aria-hidden','true')});
@@ -164,10 +164,9 @@ function validateSSOCAC(){
 }
 function renderDictionary(){
  const order=['BILLTRAN','BillItems','Dispensing','DispensedItems','OPServices','OPDx'];
- document.getElementById('dictionaryBody').innerHTML=order.map(sec=>{const rows=fieldMeta[sec]||[];return `<div class="dict-section"><h3>${escapeHtml(sec)}</h3><table class="dict-table"><thead><tr><th style="width:50px">ลำดับ</th><th style="width:180px">ชื่อฟิลด์</th><th>ความหมาย</th><th style="width:250px">เงื่อนไข/ตัวอย่าง</th></tr></thead><tbody>${rows.map((m,i)=>`<tr><td>${i+1}</td><td class="${m[3]==='important'?'dict-important':''}">${escapeHtml(m[0])}${m[3]==='important'?' ★':''}</td><td>${escapeHtml(m[1]||'')}</td><td><textarea class="field-guide-input" data-section="${escapeAttr(sec)}" data-field-name="${escapeAttr(m[0])}" placeholder="กรอกเงื่อนไขหรือตัวอย่าง...">${escapeHtml(getConditionExample(sec,m))}</textarea></td></tr>`).join('')}</tbody></table></div>`}).join('');
- document.querySelectorAll('.field-guide-input').forEach(el=>el.addEventListener('input',()=>{fieldGuideState.dirty.set(fieldGuideKey(el.dataset.section,el.dataset.fieldName),{Section:el.dataset.section,FieldName:el.dataset.fieldName,ConditionExample:el.value});}));
+ document.getElementById('dictionaryBody').innerHTML=order.map(sec=>{const rows=fieldMeta[sec]||[];return `<div class="dict-section"><h3>${escapeHtml(sec)}</h3><table class="dict-table"><thead><tr><th style="width:50px">ลำดับ</th><th style="width:180px">ชื่อฟิลด์</th><th>ความหมาย</th><th style="width:250px">เงื่อนไข/ตัวอย่าง</th></tr></thead><tbody>${rows.map((m,i)=>`<tr><td>${i+1}</td><td class="${m[3]==='important'?'dict-important':''}">${escapeHtml(m[0])}${m[3]==='important'?' ★':''}</td><td>${escapeHtml(m[1]||'')}</td><td>${escapeHtml(String(m[2]||'-'))}</td></tr>`).join('')}</tbody></table></div>`}).join('');
 }
-const dictionaryModal=document.getElementById('dictionaryModal');document.getElementById('dictionaryBtn').onclick=async()=>{dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');await loadFieldGuideOverrides();renderDictionary();};document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
+const dictionaryModal=document.getElementById('dictionaryModal');document.getElementById('dictionaryBtn').onclick=()=>{dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');renderDictionary();};document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
 function md5(bytes){
  function cmn(q,a,b,x,s,t){return (((a+q+x+t)|0)<<s|((a+q+x+t)|0)>>>32-s)+b|0}function ff(a,b,c,d,x,s,t){return cmn((b&c)|(~b&d),a,b,x,s,t)}function gg(a,b,c,d,x,s,t){return cmn((b&d)|(c&~d),a,b,x,s,t)}function hh(a,b,c,d,x,s,t){return cmn(b^c^d,a,b,x,s,t)}function ii(a,b,c,d,x,s,t){return cmn(c^(b|~d),a,b,x,s,t)}
  const len=bytes.length,bit=len*8,n=((len+8>>6)+1)*16,w=new Int32Array(n);for(let i=0;i<len;i++)w[i>>2]|=bytes[i]<<((i%4)*8);w[len>>2]|=0x80<<((len%4)*8);w[n-2]=bit;
@@ -329,8 +328,19 @@ async function saveReplyKnowledge(){
   }catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6000);}
   finally{confirmBtn.disabled=false;confirmBtn.textContent='บันทึกข้อมูล';}
 }
-function knowledgeCard(item){
-  return `<article class="knowledge-card"><div class="knowledge-card-head"><div><strong>${escapeHtml(item.ErrorCode||'-')}</strong><span>${escapeHtml(item.Module||'-')}</span></div><span class="db-badge ok">${item.Active===false?'ปิดใช้งาน':'ใช้งาน'}</span></div><h3>${escapeHtml(item.Description||'ยังไม่มีคำอธิบาย')}</h3><div class="knowledge-grid"><div><b>สาเหตุ/ข้อสังเกต</b><p>${escapeHtml(item.Cause||'-')}</p></div><div><b>แนวทางแก้</b><p>${escapeHtml(item.Solution||'-')}</p></div><div><b>ไฟล์ที่เกี่ยวข้อง</b><p>${escapeHtml(item.RelatedFile||'-')}</p></div><div><b>ฟิลด์ที่เกี่ยวข้อง</b><p>${escapeHtml(item.RelatedField||'-')}</p></div></div>${item.Tips?`<div class="knowledge-tips"><b>Tips:</b> ${escapeHtml(item.Tips)}</div>`:''}<div class="meta">อัปเดต ${escapeHtml(item.UpdatedAt||'-')} โดย ${escapeHtml(item.UpdatedBy||'-')}</div></article>`;
+function knowledgeCard(item,index){
+  return `<article class="knowledge-card" data-knowledge-index="${index}">
+    <div class="knowledge-card-head"><div><strong>${escapeHtml(item.ErrorCode||'-')}</strong><span>${escapeHtml(item.Module||'-')}</span></div><span class="db-badge ok">${item.Active===false?'ปิดใช้งาน':'ใช้งาน'}</span></div>
+    <h3>${escapeHtml(item.Description||'ยังไม่มีคำอธิบาย')}</h3>
+    <div class="knowledge-grid">
+      <div><b>สาเหตุ/ข้อสังเกต</b><p>${escapeHtml(item.Cause||'-')}</p></div>
+      <div><b>แนวทางแก้</b><textarea class="knowledge-edit-textarea" data-k-index="${index}" data-k-field="Solution" placeholder="กรอกแนวทางแก้...">${escapeHtml(item.Solution||'')}</textarea></div>
+      <div><b>ไฟล์ที่เกี่ยวข้อง</b><input class="knowledge-edit-input" data-k-index="${index}" data-k-field="RelatedFile" value="${escapeAttr(item.RelatedFile||'')}" placeholder="เช่น BILLTRAN" /></div>
+      <div><b>ฟิลด์ที่เกี่ยวข้อง</b><input class="knowledge-edit-input" data-k-index="${index}" data-k-field="RelatedField" value="${escapeAttr(item.RelatedField||'')}" placeholder="เช่น VerCode" /></div>
+    </div>
+    ${item.Tips?`<div class="knowledge-tips"><b>Tips:</b> ${escapeHtml(item.Tips)}</div>`:''}
+    <div class="knowledge-card-footer"><div class="meta">อัปเดต ${escapeHtml(item.UpdatedAt||'-')} โดย ${escapeHtml(item.UpdatedBy||'-')}</div><button class="primary knowledge-edit-save" data-k-save-index="${index}">💾 บันทึกการแก้ไข</button></div>
+  </article>`;
 }
 async function loadKnowledge(query='',module='ALL'){
   const box=document.getElementById('knowledgeResults'),status=document.getElementById('knowledgeStatus');
@@ -340,11 +350,43 @@ async function loadKnowledge(query='',module='ALL'){
     const data=await apiRequest('searchKnowledge',{query,module,limit:300});
     knowledgeCache=data.items||[];
     status.textContent=`เชื่อมต่อฐานข้อมูลแล้ว · พบ ${knowledgeCache.length} รายการ`;
-    box.innerHTML=knowledgeCache.length?knowledgeCache.map(knowledgeCard).join(''):'<div class="knowledge-empty">ไม่พบข้อมูลที่ค้นหา</div>';
+    box.innerHTML=knowledgeCache.length?knowledgeCache.map((item,index)=>knowledgeCard(item,index)).join(''):'<div class="knowledge-empty">ไม่พบข้อมูลที่ค้นหา</div>'; bindKnowledgeEditors();
   }catch(err){
     status.textContent=err.message;
     box.innerHTML=`<div class="knowledge-empty error">${escapeHtml(err.message)}</div>`;
   }
+}
+function bindKnowledgeEditors(){
+  document.querySelectorAll('[data-k-field]').forEach(el=>el.addEventListener('input',()=>{
+    const index=Number(el.dataset.kIndex); const field=el.dataset.kField;
+    if(knowledgeCache[index]) knowledgeCache[index][field]=el.value;
+  }));
+  document.querySelectorAll('[data-k-save-index]').forEach(btn=>btn.addEventListener('click',()=>openKnowledgeEditModal(Number(btn.dataset.kSaveIndex))));
+}
+function openKnowledgeEditModal(index){
+  if(!knowledgeCache[index]) return;
+  document.getElementById('knowledgeEditIndex').value=String(index);
+  document.getElementById('knowledgeEditWritePin').value='';
+  const modal=document.getElementById('knowledgeEditModal');modal.classList.add('show');modal.setAttribute('aria-hidden','false');
+  setTimeout(()=>document.getElementById('knowledgeEditUpdatedBy').focus(),80);
+}
+function closeKnowledgeEditModal(){const modal=document.getElementById('knowledgeEditModal');modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
+async function saveKnowledgeEdit(){
+  const index=Number(document.getElementById('knowledgeEditIndex').value);
+  const item=knowledgeCache[index];
+  const updatedBy=document.getElementById('knowledgeEditUpdatedBy').value.trim();
+  const writePin=document.getElementById('knowledgeEditWritePin').value.trim();
+  if(!item){toast('ไม่พบรายการ','กรุณาค้นหาข้อมูลใหม่อีกครั้ง','error');return;}
+  if(!updatedBy||!writePin){toast('ข้อมูลไม่ครบ','กรุณากรอกชื่อผู้แก้ไขและ PIN','warning');return;}
+  const btn=document.getElementById('knowledgeEditConfirm');btn.disabled=true;btn.textContent='กำลังบันทึก...';
+  try{
+    const payload={Module:item.Module,ErrorCode:item.ErrorCode,Description:item.Description,Cause:item.Cause,Solution:item.Solution||'',RelatedFile:item.RelatedFile||'',RelatedField:item.RelatedField||'',Tips:item.Tips||'',UpdatedBy:updatedBy,Active:item.Active!==false};
+    await apiRequest('upsertKnowledge',{items:[payload],writePin});
+    item.UpdatedBy=updatedBy;item.UpdatedAt=new Date().toLocaleDateString('en-US');
+    closeKnowledgeEditModal();toast('บันทึกสำเร็จ',`${item.ErrorCode} ได้รับการอัปเดตแล้ว`,'success');
+    runKnowledgeSearch();
+  }catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500);}
+  finally{btn.disabled=false;btn.textContent='บันทึกการแก้ไข';}
 }
 function runKnowledgeSearch(){loadKnowledge(document.getElementById('knowledgeSearchInput').value.trim(),document.getElementById('knowledgeModuleFilter').value);}
 
@@ -376,14 +418,6 @@ async function uploadDocument(){
  try{const base64=await fileToBase64(file);const data=await apiRequest('uploadDocument',{documentType:type,base64,updatedBy,writePin});documentState[type]=data.item;closeDocumentUploadModal();toast('อัปเดตเอกสารสำเร็จ',`${data.item.fileName} พร้อมเปิดใช้งานแล้ว`,'success');}
  catch(err){toast('อัปโหลดไม่สำเร็จ',err.message,'error',6500);}finally{btn.disabled=false;btn.textContent='อัปโหลดและแทนที่';}
 }
-function openFieldGuideSaveModal(){if(!fieldGuideState.dirty.size){toast('ยังไม่มีการแก้ไข','กรุณาแก้ไขช่องเงื่อนไข/ตัวอย่างก่อนบันทึก','info');return;}document.getElementById('fieldGuideWritePin').value='';const m=document.getElementById('fieldGuideSaveModal');m.classList.add('show');m.setAttribute('aria-hidden','false');}
-function closeFieldGuideSaveModal(){const m=document.getElementById('fieldGuideSaveModal');m.classList.remove('show');m.setAttribute('aria-hidden','true');}
-async function saveFieldGuide(){
- const updatedBy=document.getElementById('fieldGuideUpdatedBy').value.trim(),writePin=document.getElementById('fieldGuideWritePin').value.trim();if(!updatedBy||!writePin){toast('ข้อมูลไม่ครบ','กรุณากรอกชื่อผู้ปรับปรุงและ PIN','warning');return;}
- const items=[...fieldGuideState.dirty.values()].map(x=>({...x,UpdatedBy:updatedBy,Active:true}));const btn=document.getElementById('fieldGuideSaveConfirm');btn.disabled=true;btn.textContent='กำลังบันทึก...';
- try{const data=await apiRequest('upsertFieldGuide',{items,writePin});items.forEach(x=>fieldGuideState.overrides.set(fieldGuideKey(x.Section,x.FieldName),x.ConditionExample));fieldGuideState.dirty.clear();closeFieldGuideSaveModal();toast('บันทึกคู่มือฟิลด์สำเร็จ',`เพิ่ม ${data.inserted||0} รายการ และอัปเดต ${data.updated||0} รายการ`,'success');}
- catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500);}finally{btn.disabled=false;btn.textContent='บันทึกข้อมูล';}
-}
 
 document.getElementById('knowledgeSearchBtn')?.addEventListener('click',runKnowledgeSearch);
 document.getElementById('knowledgeReloadBtn')?.addEventListener('click',()=>loadKnowledge('','ALL'));
@@ -401,10 +435,12 @@ document.querySelectorAll('[data-document-type]').forEach(btn=>btn.addEventListe
 document.getElementById('documentUploadConfirm')?.addEventListener('click',uploadDocument);
 document.getElementById('documentUploadCancel')?.addEventListener('click',closeDocumentUploadModal);
 document.getElementById('documentUploadClose')?.addEventListener('click',closeDocumentUploadModal);
-document.getElementById('saveFieldGuideBtn')?.addEventListener('click',openFieldGuideSaveModal);
-document.getElementById('fieldGuideSaveConfirm')?.addEventListener('click',saveFieldGuide);
-document.getElementById('fieldGuideSaveCancel')?.addEventListener('click',closeFieldGuideSaveModal);
-document.getElementById('fieldGuideSaveClose')?.addEventListener('click',closeFieldGuideSaveModal);
+
+document.getElementById('knowledgeEditConfirm')?.addEventListener('click',saveKnowledgeEdit);
+document.getElementById('knowledgeEditCancel')?.addEventListener('click',closeKnowledgeEditModal);
+document.getElementById('knowledgeEditClose')?.addEventListener('click',closeKnowledgeEditModal);
+document.getElementById('knowledgeEditModal')?.addEventListener('click',e=>{if(e.target.id==='knowledgeEditModal')closeKnowledgeEditModal();});
+document.getElementById('knowledgeEditWritePin')?.addEventListener('keydown',e=>{if(e.key==='Enter')saveKnowledgeEdit();});
 
 document.getElementById('analyzeReplyBtn')?.addEventListener('click',analyzeSSOCACReply);
 document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportReplyKnowledgeCSV);
