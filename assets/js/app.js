@@ -1,12 +1,12 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V2.3.2
+SSOP Toolkit Professional Edition V2.3.3
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
 */
 const state={file:null,fileName:'',originalText:'',doc:null,activeSection:'',originalDoc:null,selected:new Set()};
-window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),900)});
+window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),900);loadDocumentLinks();loadFieldGuideOverrides();});
 const aboutModal=document.getElementById('aboutModal');
 document.querySelectorAll('[data-open-about]').forEach(btn=>btn.addEventListener('click',()=>{aboutModal.classList.add('show');aboutModal.setAttribute('aria-hidden','false')}));
 document.getElementById('aboutClose').addEventListener('click',()=>{aboutModal.classList.remove('show');aboutModal.setAttribute('aria-hidden','true')});
@@ -55,6 +55,12 @@ const fieldMeta={
   ['Class','ประเภทข้อมูลบริการ'],['SvID','รหัสอ้างอิงบริการ'],['Sequence','ลำดับวินิจฉัย'],['CodeSet','ชุดรหัสวินิจฉัย'],['DiagnosisCode','รหัสวินิจฉัย'],['VerCode','รหัส Protocol การรักษามะเร็งตามอนุมัติ เช่น C0111','C0111','important']
  ]
 };
+
+const documentState={ANNOUNCEMENT:null,PROTOCOL:null};
+const fieldGuideState={overrides:new Map(),dirty:new Map()};
+function fieldGuideKey(section,fieldName){return `${String(section).trim().toUpperCase()}|${String(fieldName).trim().toUpperCase()}`;}
+function getConditionExample(section,meta){const key=fieldGuideKey(section,meta[0]);return fieldGuideState.overrides.has(key)?fieldGuideState.overrides.get(key):String(meta[2]||'');}
+
 const labels=Object.fromEntries(Object.entries(fieldMeta).map(([k,v])=>[k,v.map(x=>x[0])]));
 const sectionInfo={
  BILLTRAN:{title:'ข้อมูลธุรกรรมทางการเงินและการพิสูจน์ตัวตน',desc:'ข้อมูลสรุปภาพรวมของใบแจ้งหนี้',format:'Station | AuthCode | DTTran | Hcode | InvNo | BillNo | HN | MemberNo | Amount | Paid | VerCode | Tflag | …',important:['AuthCode, MemberNo, VerCode และ Tflag เป็นจุดที่ผู้ใช้ต้องตรวจสอบก่อนส่ง'],importantCols:[1,7,10,11]},
@@ -103,7 +109,7 @@ function renderTable(){
  const indexed=rows.map((r,i)=>({r,i})).filter(x=>!q||x.r.join(' ').toLowerCase().includes(q)).slice(0,limit);
  const cols=Math.max(0,...rows.map(r=>r.length));const names=labels[state.activeSection]||[];
  const importantCols=(sectionInfo[state.activeSection]?.importantCols)||[];
- document.getElementById('tableHead').innerHTML='<tr><th class="rownum"><input type="checkbox" id="selectAll"></th>'+Array.from({length:cols},(_,i)=>{const meta=(fieldMeta[state.activeSection]||[])[i];const name=meta?.[0]||'คอลัมน์ '+(i+1);const desc=meta?.[1]||'ยังไม่มีคำอธิบายสำหรับฟิลด์นี้';const example=meta?.[2]||'';const imp=importantCols.includes(i)||meta?.[3]==='important';return `<th class="field-tip ${imp?'important-head':''}" data-tip-title="${escapeAttr(name)}" data-tip-desc="${escapeAttr(desc)}" data-tip-example="${escapeAttr(example)}"><span class="head-wrap">${escapeHtml(name)}${imp?'<span class="required-star">★</span>':''}<span class="tip-dot">i</span></span></th>`}).join('')+'</tr>';
+ document.getElementById('tableHead').innerHTML='<tr><th class="rownum"><input type="checkbox" id="selectAll"></th>'+Array.from({length:cols},(_,i)=>{const meta=(fieldMeta[state.activeSection]||[])[i];const name=meta?.[0]||'คอลัมน์ '+(i+1);const desc=meta?.[1]||'ยังไม่มีคำอธิบายสำหรับฟิลด์นี้';const example=meta?getConditionExample(state.activeSection,meta):'';const imp=importantCols.includes(i)||meta?.[3]==='important';return `<th class="field-tip ${imp?'important-head':''}" data-tip-title="${escapeAttr(name)}" data-tip-desc="${escapeAttr(desc)}" data-tip-example="${escapeAttr(example)}"><span class="head-wrap">${escapeHtml(name)}${imp?'<span class="required-star">★</span>':''}<span class="tip-dot">i</span></span></th>`}).join('')+'</tr>';
  const body=document.getElementById('tableBody');body.innerHTML='';indexed.forEach(({r,i})=>{const tr=document.createElement('tr');tr.innerHTML=`<td class="rownum"><input type="checkbox" data-select="${i}" ${state.selected.has(i)?'checked':''}> ${i+1}</td>`+Array.from({length:cols},(_,c)=>`<td contenteditable="true" data-row="${i}" data-col="${c}">${escapeHtml(r[c]??'')}</td>`).join('');body.appendChild(tr)});
  body.querySelectorAll('td[contenteditable]').forEach(td=>td.addEventListener('input',e=>{const r=+e.target.dataset.row,c=+e.target.dataset.col;state.doc.sections[state.activeSection][r][c]=e.target.textContent;e.target.classList.add('changed');markChanged();updateChecksum()}));
  body.querySelectorAll('[data-select]').forEach(x=>x.onchange=e=>e.target.checked?state.selected.add(+e.target.dataset.select):state.selected.delete(+e.target.dataset.select));
@@ -158,9 +164,10 @@ function validateSSOCAC(){
 }
 function renderDictionary(){
  const order=['BILLTRAN','BillItems','Dispensing','DispensedItems','OPServices','OPDx'];
- document.getElementById('dictionaryBody').innerHTML=order.map(sec=>{const rows=fieldMeta[sec]||[];return `<div class="dict-section"><h3>${escapeHtml(sec)}</h3><table class="dict-table"><thead><tr><th style="width:50px">ลำดับ</th><th style="width:180px">ชื่อฟิลด์</th><th>ความหมาย</th><th style="width:170px">เงื่อนไข/ตัวอย่าง</th></tr></thead><tbody>${rows.map((m,i)=>`<tr><td>${i+1}</td><td class="${m[3]==='important'?'dict-important':''}">${escapeHtml(m[0])}${m[3]==='important'?' ★':''}</td><td>${escapeHtml(m[1]||'')}</td><td>${escapeHtml(m[2]||'-')}</td></tr>`).join('')}</tbody></table></div>`}).join('');
+ document.getElementById('dictionaryBody').innerHTML=order.map(sec=>{const rows=fieldMeta[sec]||[];return `<div class="dict-section"><h3>${escapeHtml(sec)}</h3><table class="dict-table"><thead><tr><th style="width:50px">ลำดับ</th><th style="width:180px">ชื่อฟิลด์</th><th>ความหมาย</th><th style="width:250px">เงื่อนไข/ตัวอย่าง</th></tr></thead><tbody>${rows.map((m,i)=>`<tr><td>${i+1}</td><td class="${m[3]==='important'?'dict-important':''}">${escapeHtml(m[0])}${m[3]==='important'?' ★':''}</td><td>${escapeHtml(m[1]||'')}</td><td><textarea class="field-guide-input" data-section="${escapeAttr(sec)}" data-field-name="${escapeAttr(m[0])}" placeholder="กรอกเงื่อนไขหรือตัวอย่าง...">${escapeHtml(getConditionExample(sec,m))}</textarea></td></tr>`).join('')}</tbody></table></div>`}).join('');
+ document.querySelectorAll('.field-guide-input').forEach(el=>el.addEventListener('input',()=>{fieldGuideState.dirty.set(fieldGuideKey(el.dataset.section,el.dataset.fieldName),{Section:el.dataset.section,FieldName:el.dataset.fieldName,ConditionExample:el.value});}));
 }
-const dictionaryModal=document.getElementById('dictionaryModal');document.getElementById('dictionaryBtn').onclick=()=>{renderDictionary();dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false')};document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
+const dictionaryModal=document.getElementById('dictionaryModal');document.getElementById('dictionaryBtn').onclick=async()=>{dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');await loadFieldGuideOverrides();renderDictionary();};document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
 function md5(bytes){
  function cmn(q,a,b,x,s,t){return (((a+q+x+t)|0)<<s|((a+q+x+t)|0)>>>32-s)+b|0}function ff(a,b,c,d,x,s,t){return cmn((b&c)|(~b&d),a,b,x,s,t)}function gg(a,b,c,d,x,s,t){return cmn((b&d)|(c&~d),a,b,x,s,t)}function hh(a,b,c,d,x,s,t){return cmn(b^c^d,a,b,x,s,t)}function ii(a,b,c,d,x,s,t){return cmn(c^(b|~d),a,b,x,s,t)}
  const len=bytes.length,bit=len*8,n=((len+8>>6)+1)*16,w=new Int32Array(n);for(let i=0;i<len;i++)w[i>>2]|=bytes[i]<<((i%4)*8);w[len>>2]|=0x80<<((len%4)*8);w[n-2]=bit;
@@ -175,7 +182,7 @@ function md5(bytes){
 }
 
 /* ======================================================
-   SSOCAC Reply Knowledge Builder V2.3.2
+   SSOCAC Reply Knowledge Builder V2.3.3
    ประมวลผลไฟล์ตอบกลับใน Browser และเก็บเฉพาะ Error Code
 ====================================================== */
 const replyKnowledgeState={fileName:'',items:[]};
@@ -340,6 +347,44 @@ async function loadKnowledge(query='',module='ALL'){
   }
 }
 function runKnowledgeSearch(){loadKnowledge(document.getElementById('knowledgeSearchInput').value.trim(),document.getElementById('knowledgeModuleFilter').value);}
+
+async function loadDocumentLinks(){
+ try{const data=await apiRequest('getDocuments');(data.items||[]).forEach(x=>documentState[x.type]=x);}
+ catch(err){console.warn('Document API:',err.message);}
+}
+async function openDocument(type){
+ if(!documentState[type]) await loadDocumentLinks();
+ const item=documentState[type];
+ if(!item?.url){toast('ยังไม่พบไฟล์ PDF',type==='ANNOUNCEMENT'?'ยังไม่พบ CHI68-A02.pdf ในโฟลเดอร์':'ยังไม่พบ Protocol.pdf ในโฟลเดอร์','warning');return;}
+ window.open(item.url,'_blank','noopener');
+}
+function openDocumentUploadModal(type){
+ const names={ANNOUNCEMENT:['ประกาศ','CHI68-A02.pdf'],PROTOCOL:['รหัส Protocol','Protocol.pdf']};
+ const cfg=names[type];if(!cfg)return;
+ document.getElementById('documentUploadType').value=type;
+ document.getElementById('documentUploadTitle').textContent=`⬆ อัปเดต${cfg[0]}`;
+ document.getElementById('documentUploadHint').textContent=`ระบบจะบันทึกไฟล์ใหม่เป็น ${cfg[1]}`;
+ document.getElementById('documentUploadFile').value='';document.getElementById('documentWritePin').value='';
+ const modal=document.getElementById('documentUploadModal');modal.classList.add('show');modal.setAttribute('aria-hidden','false');
+}
+function closeDocumentUploadModal(){const modal=document.getElementById('documentUploadModal');modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
+function fileToBase64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]||'');r.onerror=()=>reject(new Error('อ่านไฟล์ PDF ไม่สำเร็จ'));r.readAsDataURL(file);});}
+async function uploadDocument(){
+ const type=document.getElementById('documentUploadType').value,file=document.getElementById('documentUploadFile').files[0],updatedBy=document.getElementById('documentUpdatedBy').value.trim(),writePin=document.getElementById('documentWritePin').value.trim();
+ if(!file){toast('ยังไม่ได้เลือกไฟล์','กรุณาเลือกไฟล์ PDF ฉบับใหม่','warning');return;}if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf')){toast('ชนิดไฟล์ไม่ถูกต้อง','รองรับเฉพาะไฟล์ PDF','warning');return;}if(file.size>12*1024*1024){toast('ไฟล์ใหญ่เกินไป','รองรับไฟล์ PDF ไม่เกิน 12 MB','warning');return;}if(!updatedBy||!writePin){toast('ข้อมูลไม่ครบ','กรุณากรอกชื่อผู้ปรับปรุงและ PIN','warning');return;}
+ const btn=document.getElementById('documentUploadConfirm');btn.disabled=true;btn.textContent='กำลังอัปโหลด...';
+ try{const base64=await fileToBase64(file);const data=await apiRequest('uploadDocument',{documentType:type,base64,updatedBy,writePin});documentState[type]=data.item;closeDocumentUploadModal();toast('อัปเดตเอกสารสำเร็จ',`${data.item.fileName} พร้อมเปิดใช้งานแล้ว`,'success');}
+ catch(err){toast('อัปโหลดไม่สำเร็จ',err.message,'error',6500);}finally{btn.disabled=false;btn.textContent='อัปโหลดและแทนที่';}
+}
+function openFieldGuideSaveModal(){if(!fieldGuideState.dirty.size){toast('ยังไม่มีการแก้ไข','กรุณาแก้ไขช่องเงื่อนไข/ตัวอย่างก่อนบันทึก','info');return;}document.getElementById('fieldGuideWritePin').value='';const m=document.getElementById('fieldGuideSaveModal');m.classList.add('show');m.setAttribute('aria-hidden','false');}
+function closeFieldGuideSaveModal(){const m=document.getElementById('fieldGuideSaveModal');m.classList.remove('show');m.setAttribute('aria-hidden','true');}
+async function saveFieldGuide(){
+ const updatedBy=document.getElementById('fieldGuideUpdatedBy').value.trim(),writePin=document.getElementById('fieldGuideWritePin').value.trim();if(!updatedBy||!writePin){toast('ข้อมูลไม่ครบ','กรุณากรอกชื่อผู้ปรับปรุงและ PIN','warning');return;}
+ const items=[...fieldGuideState.dirty.values()].map(x=>({...x,UpdatedBy:updatedBy,Active:true}));const btn=document.getElementById('fieldGuideSaveConfirm');btn.disabled=true;btn.textContent='กำลังบันทึก...';
+ try{const data=await apiRequest('upsertFieldGuide',{items,writePin});items.forEach(x=>fieldGuideState.overrides.set(fieldGuideKey(x.Section,x.FieldName),x.ConditionExample));fieldGuideState.dirty.clear();closeFieldGuideSaveModal();toast('บันทึกคู่มือฟิลด์สำเร็จ',`เพิ่ม ${data.inserted||0} รายการ และอัปเดต ${data.updated||0} รายการ`,'success');}
+ catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500);}finally{btn.disabled=false;btn.textContent='บันทึกข้อมูล';}
+}
+
 document.getElementById('knowledgeSearchBtn')?.addEventListener('click',runKnowledgeSearch);
 document.getElementById('knowledgeReloadBtn')?.addEventListener('click',()=>loadKnowledge('','ALL'));
 document.getElementById('knowledgeSearchInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')runKnowledgeSearch();});
@@ -349,6 +394,17 @@ document.getElementById('saveKnowledgeCancel')?.addEventListener('click',closeSa
 document.getElementById('saveKnowledgeClose')?.addEventListener('click',closeSaveKnowledgeModal);
 document.getElementById('saveKnowledgeModal')?.addEventListener('click',e=>{if(e.target.id==='saveKnowledgeModal')closeSaveKnowledgeModal();});
 document.getElementById('saveWritePin')?.addEventListener('keydown',e=>{if(e.key==='Enter')saveReplyKnowledge();});
+
+document.getElementById('announcementBtn')?.addEventListener('click',()=>openDocument('ANNOUNCEMENT'));
+document.getElementById('protocolBtn')?.addEventListener('click',()=>openDocument('PROTOCOL'));
+document.querySelectorAll('[data-document-type]').forEach(btn=>btn.addEventListener('click',()=>openDocumentUploadModal(btn.dataset.documentType)));
+document.getElementById('documentUploadConfirm')?.addEventListener('click',uploadDocument);
+document.getElementById('documentUploadCancel')?.addEventListener('click',closeDocumentUploadModal);
+document.getElementById('documentUploadClose')?.addEventListener('click',closeDocumentUploadModal);
+document.getElementById('saveFieldGuideBtn')?.addEventListener('click',openFieldGuideSaveModal);
+document.getElementById('fieldGuideSaveConfirm')?.addEventListener('click',saveFieldGuide);
+document.getElementById('fieldGuideSaveCancel')?.addEventListener('click',closeFieldGuideSaveModal);
+document.getElementById('fieldGuideSaveClose')?.addEventListener('click',closeFieldGuideSaveModal);
 
 document.getElementById('analyzeReplyBtn')?.addEventListener('click',analyzeSSOCACReply);
 document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportReplyKnowledgeCSV);
