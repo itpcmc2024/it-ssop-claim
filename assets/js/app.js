@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V2.3.1
+SSOP Toolkit Professional Edition V2.3.2
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -175,7 +175,7 @@ function md5(bytes){
 }
 
 /* ======================================================
-   SSOCAC Reply Knowledge Builder V2.3.1
+   SSOCAC Reply Knowledge Builder V2.3.2
    ประมวลผลไฟล์ตอบกลับใน Browser และเก็บเฉพาะ Error Code
 ====================================================== */
 const replyKnowledgeState={fileName:'',items:[]};
@@ -242,8 +242,8 @@ function renderReplyKnowledge(){
   summary.classList.remove('hidden');wrap.classList.toggle('hidden',!items.length);
   const total=items.reduce((s,x)=>s+x.count,0),known=items.filter(x=>x.cause||x.solution).length;
   summary.innerHTML=`<div class="reply-summary-card"><div class="reply-stat"><b>${items.length}</b><span>Error Code ไม่ซ้ำ</span></div><div class="reply-stat"><b>${total}</b><span>จำนวนที่ตรวจพบ</span></div><div class="reply-stat"><b>${known}</b><span>มีแนวทางแก้เริ่มต้น</span></div></div>`;
-  body.innerHTML=items.map((x,i)=>`<tr><td>${escapeHtml(x.code)}<div class="meta">SSOCAC</div></td><td>${escapeHtml(x.description)}</td><td><textarea data-reply-index="${i}" data-field="cause" placeholder="เพิ่มสาเหตุหรือข้อสังเกต...">${escapeHtml(x.cause)}</textarea></td><td><textarea data-reply-index="${i}" data-field="solution" placeholder="เพิ่มแนวทางแก้...">${escapeHtml(x.solution)}</textarea></td><td>${x.count}</td><td><span class="db-badge ${x.dbStatus==='มีในฐานข้อมูล'?'ok':'pending'}">${escapeHtml(x.dbStatus)}</span></td></tr>`).join('');
-  body.querySelectorAll('textarea').forEach(el=>el.addEventListener('input',()=>{const i=Number(el.dataset.replyIndex);replyKnowledgeState.items[i][el.dataset.field]=el.value}));
+  body.innerHTML=items.map((x,i)=>`<tr><td>${escapeHtml(x.code)}<div class="meta">SSOCAC</div></td><td>${escapeHtml(x.description)}</td><td><textarea data-reply-index="${i}" data-field="cause" placeholder="เพิ่มสาเหตุหรือข้อสังเกต...">${escapeHtml(x.cause)}</textarea></td><td><textarea data-reply-index="${i}" data-field="solution" placeholder="เพิ่มแนวทางแก้...">${escapeHtml(x.solution)}</textarea></td><td><input class="knowledge-inline-input" data-reply-index="${i}" data-field="relatedFile" placeholder="เช่น BILLTRAN" value="${escapeHtml(x.relatedFile||'')}"></td><td><input class="knowledge-inline-input" data-reply-index="${i}" data-field="relatedField" placeholder="เช่น VerCode" value="${escapeHtml(x.relatedField||'')}"></td><td>${x.count}</td><td><span class="db-badge ${x.dbStatus==='มีในฐานข้อมูล'?'ok':'pending'}">${escapeHtml(x.dbStatus)}</span></td></tr>`).join('');
+  body.querySelectorAll('textarea, input[data-reply-index]').forEach(el=>el.addEventListener('input',()=>{const i=Number(el.dataset.replyIndex);replyKnowledgeState.items[i][el.dataset.field]=el.value}));
 }
 function csvCell(v){return `"${String(v??'').replace(/"/g,'""')}"`}
 function exportReplyKnowledgeCSV(){
@@ -289,12 +289,26 @@ async function hydrateReplyKnowledgeFromDatabase(){
     toast('ยังไม่ได้เชื่อมฐานข้อมูล',err.message,'warning',5200);
   }
 }
-async function saveReplyKnowledge(){
+function openSaveKnowledgeModal(){
   if(!replyKnowledgeState.items.length){toast('ไม่มีข้อมูล','กรุณาวิเคราะห์ไฟล์ตอบกลับก่อน','warning');return;}
-  const updatedBy=prompt('ชื่อผู้บันทึก/ผู้แก้ไข','Kimhan');
-  if(!updatedBy)return;
-  const writePin=prompt('กรอกรหัส PIN สำหรับบันทึก Knowledge');
-  if(!writePin)return;
+  const modal=document.getElementById('saveKnowledgeModal');
+  document.getElementById('saveWritePin').value='';
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  setTimeout(()=>document.getElementById('saveUpdatedBy').focus(),80);
+}
+function closeSaveKnowledgeModal(){
+  const modal=document.getElementById('saveKnowledgeModal');
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+}
+async function saveReplyKnowledge(){
+  const updatedBy=document.getElementById('saveUpdatedBy').value.trim();
+  const writePin=document.getElementById('saveWritePin').value.trim();
+  if(!updatedBy){toast('กรอกชื่อผู้บันทึก','กรุณาระบุชื่อผู้บันทึกหรือผู้แก้ไข','warning');document.getElementById('saveUpdatedBy').focus();return;}
+  if(!writePin){toast('กรอก PIN','กรุณากรอกรหัส PIN สำหรับบันทึก Knowledge','warning');document.getElementById('saveWritePin').focus();return;}
+  const confirmBtn=document.getElementById('saveKnowledgeConfirm');
+  confirmBtn.disabled=true;confirmBtn.textContent='กำลังบันทึก...';
   try{
     const items=replyKnowledgeState.items.map(x=>({
       Module:'SSOCAC',ErrorCode:x.code,Description:x.description,Cause:x.cause,Solution:x.solution,
@@ -303,8 +317,10 @@ async function saveReplyKnowledge(){
     const data=await apiRequest('upsertKnowledge',{items,writePin});
     replyKnowledgeState.items.forEach(x=>x.dbStatus='มีในฐานข้อมูล');
     renderReplyKnowledge();
+    closeSaveKnowledgeModal();
     toast('บันทึกสำเร็จ',`เพิ่ม ${data.inserted||0} รายการ และอัปเดต ${data.updated||0} รายการ`,'success');
   }catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6000);}
+  finally{confirmBtn.disabled=false;confirmBtn.textContent='บันทึกข้อมูล';}
 }
 function knowledgeCard(item){
   return `<article class="knowledge-card"><div class="knowledge-card-head"><div><strong>${escapeHtml(item.ErrorCode||'-')}</strong><span>${escapeHtml(item.Module||'-')}</span></div><span class="db-badge ok">${item.Active===false?'ปิดใช้งาน':'ใช้งาน'}</span></div><h3>${escapeHtml(item.Description||'ยังไม่มีคำอธิบาย')}</h3><div class="knowledge-grid"><div><b>สาเหตุ/ข้อสังเกต</b><p>${escapeHtml(item.Cause||'-')}</p></div><div><b>แนวทางแก้</b><p>${escapeHtml(item.Solution||'-')}</p></div><div><b>ไฟล์ที่เกี่ยวข้อง</b><p>${escapeHtml(item.RelatedFile||'-')}</p></div><div><b>ฟิลด์ที่เกี่ยวข้อง</b><p>${escapeHtml(item.RelatedField||'-')}</p></div></div>${item.Tips?`<div class="knowledge-tips"><b>Tips:</b> ${escapeHtml(item.Tips)}</div>`:''}<div class="meta">อัปเดต ${escapeHtml(item.UpdatedAt||'-')} โดย ${escapeHtml(item.UpdatedBy||'-')}</div></article>`;
@@ -327,7 +343,12 @@ function runKnowledgeSearch(){loadKnowledge(document.getElementById('knowledgeSe
 document.getElementById('knowledgeSearchBtn')?.addEventListener('click',runKnowledgeSearch);
 document.getElementById('knowledgeReloadBtn')?.addEventListener('click',()=>loadKnowledge('','ALL'));
 document.getElementById('knowledgeSearchInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')runKnowledgeSearch();});
-document.getElementById('saveKnowledgeBtn')?.addEventListener('click',saveReplyKnowledge);
+document.getElementById('saveKnowledgeBtn')?.addEventListener('click',openSaveKnowledgeModal);
+document.getElementById('saveKnowledgeConfirm')?.addEventListener('click',saveReplyKnowledge);
+document.getElementById('saveKnowledgeCancel')?.addEventListener('click',closeSaveKnowledgeModal);
+document.getElementById('saveKnowledgeClose')?.addEventListener('click',closeSaveKnowledgeModal);
+document.getElementById('saveKnowledgeModal')?.addEventListener('click',e=>{if(e.target.id==='saveKnowledgeModal')closeSaveKnowledgeModal();});
+document.getElementById('saveWritePin')?.addEventListener('keydown',e=>{if(e.key==='Enter')saveReplyKnowledge();});
 
 document.getElementById('analyzeReplyBtn')?.addEventListener('click',analyzeSSOCACReply);
 document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportReplyKnowledgeCSV);
