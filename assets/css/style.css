@@ -52,3 +52,14 @@ All Rights Reserved.
 .reply-table td:first-child{font-weight:800;color:#9b2c2c;white-space:nowrap}.reply-table td:last-child{text-align:center;font-weight:700}
 .reply-summary-card{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}.reply-stat{padding:14px;border-radius:12px;background:#f7fbfa;border:1px solid #dbe9e5}.reply-stat b{display:block;font-size:22px;color:#274f48}.reply-stat span{font-size:12px;color:#6c7f7b}
 @media(max-width:800px){.reply-upload-grid{grid-template-columns:1fr}.reply-summary-card{grid-template-columns:1fr}.reply-action-field{min-width:0}}
+
+
+/* Knowledge Center V2.3 */
+.knowledge-toolbar{display:grid;grid-template-columns:minmax(300px,2fr) minmax(220px,1fr) auto;gap:14px;align-items:end}
+.knowledge-action{min-width:120px}.knowledge-status{margin-top:12px}.knowledge-results{display:grid;gap:14px}
+.knowledge-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff;box-shadow:0 8px 24px rgba(48,91,79,.07)}
+.knowledge-card-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.knowledge-card-head strong{font-size:20px;color:#9b2c2c}.knowledge-card-head span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.knowledge-card h3{margin:12px 0;font-size:16px}.knowledge-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.knowledge-grid>div{background:#f7fbfa;border-radius:12px;padding:11px}.knowledge-grid b{font-size:12px;color:#385f57}.knowledge-grid p{margin:5px 0 0;line-height:1.55}
+.knowledge-tips{margin-top:10px;padding:11px;border-radius:12px;background:#fff7df}.knowledge-empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}.knowledge-empty.error{color:#a71919;background:#fff6f6}
+.db-badge{display:inline-block;padding:5px 8px;border-radius:999px;font-size:11px;white-space:nowrap}.db-badge.ok{background:#dcf6ea;color:#176b4e}.db-badge.pending{background:#fff0df;color:#9a5a13}
+@media(max-width:800px){.knowledge-toolbar{grid-template-columns:1fr}.knowledge-grid{grid-template-columns:1fr}.knowledge-action{min-width:0}}
