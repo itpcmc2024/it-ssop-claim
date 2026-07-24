@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V2.1
+SSOP Toolkit Professional Edition V2.3.3
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -73,3 +73,8 @@ All Rights Reserved.
 .save-knowledge-modal .dialog-actions{justify-content:flex-end}
 .save-knowledge-modal button:disabled{opacity:.65;cursor:wait}
 @media(max-width:720px){.save-form-grid{grid-template-columns:1fr}}
+
+
+/* V2.3.3 — PDF documents and editable field guide */
+.header-actions{justify-content:flex-end}.split-doc-action{display:inline-flex;align-items:stretch}.split-doc-action .doc-view-btn{border-radius:12px 0 0 12px;background:#fff;border:1px solid rgba(41,65,59,.12);border-right:0}.split-doc-action .doc-upload-btn{border-radius:0 12px 12px 0;padding:10px 9px;background:#eaf7f2;border:1px solid rgba(41,65,59,.12);font-weight:800}.split-doc-action .doc-upload-btn:hover{background:#d9f1e8}.field-guide-input{width:100%;min-height:64px;resize:vertical;padding:9px 10px;border:1px solid var(--line);border-radius:9px;font:inherit;color:var(--ink);background:#fff}.field-guide-input:focus{outline:none;border-color:#72c7ad;box-shadow:0 0 0 3px rgba(114,199,173,.18)}
+@media(max-width:900px){.header-actions{justify-content:flex-start}.split-doc-action{width:auto}}
