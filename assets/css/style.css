@@ -75,6 +75,13 @@ All Rights Reserved.
 @media(max-width:720px){.save-form-grid{grid-template-columns:1fr}}
 
 
-/* V2.3.3 — PDF documents and editable field guide */
+/* V2.3.4 — PDF documents, read-only field guide and editable Knowledge */
 .header-actions{justify-content:flex-end}.split-doc-action{display:inline-flex;align-items:stretch}.split-doc-action .doc-view-btn{border-radius:12px 0 0 12px;background:#fff;border:1px solid rgba(41,65,59,.12);border-right:0}.split-doc-action .doc-upload-btn{border-radius:0 12px 12px 0;padding:10px 9px;background:#eaf7f2;border:1px solid rgba(41,65,59,.12);font-weight:800}.split-doc-action .doc-upload-btn:hover{background:#d9f1e8}.field-guide-input{width:100%;min-height:64px;resize:vertical;padding:9px 10px;border:1px solid var(--line);border-radius:9px;font:inherit;color:var(--ink);background:#fff}.field-guide-input:focus{outline:none;border-color:#72c7ad;box-shadow:0 0 0 3px rgba(114,199,173,.18)}
 @media(max-width:900px){.header-actions{justify-content:flex-start}.split-doc-action{width:auto}}
+
+/* V2.3.4 — Knowledge Center editing */
+.knowledge-edit-textarea{width:100%;min-height:76px;resize:vertical;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit;color:var(--ink)}
+.knowledge-edit-input{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit;color:var(--ink)}
+.knowledge-edit-textarea:focus,.knowledge-edit-input:focus{outline:none;border-color:#72c7ad;box-shadow:0 0 0 3px rgba(114,199,173,.18)}
+.knowledge-card-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}.knowledge-edit-save{white-space:nowrap}
+@media(max-width:700px){.knowledge-card-footer{align-items:stretch;flex-direction:column}.knowledge-edit-save{width:100%}}
