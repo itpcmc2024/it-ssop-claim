@@ -1,1 +1,137 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SSOP Toolkit | PCMC By Kimhan</title>
+  <meta name="author" content="PCMC By Kimhan" />
+  <meta name="copyright" content="© 2026 PCMC By Kimhan" />
+  <meta name="application-name" content="SSOP Toolkit" />
+  <meta name="generator" content="SSOP Toolkit Version 2.1" />
+  <!--
+  ======================================================
+  SSOP Toolkit Version 2.1
+  Copyright © 2026 PCMC By Kimhan
+  All Rights Reserved.
+  ======================================================
+  -->
+  <link rel="stylesheet" href="assets/css/style.css?v=2.1" />
+</head>
+<body>
+<div id="splashScreen" class="splash-screen" aria-hidden="true">
+  <div class="splash-card">
+    <div class="splash-logo">🩺</div>
+    <h1>SSOP Toolkit</h1>
+    <p>Professional Edition · Version 2.1</p>
+    <div class="splash-loader"></div>
+    <small>© 2026 PCMC By Kimhan</small>
+  </div>
+</div>
+<div class="app-shell">
+  <section id="homePage" class="home-page">
+    <header class="home-hero"><div class="top-row"><div><h1>SSOP Toolkit <span class="version">V2.1</span></h1><p>ศูนย์รวมเครื่องมือจัดการไฟล์ส่งเบิกประกันสังคม เลือกประเภทงานที่ต้องการใช้งาน</p></div><div class="row"><div class="module-badge">ข้อมูลประมวลผลในเบราว์เซอร์</div><button class="about-btn" data-open-about>ℹ เกี่ยวกับโปรแกรม</button></div></div></header>
+    <main class="wrap">
+      <section class="card"><div class="section-title">เลือกระบบงานประกันสังคม</div><div class="module-grid">
+        <button class="module-card planned" data-module="main"><div class="module-icon">🏥</div><h3>ประกันสังคม Main</h3><p>พื้นที่สำหรับตรวจและแก้ไขไฟล์ส่งเบิกผู้ป่วยนอกประกันสังคมทั่วไป</p><span class="module-badge">เตรียมพัฒนา</span></button>
+        <button class="module-card planned" data-module="cross"><div class="module-icon">🧭</div><h3>ประกันสังคมข้ามเขต</h3><p>รองรับกฎและเงื่อนไขการส่งเบิกกรณีผู้รับบริการข้ามเขต</p><span class="module-badge">เตรียมพัฒนา</span></button>
+        <button class="module-card ready" data-module="cancer"><div class="module-icon">🎗️</div><h3>ประกันสังคม Cancer Care</h3><p>แก้ไข BILLTRAN, BILLDISP และ OPServices พร้อมตรวจเงื่อนไข SSOCAC</p><span class="module-badge">พร้อมใช้งาน</span></button>
+        <button class="module-card planned" data-module="cpap"><div class="module-icon">🫁</div><h3>ประกันสังคม CPAP</h3><p>เตรียมพื้นที่สำหรับไฟล์ส่งเบิกอุปกรณ์และบริการ CPAP</p><span class="module-badge">เตรียมพัฒนา</span></button>
+        <button class="module-card planned" data-module="sleep"><div class="module-icon">😴</div><h3>ประกันสังคม Sleep Test</h3><p>เตรียมพื้นที่สำหรับการตรวจสอบและแก้ไขข้อมูล Sleep Test</p><span class="module-badge">เตรียมพัฒนา</span></button>
+        <button class="module-card planned" data-module="response"><div class="module-icon">📥</div><h3>รับไฟล์ตอบกลับ / Error</h3><p>รองรับการอ่าน Error Code บันทึกสาเหตุ วิธีแก้ และเชื่อมโยงกลับไปยังรายการ</p><span class="module-badge">โครงสร้างพร้อมต่อยอด</span></button>
+      </div></section>
+      <section class="card future-card"><div class="section-title">แผนพัฒนาฐานความรู้ Error</div><p class="meta">ระบบเตรียมโครงสร้างเมนูไว้แล้ว สำหรับเวอร์ชันถัดไปจะเพิ่มการอัปโหลดไฟล์ตอบกลับและฐานข้อมูล Error Code</p><ul class="future-list"><li>เก็บ Error Code, รายละเอียด, สาเหตุ, วิธีแก้ และตัวอย่างก่อน–หลังแก้</li><li>ค้นหาและกรองตามไฟล์, วันที่, Invoice, HN และสถานะการแก้ไข</li><li>เชื่อม Error กลับไปยังแถวข้อมูลและรองรับ Auto Fix ในอนาคต</li></ul></section>
+      <footer class="copyright-footer"><strong>SSOP Toolkit Version 2.1</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
+    </main>
+  </section>
+  <section id="cancerPage" class="module-page">
+  <header class="top"><div class="top-row"><div><h1>SSO Cancer Care Editor <span class="version">V2.1</span></h1><p>อัปโหลด แยกข้อมูล แก้ไข ตรวจสอบ และส่งออกกลับชื่อเดิม</p></div><div class="row"><button class="back-home" id="backHomeBtn">← หน้าหลัก</button><button class="guide-btn" id="dictionaryBtn">📖 คู่มือฟิลด์</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
+  <main class="wrap">
+    <section class="card">
+      <div class="upload" id="dropZone">
+        <input id="fileInput" type="file" accept=".txt,text/plain" />
+        <div style="font-size:40px">📄</div>
+        <h3>ลากไฟล์ .txt มาวาง หรือเลือกไฟล์</h3>
+        <p class="meta">รองรับ BILLTRAN, BILLDISP และ OPServices รูปแบบ Windows-874</p>
+        <label class="btn blue" for="fileInput">เลือกไฟล์</label>
+      </div>
+      <div id="fileMeta" class="row hidden" style="margin-top:14px">
+        <div class="grow"><b id="fileName"></b><div class="meta" id="fileInfo"></div></div>
+        <button class="soft" id="clearBtn">ล้างไฟล์</button>
+      </div>
+    </section>
 
+    <div id="workspace" class="hidden">
+      <section class="card rules-card">
+        <div class="section-title">เงื่อนไขสำคัญสำหรับโครงการ SSO Cancer Care (SSOCAC)</div>
+        <div class="rules-grid">
+          <div class="rule-item"><div class="rule-icon">!</div><div><strong>OPServices · PrdSeCode = SSOCAC</strong><small>ต้องระบุรหัสโครงการในข้อมูลบริการ เพื่อให้ระบบ สกส. จำแนกการเบิกเฉพาะโครงการได้</small></div></div>
+          <div class="rule-item"><div class="rule-icon">!</div><div><strong>BILLTRAN · MemberNo = Case Number</strong><small>ใช้เลข Case Number ของผู้ป่วยที่ได้รับอนุมัติในระบบ SSO Cancer Care</small></div></div>
+          <div class="rule-item"><div class="rule-icon">!</div><div><strong>OPServices / OPDx · VerCode = Protocol Code</strong><small>ระบุรหัสโปรโตคอลการรักษามะเร็ง เช่น C0111 ตามการอนุมัติ</small></div></div>
+          <div class="rule-item"><div class="rule-icon">!</div><div><strong>BillItems / DispensedItems · ClaimCat = OPR</strong><small>ใช้กับรายการยาและค่าใช้จ่ายที่สำนักงานประกันสังคมจ่ายเพิ่มในโครงการ</small></div></div>
+        </div>
+        <div id="ruleResults" class="validation-list"></div><div id="healthDashboard" class="health-dashboard"></div>
+      </section>
+      <section class="card">
+        <div class="section-title">ข้อมูล Header</div>
+        <div id="headerGrid" class="grid"></div>
+      </section>
+
+      <section class="card">
+        <div class="row"><div class="section-title grow">ข้อมูลในไฟล์</div><div id="statusBox" class="status">พร้อมแก้ไข</div></div>
+        <div id="tabs" class="tabs"></div>
+        <div id="sectionNote" class="section-note"></div>
+        <div class="toolbar">
+          <input id="searchInput" placeholder="ค้นหาข้อมูล..." />
+          <select id="pageSize"><option>20</option><option>50</option><option>100</option><option value="99999">ทั้งหมด</option></select>
+          <button class="soft" id="addRowBtn">+ เพิ่มแถว</button>
+          <button class="danger" id="deleteRowsBtn">ลบแถวที่เลือก</button>
+          <span class="meta" id="countText"></span>
+        </div>
+        <div class="table-wrap"><table class="data-table"><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">ตัวอย่างท้ายไฟล์</div>
+        <div class="grid">
+          <div class="field"><label>ชื่อไฟล์ส่งออก</label><input id="outputName" /></div>
+          <div class="field"><label>Checksum ใหม่</label><input id="checksumPreview" readonly /></div>
+        </div>
+        <p class="meta">ระบบคำนวณ MD5 จากข้อมูลทั้งหมดก่อนบรรทัด EndNote และสร้าง Checksum ใหม่ให้อัตโนมัติ</p>
+      </section>
+
+      <div class="footer-actions">
+        <button class="soft" id="undoBtn">ย้อนกลับทั้งหมด</button>
+        <button class="peach" id="previewBtn">ตรวจสอบไฟล์</button>
+        <button class="primary" id="downloadBtn">ดาวน์โหลดชื่อเดิม</button>
+      </div>
+    </div>
+    <footer class="copyright-footer"><strong>SSOP Toolkit · SSO Cancer Care Editor Version 2.1</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
+  </main>
+  </section>
+</div>
+
+  <div class="tooltip" id="fieldTooltip"></div>
+  <div class="modal" id="dictionaryModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head"><div><strong>📖 คู่มือฟิลด์ SSOCAC</strong><div class="meta">ชี้เมาส์ที่หัวตารางเพื่อดูคำอธิบายแบบย่อได้ทุกเวลา</div></div><button class="close-x" id="dictionaryClose">✕ ปิด</button></div>
+      <div class="modal-body" id="dictionaryBody"></div>
+    </div>
+  </div>
+<div class="modal" id="aboutModal" aria-hidden="true">
+  <div class="modal-card" style="width:min(620px,96vw)">
+    <div class="modal-head"><strong>ℹ เกี่ยวกับโปรแกรม</strong><button class="close-x" id="aboutClose">✕ ปิด</button></div>
+    <div class="modal-body">
+      <div class="about-brand">
+        <div class="about-logo">🩺</div>
+        <h2>SSOP Toolkit</h2>
+        <p>Professional Edition · Version 2.1<br>ระบบช่วยตรวจสอบ แก้ไข และจัดการไฟล์ส่งเบิกประกันสังคม</p>
+      </div>
+      <div class="about-credit">Developed by<strong>PCMC By Kimhan</strong>© 2026 All Rights Reserved.</div>
+    </div>
+  </div>
+</div>
+<div class="toast-stack" id="toastStack"></div>
+<div class="dialog-overlay" id="dialogOverlay"><div class="dialog-box"><div class="dialog-icon" id="dialogIcon">ℹ️</div><h3 id="dialogTitle"></h3><p id="dialogMessage"></p><div class="dialog-actions" id="dialogActions"></div></div></div>
+<script src="assets/js/app.js?v=2.1"></script>
+</body>
+</html>
