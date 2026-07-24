@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V2.1
+SSOP Toolkit Professional Edition V2.3.1
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -11,14 +11,27 @@ const aboutModal=document.getElementById('aboutModal');
 document.querySelectorAll('[data-open-about]').forEach(btn=>btn.addEventListener('click',()=>{aboutModal.classList.add('show');aboutModal.setAttribute('aria-hidden','false')}));
 document.getElementById('aboutClose').addEventListener('click',()=>{aboutModal.classList.remove('show');aboutModal.setAttribute('aria-hidden','true')});
 aboutModal.addEventListener('click',e=>{if(e.target===aboutModal){aboutModal.classList.remove('show');aboutModal.setAttribute('aria-hidden','true')}});
+function showPage(pageId){
+ document.getElementById('homePage').classList.add('hidden-page');
+ document.querySelectorAll('.module-page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(pageId)?.classList.add('active');
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function goHome(){
+ document.querySelectorAll('.module-page').forEach(p=>p.classList.remove('active'));
+ document.getElementById('homePage').classList.remove('hidden-page');
+ window.scrollTo({top:0,behavior:'smooth'});
+}
 function openModule(name){
- if(name==='cancer'){document.getElementById('homePage').classList.add('hidden-page');document.getElementById('cancerPage').classList.add('active');window.scrollTo({top:0,behavior:'smooth'});return;}
- const names={main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test',response:'รับไฟล์ตอบกลับ / Error'};
+ if(name==='cancer'){showPage('cancerPage');return;}
+ if(name==='knowledge'){showPage('knowledgePage');loadKnowledge('','ALL');return;}
+ const names={main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test'};
  showDialog('เตรียมพัฒนา',`${names[name]||'โมดูลนี้'} ถูกเตรียมปุ่มและโครงสร้างไว้แล้ว
 จะเพิ่ม Parser และกฎตรวจสอบเฉพาะงานในเวอร์ชันถัดไป`,'info');
 }
 document.querySelectorAll('[data-module]').forEach(b=>b.addEventListener('click',()=>openModule(b.dataset.module)));
-document.getElementById('backHomeBtn').onclick=()=>{document.getElementById('cancerPage').classList.remove('active');document.getElementById('homePage').classList.remove('hidden-page');window.scrollTo({top:0,behavior:'smooth'})};
+document.getElementById('backHomeBtn').onclick=goHome;
+document.getElementById('knowledgeBackHomeBtn').onclick=goHome;
 function toast(title,message,type='info',duration=3600){const stack=document.getElementById('toastStack'),el=document.createElement('div');const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};el.className=`toast ${type}`;el.innerHTML=`<div class="toast-icon">${icons[type]||icons.info}</div><div><div class="toast-title">${escapeHtml(title)}</div><div class="toast-msg">${escapeHtml(message)}</div></div>`;stack.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(-8px)';setTimeout(()=>el.remove(),220)},duration)}
 function showDialog(title,message,type='info',buttons=[{text:'ตกลง',value:true,className:'primary'}]){return new Promise(resolve=>{const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};document.getElementById('dialogIcon').textContent=icons[type]||icons.info;document.getElementById('dialogTitle').textContent=title;document.getElementById('dialogMessage').textContent=message;const actions=document.getElementById('dialogActions');actions.innerHTML='';buttons.forEach(btn=>{const b=document.createElement('button');b.textContent=btn.text;b.className=btn.className||'soft';b.onclick=()=>{document.getElementById('dialogOverlay').classList.remove('show');resolve(btn.value)};actions.appendChild(b)});document.getElementById('dialogOverlay').classList.add('show')})}
 
@@ -162,10 +175,11 @@ function md5(bytes){
 }
 
 /* ======================================================
-   SSOCAC Reply Knowledge Builder V2.2
+   SSOCAC Reply Knowledge Builder V2.3.1
    ประมวลผลไฟล์ตอบกลับใน Browser และเก็บเฉพาะ Error Code
 ====================================================== */
 const replyKnowledgeState={fileName:'',items:[]};
+let knowledgeCache=[];
 const ssocacSeedKnowledge={
   CD1:{description:'ไม่มีรหัสวินิจฉัยที่สอดคล้องกับ Protocol',cause:'ตรวจสอบรหัสวินิจฉัยและ Protocol ที่ใช้ในรายการ',solution:'ตรวจ OPDx และรหัส Protocol ให้สัมพันธ์กับเงื่อนไข SSOCAC'},
   CE3:{description:'มีการเบิก CAC แต่รหัส Protocol (Billtran.Vercode) ไม่ถูกต้อง',cause:'Billtran.VerCode ไม่ตรงกับ Protocol ที่ได้รับอนุมัติ',solution:'ตรวจและแก้ Billtran.VerCode ให้เป็น Protocol Code ที่ถูกต้อง'}
@@ -200,7 +214,8 @@ function parseSSOCACReplyKnowledge(text){
     module:'SSOCAC',code,count,
     description:descriptions.get(code)||ssocacSeedKnowledge[code]?.description||'ไม่พบคำอธิบายในไฟล์ตอบกลับ',
     cause:ssocacSeedKnowledge[code]?.cause||'',
-    solution:ssocacSeedKnowledge[code]?.solution||''
+    solution:ssocacSeedKnowledge[code]?.solution||'',
+    dbStatus:'ยังไม่ได้ตรวจฐานข้อมูล', relatedFile:'', relatedField:'', tips:''
   })).sort((a,b)=>a.code.localeCompare(b.code));
 }
 async function analyzeSSOCACReply(){
@@ -217,7 +232,7 @@ async function analyzeSSOCACReply(){
     replyKnowledgeState.fileName=file.name;
     replyKnowledgeState.items=parseSSOCACReplyKnowledge(text);
     renderReplyKnowledge();
-    if(replyKnowledgeState.items.length)toast('วิเคราะห์สำเร็จ',`พบ Error Code ${replyKnowledgeState.items.length} รหัส โดยไม่จัดเก็บข้อมูลผู้ป่วย`,'success');
+    if(replyKnowledgeState.items.length){toast('วิเคราะห์สำเร็จ',`พบ Error Code ${replyKnowledgeState.items.length} รหัส โดยไม่จัดเก็บข้อมูลผู้ป่วย`,'success');await hydrateReplyKnowledgeFromDatabase();}
     else toast('ไม่พบ Error Code','ยังไม่พบรูปแบบ CheckCode ที่ระบบรองรับในไฟล์นี้','warning');
   }catch(err){showDialog('อ่านไฟล์ไม่สำเร็จ',err?.message||String(err),'error')}
 }
@@ -227,7 +242,7 @@ function renderReplyKnowledge(){
   summary.classList.remove('hidden');wrap.classList.toggle('hidden',!items.length);
   const total=items.reduce((s,x)=>s+x.count,0),known=items.filter(x=>x.cause||x.solution).length;
   summary.innerHTML=`<div class="reply-summary-card"><div class="reply-stat"><b>${items.length}</b><span>Error Code ไม่ซ้ำ</span></div><div class="reply-stat"><b>${total}</b><span>จำนวนที่ตรวจพบ</span></div><div class="reply-stat"><b>${known}</b><span>มีแนวทางแก้เริ่มต้น</span></div></div>`;
-  body.innerHTML=items.map((x,i)=>`<tr><td>${escapeHtml(x.code)}<div class="meta">SSOCAC</div></td><td>${escapeHtml(x.description)}</td><td><textarea data-reply-index="${i}" data-field="cause" placeholder="เพิ่มสาเหตุหรือข้อสังเกต...">${escapeHtml(x.cause)}</textarea></td><td><textarea data-reply-index="${i}" data-field="solution" placeholder="เพิ่มแนวทางแก้...">${escapeHtml(x.solution)}</textarea></td><td>${x.count}</td></tr>`).join('');
+  body.innerHTML=items.map((x,i)=>`<tr><td>${escapeHtml(x.code)}<div class="meta">SSOCAC</div></td><td>${escapeHtml(x.description)}</td><td><textarea data-reply-index="${i}" data-field="cause" placeholder="เพิ่มสาเหตุหรือข้อสังเกต...">${escapeHtml(x.cause)}</textarea></td><td><textarea data-reply-index="${i}" data-field="solution" placeholder="เพิ่มแนวทางแก้...">${escapeHtml(x.solution)}</textarea></td><td>${x.count}</td><td><span class="db-badge ${x.dbStatus==='มีในฐานข้อมูล'?'ok':'pending'}">${escapeHtml(x.dbStatus)}</span></td></tr>`).join('');
   body.querySelectorAll('textarea').forEach(el=>el.addEventListener('input',()=>{const i=Number(el.dataset.replyIndex);replyKnowledgeState.items[i][el.dataset.field]=el.value}));
 }
 function csvCell(v){return `"${String(v??'').replace(/"/g,'""')}"`}
@@ -240,5 +255,79 @@ function exportReplyKnowledgeCSV(){
   a.href=URL.createObjectURL(blob);a.download=`SSOCAC_Error_Knowledge_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   toast('ส่งออกแล้ว','ไฟล์ CSV มีเฉพาะ Error Code และองค์ความรู้ ไม่มีข้อมูลผู้ป่วย','success');
 }
+
+function getApiUrl(){return (window.SSOP_CONFIG?.apiUrl||'').trim();}
+async function apiRequest(action,payload={}){
+  const url=getApiUrl();
+  if(!url || url.includes('PASTE_')) throw new Error('ยังไม่ได้ตั้งค่า Apps Script Web App URL ใน assets/js/config.js');
+  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...payload})});
+  if(!response.ok) throw new Error(`API ตอบกลับ ${response.status}`);
+  const data=await response.json();
+  if(!data.ok) throw new Error(data.message||'เกิดข้อผิดพลาดจากฐานข้อมูล');
+  return data;
+}
+async function hydrateReplyKnowledgeFromDatabase(){
+  try{
+    const data=await apiRequest('getByCodes',{module:'SSOCAC',codes:replyKnowledgeState.items.map(x=>x.code)});
+    const map=new Map((data.items||[]).map(x=>[String(x.ErrorCode||'').toUpperCase(),x]));
+    replyKnowledgeState.items.forEach(item=>{
+      const db=map.get(item.code.toUpperCase());
+      if(db){
+        item.description=db.Description||item.description;
+        item.cause=db.Cause||item.cause;
+        item.solution=db.Solution||item.solution;
+        item.relatedFile=db.RelatedFile||'';
+        item.relatedField=db.RelatedField||'';
+        item.tips=db.Tips||'';
+        item.dbStatus='มีในฐานข้อมูล';
+      }else item.dbStatus='ยังไม่มีในฐานข้อมูล';
+    });
+    renderReplyKnowledge();
+  }catch(err){
+    replyKnowledgeState.items.forEach(x=>x.dbStatus='เชื่อมฐานข้อมูลไม่ได้');
+    renderReplyKnowledge();
+    toast('ยังไม่ได้เชื่อมฐานข้อมูล',err.message,'warning',5200);
+  }
+}
+async function saveReplyKnowledge(){
+  if(!replyKnowledgeState.items.length){toast('ไม่มีข้อมูล','กรุณาวิเคราะห์ไฟล์ตอบกลับก่อน','warning');return;}
+  const updatedBy=prompt('ชื่อผู้บันทึก/ผู้แก้ไข','Kimhan');
+  if(!updatedBy)return;
+  const writePin=prompt('กรอกรหัส PIN สำหรับบันทึก Knowledge');
+  if(!writePin)return;
+  try{
+    const items=replyKnowledgeState.items.map(x=>({
+      Module:'SSOCAC',ErrorCode:x.code,Description:x.description,Cause:x.cause,Solution:x.solution,
+      RelatedFile:x.relatedFile||'',RelatedField:x.relatedField||'',Tips:x.tips||'',UpdatedBy:updatedBy,Active:true
+    }));
+    const data=await apiRequest('upsertKnowledge',{items,writePin});
+    replyKnowledgeState.items.forEach(x=>x.dbStatus='มีในฐานข้อมูล');
+    renderReplyKnowledge();
+    toast('บันทึกสำเร็จ',`เพิ่ม ${data.inserted||0} รายการ และอัปเดต ${data.updated||0} รายการ`,'success');
+  }catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6000);}
+}
+function knowledgeCard(item){
+  return `<article class="knowledge-card"><div class="knowledge-card-head"><div><strong>${escapeHtml(item.ErrorCode||'-')}</strong><span>${escapeHtml(item.Module||'-')}</span></div><span class="db-badge ok">${item.Active===false?'ปิดใช้งาน':'ใช้งาน'}</span></div><h3>${escapeHtml(item.Description||'ยังไม่มีคำอธิบาย')}</h3><div class="knowledge-grid"><div><b>สาเหตุ/ข้อสังเกต</b><p>${escapeHtml(item.Cause||'-')}</p></div><div><b>แนวทางแก้</b><p>${escapeHtml(item.Solution||'-')}</p></div><div><b>ไฟล์ที่เกี่ยวข้อง</b><p>${escapeHtml(item.RelatedFile||'-')}</p></div><div><b>ฟิลด์ที่เกี่ยวข้อง</b><p>${escapeHtml(item.RelatedField||'-')}</p></div></div>${item.Tips?`<div class="knowledge-tips"><b>Tips:</b> ${escapeHtml(item.Tips)}</div>`:''}<div class="meta">อัปเดต ${escapeHtml(item.UpdatedAt||'-')} โดย ${escapeHtml(item.UpdatedBy||'-')}</div></article>`;
+}
+async function loadKnowledge(query='',module='ALL'){
+  const box=document.getElementById('knowledgeResults'),status=document.getElementById('knowledgeStatus');
+  if(!box)return;
+  box.innerHTML='<div class="knowledge-empty">กำลังโหลดข้อมูล...</div>';
+  try{
+    const data=await apiRequest('searchKnowledge',{query,module,limit:300});
+    knowledgeCache=data.items||[];
+    status.textContent=`เชื่อมต่อฐานข้อมูลแล้ว · พบ ${knowledgeCache.length} รายการ`;
+    box.innerHTML=knowledgeCache.length?knowledgeCache.map(knowledgeCard).join(''):'<div class="knowledge-empty">ไม่พบข้อมูลที่ค้นหา</div>';
+  }catch(err){
+    status.textContent=err.message;
+    box.innerHTML=`<div class="knowledge-empty error">${escapeHtml(err.message)}</div>`;
+  }
+}
+function runKnowledgeSearch(){loadKnowledge(document.getElementById('knowledgeSearchInput').value.trim(),document.getElementById('knowledgeModuleFilter').value);}
+document.getElementById('knowledgeSearchBtn')?.addEventListener('click',runKnowledgeSearch);
+document.getElementById('knowledgeReloadBtn')?.addEventListener('click',()=>loadKnowledge('','ALL'));
+document.getElementById('knowledgeSearchInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')runKnowledgeSearch();});
+document.getElementById('saveKnowledgeBtn')?.addEventListener('click',saveReplyKnowledge);
+
 document.getElementById('analyzeReplyBtn')?.addEventListener('click',analyzeSSOCACReply);
 document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportReplyKnowledgeCSV);
