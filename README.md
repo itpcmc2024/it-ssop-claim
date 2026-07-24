@@ -1,4 +1,4 @@
-# SSOP Toolkit Professional Edition V2.3.1
+# SSOP Toolkit Professional Edition V2.3.2
 
 เวอร์ชันใช้งานจริงสำหรับ SSOCAC พร้อม SSOP Knowledge Center และ Google Sheets Knowledge API
 
