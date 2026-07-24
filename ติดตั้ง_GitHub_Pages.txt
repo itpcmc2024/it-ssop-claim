@@ -1,1 +1,14 @@
+วิธีเริ่มใช้งาน SSOP Toolkit บน GitHub Pages
 
+1) แตกไฟล์ ZIP
+2) เข้า github.com และสร้าง Repository ชื่อ ssop-toolkit
+3) กด Add file > Upload files
+4) ลาก index.html, assets, .nojekyll และ README.md ขึ้น GitHub
+5) กด Commit changes
+6) เข้า Settings > Pages
+7) Source: Deploy from a branch
+8) Branch: main / (root)
+9) กด Save และรอ 1-3 นาที
+10) เปิดลิงก์ที่ GitHub Pages แสดง
+
+สำคัญ: อย่าอัปโหลดไฟล์ BILLTRAN/BILLDISP/OPServices ที่มีข้อมูลผู้ป่วยขึ้น Repository
