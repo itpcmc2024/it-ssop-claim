@@ -63,3 +63,13 @@ All Rights Reserved.
 .knowledge-tips{margin-top:10px;padding:11px;border-radius:12px;background:#fff7df}.knowledge-empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}.knowledge-empty.error{color:#a71919;background:#fff6f6}
 .db-badge{display:inline-block;padding:5px 8px;border-radius:999px;font-size:11px;white-space:nowrap}.db-badge.ok{background:#dcf6ea;color:#176b4e}.db-badge.pending{background:#fff0df;color:#9a5a13}
 @media(max-width:800px){.knowledge-toolbar{grid-template-columns:1fr}.knowledge-grid{grid-template-columns:1fr}.knowledge-action{min-width:0}}
+
+
+/* V2.3.2 — Knowledge form improvements */
+.knowledge-inline-input{min-width:150px;width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;color:var(--ink)}
+.knowledge-inline-input:focus{outline:none;border-color:#72c7ad;box-shadow:0 0 0 3px rgba(114,199,173,.18)}
+.save-knowledge-modal{width:min(620px,96vw)}
+.save-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.save-knowledge-modal .dialog-actions{justify-content:flex-end}
+.save-knowledge-modal button:disabled{opacity:.65;cursor:wait}
+@media(max-width:720px){.save-form-grid{grid-template-columns:1fr}}
