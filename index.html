@@ -1,63 +1,37 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SSOP Claim Management</title>
-  <style>
-    :root{--primary:#377f79;--primary2:#dff2ee;--bg:#f5faf9;--card:#fff;--text:#253433;--muted:#70817f;--line:#dce9e6;--danger:#b94d4d}
-    *{box-sizing:border-box}body{margin:0;font-family:Tahoma,"Noto Sans Thai",sans-serif;background:var(--bg);color:var(--text)}
-    .shell{min-height:100vh}.top{background:linear-gradient(135deg,#2f7771,#4d928c);color:#fff;padding:24px}.top-inner{max-width:1180px;margin:auto;display:flex;justify-content:space-between;gap:20px;align-items:center}.top h1{margin:0;font-size:25px}.top p{margin:6px 0 0;opacity:.9}.user{display:none;text-align:right}.user.show{display:block}.user b,.user span{display:block}.user span{font-size:13px;opacity:.85;margin-top:4px}
-    main{max-width:1180px;margin:auto;padding:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 26px rgba(35,74,70,.06)}
-    .state{min-height:260px;display:flex;align-items:center;justify-content:center;text-align:center}.spinner{width:42px;height:42px;border:4px solid #d7ebe7;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}@keyframes spin{to{transform:rotate(360deg)}}
-    .error{color:var(--danger)}.hidden{display:none!important}.dashboard h2{margin:0 0 18px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.stat{border:1px solid var(--line);border-radius:15px;padding:18px;background:#fbfefd}.stat .label{font-size:14px;color:var(--muted)}.stat .value{font-size:31px;font-weight:800;margin-top:8px}.modules{margin-top:20px}.module-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.module{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--primary2)}.module b{display:block}.module span{font-size:24px;font-weight:800;display:block;margin-top:8px}.note{margin-top:20px;padding:14px;border-radius:12px;background:#fff9e7;color:#735f25;font-size:14px}.footer{text-align:center;color:var(--muted);font-size:12px;padding:28px}
-    @media(max-width:760px){.top-inner{align-items:flex-start;flex-direction:column}.user{text-align:left}.grid{grid-template-columns:repeat(2,1fr)}.module-grid{grid-template-columns:1fr}main{padding:14px}}
-  </style>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js" defer></script>
 </head>
 <body>
 <div class="shell">
-  <header class="top"><div class="top-inner"><div><h1>SSOP Claim Management</h1><p>ระบบทะเบียนและติดตามการส่งเบิกประกันสังคม</p></div><div id="userBox" class="user"><b id="userName"></b><span id="userMeta"></span></div></div></header>
+  <header class="top"><div class="top-inner">
+    <div><h1>SSOP Claim Management</h1><p>ระบบทะเบียนและติดตามการส่งเบิกประกันสังคม</p></div>
+    <div id="userBox" class="user"><div><b id="userName"></b><span id="userMeta"></span></div><button class="logout" onclick="ssopSignOut()">ออกจากระบบ</button></div>
+  </div></header>
   <main>
-    <section id="loading" class="card state"><div><div class="spinner"></div><b>กำลังตรวจสอบบัญชีผู้ใช้งาน</b><p>กรุณารอสักครู่</p></div></section>
-    <section id="errorBox" class="card state hidden"><div><div style="font-size:48px">🔒</div><h2 class="error">ไม่สามารถเข้าใช้งานได้</h2><p id="errorText"></p><p style="color:var(--muted);font-size:13px">กรุณาเข้าสู่ระบบด้วยบัญชี Google ที่ได้รับอนุญาตใน System_Users</p></div></section>
-    <section id="dashboard" class="dashboard hidden">
-      <div class="card"><h2>ภาพรวมระบบ</h2><div class="grid">
-        <div class="stat"><div class="label">เคสทั้งหมด</div><div id="total" class="value">0</div></div>
-        <div class="stat"><div class="label">รอดำเนินการ</div><div id="pending" class="value">0</div></div>
-        <div class="stat"><div class="label">ติด C</div><div id="countC" class="value">0</div></div>
-        <div class="stat"><div class="label">ผ่าน A</div><div id="countA" class="value">0</div></div>
-      </div><div class="modules"><h3>จำนวนเคสแยกตาม Module</h3><div id="moduleGrid" class="module-grid"></div></div>
-      <div class="note">Phase 1 ใช้ทดสอบ Google Login สำหรับบัญชี Google ทุกโดเมน ตรวจสิทธิ์จาก System_Users และอ่าน Dashboard เท่านั้น ยังไม่มีการนำเข้าข้อมูลผู้ป่วย</div></div>
-    </section>
+    <section id="loginBox" class="card state hidden"><div><div style="font-size:44px">🔐</div><h2 class="login-title">เข้าสู่ระบบ</h2><p class="login-desc">ใช้บัญชี Google ที่ได้รับอนุญาตใน System_Users</p><div id="googleButton" class="google-wrap"></div></div></section>
+    <section id="loading" class="card state"><div><div class="spinner"></div><b id="loadingText">กำลังเตรียมระบบ</b><p>กรุณารอสักครู่</p></div></section>
+    <section id="errorBox" class="card state hidden"><div><div style="font-size:48px">🔒</div><h2 class="error">ไม่สามารถเข้าใช้งานได้</h2><p id="errorText"></p><button class="retry" onclick="ssopRetry()">ลองเข้าสู่ระบบใหม่</button></div></section>
+    <section id="dashboard" class="dashboard hidden"><div class="card"><h2>ภาพรวมระบบ</h2><div class="grid">
+      <div class="stat"><div class="label">เคสทั้งหมด</div><div id="total" class="value">0</div></div>
+      <div class="stat"><div class="label">รอดำเนินการ</div><div id="pending" class="value">0</div></div>
+      <div class="stat"><div class="label">ติด C</div><div id="countC" class="value">0</div></div>
+      <div class="stat"><div class="label">ผ่าน A</div><div id="countA" class="value">0</div></div>
+    </div><div class="modules"><h3>จำนวนเคสแยกตาม Module</h3><div id="moduleGrid" class="module-grid"></div></div>
+    <div class="note">Phase 1 ใช้ Google Sign-In และตรวจสิทธิ์จาก System_Users โดย Google Sheet ไม่ต้องแชร์ให้ผู้ใช้งาน</div></div></section>
   </main>
   <footer class="footer">© 2026 PCMC By Kimhan</footer>
 </div>
-<script>
-  google.script.run
-    .withSuccessHandler(renderApp)
-    .withFailureHandler(showError)
-    .getAppBootstrap();
-
-  function renderApp(data){
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
-    document.getElementById('userBox').classList.add('show');
-    document.getElementById('userName').textContent=data.user.displayName;
-    document.getElementById('userMeta').textContent=`${data.user.email} • ${data.user.role}${data.user.department?' • '+data.user.department:''}`;
-    document.getElementById('total').textContent=data.dashboard.total.toLocaleString('th-TH');
-    document.getElementById('pending').textContent=data.dashboard.pending.toLocaleString('th-TH');
-    document.getElementById('countC').textContent=data.dashboard.c.toLocaleString('th-TH');
-    document.getElementById('countA').textContent=data.dashboard.a.toLocaleString('th-TH');
-    const modules=data.dashboard.modules||{};
-    const names={SSOCAC:'Cancer Care',STCPAP:'CPAP',STSLEEP:'Sleep Test',MAIN:'Main',CROSS:'Cross Area'};
-    const keys=Object.keys(modules);
-    document.getElementById('moduleGrid').innerHTML=keys.length
-      ? keys.map(k=>`<div class="module"><b>${escapeHtml(names[k]||k)}</b><span>${Number(modules[k]).toLocaleString('th-TH')}</span></div>`).join('')
-      : '<div class="module"><b>SSOCAC</b><span>0</span></div>';
-  }
-  function showError(err){document.getElementById('loading').classList.add('hidden');document.getElementById('errorBox').classList.remove('hidden');document.getElementById('errorText').textContent=err&&err.message?err.message:String(err)}
-  function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-</script>
+<form id="apiForm" method="post" target="apiFrame" class="hidden">
+  <input id="apiAction" name="action"><input id="apiCredential" name="credential"><input id="apiNonce" name="nonce">
+</form>
+<iframe name="apiFrame" title="API response" class="hidden"></iframe>
 </body>
 </html>
