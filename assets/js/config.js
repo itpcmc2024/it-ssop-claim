@@ -1,8 +1,7 @@
 window.SSOP_CONFIG = Object.freeze({
-  version: '2.4-phase1-ui',
-  mockMode: true,
-  defaultPage: 'dashboard',
-  user: {
+  apiUrl: 'https://script.google.com/macros/s/AKfycbztQYOpzMGJ16oCWviNFuEOqMgC-wMWb0cmtusxGAA9E62SzczHp93TJxaqoXVrS_N2/exec',
+  version: '2.4-ssocac-beta',
+  mockUser: {
     email: 'itpcmc2024@gmail.com',
     displayName: 'Panisara',
     role: 'ADMIN',
