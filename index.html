@@ -1,215 +1,63 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SSOP Toolkit | PCMC By Kimhan</title>
-  <meta name="author" content="PCMC By Kimhan" />
-  <meta name="copyright" content="© 2026 PCMC By Kimhan" />
-  <meta name="application-name" content="SSOP Toolkit" />
-  <meta name="generator" content="SSOP Toolkit Version 2.3.4" />
-  <!--
-  ======================================================
-  SSOP Toolkit Version 2.3.4
-  Copyright © 2026 PCMC By Kimhan
-  All Rights Reserved.
-  ======================================================
-  -->
-  <link rel="stylesheet" href="assets/css/style.css?v=2.3.4" />
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SSOP Claim Management</title>
+  <style>
+    :root{--primary:#377f79;--primary2:#dff2ee;--bg:#f5faf9;--card:#fff;--text:#253433;--muted:#70817f;--line:#dce9e6;--danger:#b94d4d}
+    *{box-sizing:border-box}body{margin:0;font-family:Tahoma,"Noto Sans Thai",sans-serif;background:var(--bg);color:var(--text)}
+    .shell{min-height:100vh}.top{background:linear-gradient(135deg,#2f7771,#4d928c);color:#fff;padding:24px}.top-inner{max-width:1180px;margin:auto;display:flex;justify-content:space-between;gap:20px;align-items:center}.top h1{margin:0;font-size:25px}.top p{margin:6px 0 0;opacity:.9}.user{display:none;text-align:right}.user.show{display:block}.user b,.user span{display:block}.user span{font-size:13px;opacity:.85;margin-top:4px}
+    main{max-width:1180px;margin:auto;padding:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 26px rgba(35,74,70,.06)}
+    .state{min-height:260px;display:flex;align-items:center;justify-content:center;text-align:center}.spinner{width:42px;height:42px;border:4px solid #d7ebe7;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}@keyframes spin{to{transform:rotate(360deg)}}
+    .error{color:var(--danger)}.hidden{display:none!important}.dashboard h2{margin:0 0 18px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.stat{border:1px solid var(--line);border-radius:15px;padding:18px;background:#fbfefd}.stat .label{font-size:14px;color:var(--muted)}.stat .value{font-size:31px;font-weight:800;margin-top:8px}.modules{margin-top:20px}.module-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.module{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--primary2)}.module b{display:block}.module span{font-size:24px;font-weight:800;display:block;margin-top:8px}.note{margin-top:20px;padding:14px;border-radius:12px;background:#fff9e7;color:#735f25;font-size:14px}.footer{text-align:center;color:var(--muted);font-size:12px;padding:28px}
+    @media(max-width:760px){.top-inner{align-items:flex-start;flex-direction:column}.user{text-align:left}.grid{grid-template-columns:repeat(2,1fr)}.module-grid{grid-template-columns:1fr}main{padding:14px}}
+  </style>
 </head>
 <body>
-<div id="splashScreen" class="splash-screen" aria-hidden="true">
-  <div class="splash-card">
-    <div class="splash-logo">🩺</div>
-    <h1>SSOP Toolkit</h1>
-    <p>Professional Edition · Version 2.3.4</p>
-    <div class="splash-loader"></div>
-    <small>© 2026 PCMC By Kimhan</small>
-  </div>
-</div>
-<div class="app-shell">
-  <section id="homePage" class="home-page">
-    <header class="home-hero"><div class="top-row"><div><h1>SSOP Toolkit <span class="version">V2.3.4</span></h1><p>ศูนย์รวมเครื่องมือจัดการไฟล์ส่งเบิกประกันสังคม เลือกประเภทงานที่ต้องการใช้งาน</p></div><div class="row"><div class="module-badge">ข้อมูลประมวลผลในเบราว์เซอร์</div><button class="about-btn" data-open-about>ℹ เกี่ยวกับโปรแกรม</button></div></div></header>
-    <main class="wrap">
-      <section class="card"><div class="section-title">เลือกระบบงานประกันสังคม</div><div class="module-grid">
-        <button class="module-card planned" data-module="main"><div class="module-icon">🏥</div><h3>ประกันสังคม Main</h3><p>พื้นที่สำหรับตรวจและแก้ไขไฟล์ส่งเบิกผู้ป่วยนอกประกันสังคมทั่วไป</p><span class="module-badge">เตรียมพัฒนา</span></button>
-        <button class="module-card planned" data-module="cross"><div class="module-icon">🧭</div><h3>ประกันสังคมข้ามเขต</h3><p>รองรับกฎและเงื่อนไขการส่งเบิกกรณีผู้รับบริการข้ามเขต</p><span class="module-badge">เตรียมพัฒนา</span></button>
-        <button class="module-card ready" data-module="cancer"><div class="module-icon">🎗️</div><h3>ประกันสังคม Cancer Care</h3><p>แก้ไข BILLTRAN, BILLDISP และ OPServices พร้อมตรวจเงื่อนไข SSOCAC</p><span class="module-badge">พร้อมใช้งาน</span></button>
-        <button class="module-card planned" data-module="cpap"><div class="module-icon">🫁</div><h3>ประกันสังคม CPAP</h3><p>เตรียมพื้นที่สำหรับไฟล์ส่งเบิกอุปกรณ์และบริการ CPAP</p><span class="module-badge">เตรียมพัฒนา</span></button>
-        <button class="module-card planned" data-module="sleep"><div class="module-icon">😴</div><h3>ประกันสังคม Sleep Test</h3><p>เตรียมพื้นที่สำหรับการตรวจสอบและแก้ไขข้อมูล Sleep Test</p><span class="module-badge">เตรียมพัฒนา</span></button>
-        <button class="module-card ready" data-module="knowledge"><div class="module-icon">📚</div><h3>SSOP Knowledge Center</h3><p>ค้นหา Error Code คำอธิบาย สาเหตุ วิธีแก้ ไฟล์และฟิลด์ที่เกี่ยวข้อง</p><span class="module-badge">พร้อมใช้งานร่วมกับ SSOCAC</span></button>
-      </div></section>
-      <section class="card future-card"><div class="section-title">🔒 แนวทางความเป็นส่วนตัวของข้อมูล</div><p class="meta">ไฟล์ตอบกลับและไฟล์ส่งเบิกทั้งหมดอ่านและประมวลผลภายในเบราว์เซอร์ ระบบไม่จัดเก็บข้อมูลผู้ป่วยออนไลน์</p><ul class="future-list"><li>ฐานความรู้ออนไลน์เก็บเฉพาะประเภทการส่งเบิก, Error Code, คำอธิบาย, สาเหตุ และแนวทางแก้</li><li>ไม่บันทึก HN, PID, Invoice, วันที่รักษา, จำนวนเงิน หรือเนื้อหาไฟล์ตอบกลับ</li><li>รองรับการค้นหาความรู้จากทุกโมดูลผ่าน SSOP Knowledge Center</li></ul></section>
-      <footer class="copyright-footer"><strong>SSOP Toolkit Version 2.3.4</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
-    </main>
-  </section>
-  <section id="cancerPage" class="module-page">
-  <header class="top"><div class="top-row"><div><h1>SSO Cancer Care Editor <span class="version">V2.3.4</span></h1><p>อัปโหลด แยกข้อมูล แก้ไข ตรวจสอบ และส่งออกกลับชื่อเดิม</p></div><div class="row header-actions"><button class="back-home" id="backHomeBtn">← หน้าหลัก</button><div class="split-doc-action"><button class="doc-view-btn" id="announcementBtn">📢 ประกาศ</button><button class="doc-upload-btn" data-document-type="ANNOUNCEMENT" title="อัปโหลดประกาศฉบับใหม่">⬆</button></div><div class="split-doc-action"><button class="doc-view-btn" id="protocolBtn">🧬 รหัส Protocol</button><button class="doc-upload-btn" data-document-type="PROTOCOL" title="อัปโหลดรหัส Protocol ฉบับใหม่">⬆</button></div><button class="guide-btn" id="dictionaryBtn">📖 คู่มือฟิลด์</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
-  <main class="wrap">
-    <section class="card reply-card" id="ssocacReplyCard">
-      <div class="row">
-        <div class="grow">
-          <div class="section-title">📥 รับไฟล์ตอบกลับ SSOCAC</div>
-          <p class="meta">เลือกไฟล์ตอบกลับ .BIL หรือ .txt ระบบจะอ่านเฉพาะ CheckCode และคำอธิบายเพื่อสร้างฐานความรู้ โดยไม่เก็บข้อมูลผู้ป่วย</p>
-        </div>
-        <span class="privacy-badge">🔒 Local Processing</span>
-      </div>
-      <div class="reply-upload-grid">
-        <div class="field">
-          <label>ประเภทการส่งเบิก</label>
-          <select id="replyModule" disabled><option value="SSOCAC" selected>Cancer Care</option></select>
-        </div>
-        <div class="field">
-          <label>ไฟล์ตอบกลับ</label>
-          <input id="replyFileInput" type="file" accept=".bil,.txt,text/plain" />
-        </div>
-        <div class="field reply-action-field">
-          <label>&nbsp;</label>
-          <button class="primary" id="analyzeReplyBtn">วิเคราะห์ Error</button>
-        </div>
-      </div>
-      <div class="privacy-note">ไฟล์จะถูกอ่านภายในเบราว์เซอร์เท่านั้น ระบบจะไม่นำ HN, เลขบัตรประชาชน, Invoice หรือรายละเอียดผู้ป่วยไปบันทึก</div>
-      <div id="replySummary" class="hidden"></div>
-      <div id="replyKnowledgeWrap" class="hidden">
-        <div class="row reply-result-head"><div class="section-title grow">Error Knowledge ที่พบ</div><div class="row"><button class="soft" id="exportKnowledgeBtn">สำรองเป็น CSV</button><button class="primary" id="saveKnowledgeBtn">💾 บันทึกเข้าสู่ Knowledge Center</button></div></div>
-        <div class="table-wrap"><table class="data-table reply-table"><thead><tr><th>Error Code</th><th>คำอธิบายจากไฟล์ตอบกลับ</th><th>สาเหตุ/ข้อสังเกต</th><th>แนวทางแก้</th><th>ไฟล์ที่เกี่ยวข้อง</th><th>ฟิลด์ที่เกี่ยวข้อง</th><th>จำนวนที่พบ</th><th>สถานะฐานข้อมูล</th></tr></thead><tbody id="replyKnowledgeBody"></tbody></table></div>
-      </div>
+<div class="shell">
+  <header class="top"><div class="top-inner"><div><h1>SSOP Claim Management</h1><p>ระบบทะเบียนและติดตามการส่งเบิกประกันสังคม</p></div><div id="userBox" class="user"><b id="userName"></b><span id="userMeta"></span></div></div></header>
+  <main>
+    <section id="loading" class="card state"><div><div class="spinner"></div><b>กำลังตรวจสอบบัญชีผู้ใช้งาน</b><p>กรุณารอสักครู่</p></div></section>
+    <section id="errorBox" class="card state hidden"><div><div style="font-size:48px">🔒</div><h2 class="error">ไม่สามารถเข้าใช้งานได้</h2><p id="errorText"></p><p style="color:var(--muted);font-size:13px">กรุณาเข้าสู่ระบบด้วยบัญชี Google ที่ได้รับอนุญาตใน System_Users</p></div></section>
+    <section id="dashboard" class="dashboard hidden">
+      <div class="card"><h2>ภาพรวมระบบ</h2><div class="grid">
+        <div class="stat"><div class="label">เคสทั้งหมด</div><div id="total" class="value">0</div></div>
+        <div class="stat"><div class="label">รอดำเนินการ</div><div id="pending" class="value">0</div></div>
+        <div class="stat"><div class="label">ติด C</div><div id="countC" class="value">0</div></div>
+        <div class="stat"><div class="label">ผ่าน A</div><div id="countA" class="value">0</div></div>
+      </div><div class="modules"><h3>จำนวนเคสแยกตาม Module</h3><div id="moduleGrid" class="module-grid"></div></div>
+      <div class="note">Phase 1 ใช้ทดสอบ Google Login สำหรับบัญชี Google ทุกโดเมน ตรวจสิทธิ์จาก System_Users และอ่าน Dashboard เท่านั้น ยังไม่มีการนำเข้าข้อมูลผู้ป่วย</div></div>
     </section>
-
-    <section class="card">
-      <div class="upload" id="dropZone">
-        <input id="fileInput" type="file" accept=".txt,text/plain" />
-        <div style="font-size:40px">📄</div>
-        <h3>ลากไฟล์ .txt มาวาง หรือเลือกไฟล์</h3>
-        <p class="meta">รองรับ BILLTRAN, BILLDISP และ OPServices รูปแบบ Windows-874</p>
-        <label class="btn blue" for="fileInput">เลือกไฟล์</label>
-      </div>
-      <div id="fileMeta" class="row hidden" style="margin-top:14px">
-        <div class="grow"><b id="fileName"></b><div class="meta" id="fileInfo"></div></div>
-        <button class="soft" id="clearBtn">ล้างไฟล์</button>
-      </div>
-    </section>
-
-    <div id="workspace" class="hidden">
-      <section class="card rules-card">
-        <div class="section-title">เงื่อนไขสำคัญสำหรับโครงการ SSO Cancer Care (SSOCAC)</div>
-        <div class="rules-grid">
-          <div class="rule-item"><div class="rule-icon">!</div><div><strong>OPServices · PrdSeCode = SSOCAC</strong><small>ต้องระบุรหัสโครงการในข้อมูลบริการ เพื่อให้ระบบ สกส. จำแนกการเบิกเฉพาะโครงการได้</small></div></div>
-          <div class="rule-item"><div class="rule-icon">!</div><div><strong>BILLTRAN · MemberNo = Case Number</strong><small>ใช้เลข Case Number ของผู้ป่วยที่ได้รับอนุมัติในระบบ SSO Cancer Care</small></div></div>
-          <div class="rule-item"><div class="rule-icon">!</div><div><strong>OPServices / OPDx · VerCode = Protocol Code</strong><small>ระบุรหัสโปรโตคอลการรักษามะเร็ง เช่น C0111 ตามการอนุมัติ</small></div></div>
-          <div class="rule-item"><div class="rule-icon">!</div><div><strong>BillItems / DispensedItems · ClaimCat = OPR</strong><small>ใช้กับรายการยาและค่าใช้จ่ายที่สำนักงานประกันสังคมจ่ายเพิ่มในโครงการ</small></div></div>
-        </div>
-        <div id="ruleResults" class="validation-list"></div><div id="healthDashboard" class="health-dashboard"></div>
-      </section>
-      <section class="card">
-        <div class="section-title">ข้อมูล Header</div>
-        <div id="headerGrid" class="grid"></div>
-      </section>
-
-      <section class="card">
-        <div class="row"><div class="section-title grow">ข้อมูลในไฟล์</div><div id="statusBox" class="status">พร้อมแก้ไข</div></div>
-        <div id="tabs" class="tabs"></div>
-        <div id="sectionNote" class="section-note"></div>
-        <div class="toolbar">
-          <input id="searchInput" placeholder="ค้นหาข้อมูล..." />
-          <select id="pageSize"><option>20</option><option>50</option><option>100</option><option value="99999">ทั้งหมด</option></select>
-          <button class="soft" id="addRowBtn">+ เพิ่มแถว</button>
-          <button class="danger" id="deleteRowsBtn">ลบแถวที่เลือก</button>
-          <span class="meta" id="countText"></span>
-        </div>
-        <div class="table-wrap"><table class="data-table"><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
-      </section>
-
-      <section class="card">
-        <div class="section-title">ตัวอย่างท้ายไฟล์</div>
-        <div class="grid">
-          <div class="field"><label>ชื่อไฟล์ส่งออก</label><input id="outputName" /></div>
-          <div class="field"><label>Checksum ใหม่</label><input id="checksumPreview" readonly /></div>
-        </div>
-        <p class="meta">ระบบคำนวณ MD5 จากข้อมูลทั้งหมดก่อนบรรทัด EndNote และสร้าง Checksum ใหม่ให้อัตโนมัติ</p>
-      </section>
-
-      <div class="footer-actions">
-        <button class="soft" id="undoBtn">ย้อนกลับทั้งหมด</button>
-        <button class="peach" id="previewBtn">ตรวจสอบไฟล์</button>
-        <button class="primary" id="downloadBtn">ดาวน์โหลดชื่อเดิม</button>
-      </div>
-    </div>
-    <footer class="copyright-footer"><strong>SSOP Toolkit · SSO Cancer Care Editor Version 2.3.4</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
   </main>
-  </section>
-  <section id="knowledgePage" class="module-page">
-    <header class="top"><div class="top-row"><div><h1>📚 SSOP Knowledge Center <span class="version">V2.3.4</span></h1><p>ค้นหาและจัดการองค์ความรู้ Error โดยไม่จัดเก็บข้อมูลผู้ป่วย</p></div><div class="row"><button class="back-home" id="knowledgeBackHomeBtn">← หน้าหลัก</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
-    <main class="wrap">
-      <section class="card">
-        <div class="knowledge-toolbar">
-          <div class="field grow"><label>ค้นหา Error Code / คำอธิบาย / สาเหตุ / วิธีแก้ / ไฟล์ / ฟิลด์</label><input id="knowledgeSearchInput" placeholder="เช่น CE3, Protocol, VerCode, BILLTRAN" /></div>
-          <div class="field"><label>ประเภทการส่งเบิก</label><select id="knowledgeModuleFilter"><option value="ALL">ทั้งหมด</option><option value="MAIN">Main</option><option value="SSOCAC">Cancer Care</option><option value="STCPAP">CPAP</option><option value="STSLEEP">Sleep Test</option><option value="CROSS">ข้ามเขต</option></select></div>
-          <div class="field knowledge-action"><label>&nbsp;</label><button class="primary" id="knowledgeSearchBtn">ค้นหา</button></div>
-        </div>
-        <div class="privacy-note">🔒 หน้าเว็บส่งไปยังฐานข้อมูลเฉพาะคำค้นและข้อมูล Knowledge เท่านั้น ไม่มีข้อมูลผู้ป่วย</div>
-        <div id="knowledgeStatus" class="meta knowledge-status">กรุณาตั้งค่า Apps Script Web App URL ใน assets/js/config.js</div>
-      </section>
-      <section class="card">
-        <div class="row"><div class="section-title grow">ผลการค้นหา</div><button class="soft" id="knowledgeReloadBtn">โหลดข้อมูลทั้งหมด</button></div>
-        <div id="knowledgeResults" class="knowledge-results"><div class="knowledge-empty">ยังไม่มีผลการค้นหา</div></div>
-      </section>
-      <footer class="copyright-footer"><strong>SSOP Toolkit · SSOP Knowledge Center Version 2.3.4</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
-    </main>
-  </section>
+  <footer class="footer">© 2026 PCMC By Kimhan</footer>
 </div>
+<script>
+  google.script.run
+    .withSuccessHandler(renderApp)
+    .withFailureHandler(showError)
+    .getAppBootstrap();
 
-  <div class="tooltip" id="fieldTooltip"></div>
-  <div class="modal" id="dictionaryModal" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-head"><div><strong>📖 คู่มือฟิลด์ SSOCAC</strong><div class="meta">ใช้สำหรับเปิดดูความหมาย เงื่อนไข และตัวอย่างของแต่ละฟิลด์</div></div><button class="close-x" id="dictionaryClose">✕ ปิด</button></div>
-      <div class="modal-body" id="dictionaryBody"></div>
-    </div>
-  </div>
-<div class="modal" id="aboutModal" aria-hidden="true">
-  <div class="modal-card" style="width:min(620px,96vw)">
-    <div class="modal-head"><strong>ℹ เกี่ยวกับโปรแกรม</strong><button class="close-x" id="aboutClose">✕ ปิด</button></div>
-    <div class="modal-body">
-      <div class="about-brand">
-        <div class="about-logo">🩺</div>
-        <h2>SSOP Toolkit</h2>
-        <p>Professional Edition · Version 2.3.4<br>ระบบช่วยตรวจสอบ แก้ไข และจัดการไฟล์ส่งเบิกประกันสังคม</p>
-      </div>
-      <div class="about-credit">Developed by<strong>PCMC By Kimhan</strong>© 2026 All Rights Reserved.</div>
-    </div>
-  </div>
-</div>
-<div class="modal" id="saveKnowledgeModal" aria-hidden="true">
-  <div class="modal-card save-knowledge-modal">
-    <div class="modal-head"><div><strong>💾 บันทึกเข้าสู่ Knowledge Center</strong><div class="meta">ยืนยันผู้บันทึกและรหัส PIN ก่อนส่งข้อมูล</div></div><button class="close-x" id="saveKnowledgeClose">✕ ปิด</button></div>
-    <div class="modal-body">
-      <div class="save-form-grid">
-        <div class="field"><label>ชื่อผู้บันทึก/ผู้แก้ไข</label><input id="saveUpdatedBy" value="Kimhan" autocomplete="name" /></div>
-        <div class="field"><label>รหัส PIN</label><input id="saveWritePin" type="password" inputmode="numeric" autocomplete="off" placeholder="กรอกรหัส PIN" /></div>
-      </div>
-      <div class="privacy-note">🔒 ระบบส่งเฉพาะข้อมูล Knowledge เท่านั้น ไม่ส่งข้อมูลผู้ป่วยหรือเนื้อหาไฟล์ตอบกลับ</div>
-      <div class="dialog-actions"><button class="soft" id="saveKnowledgeCancel">ยกเลิก</button><button class="primary" id="saveKnowledgeConfirm">บันทึกข้อมูล</button></div>
-    </div>
-  </div>
-</div>
-<div class="modal" id="documentUploadModal" aria-hidden="true"><div class="modal-card save-knowledge-modal"><div class="modal-head"><div><strong id="documentUploadTitle">⬆ อัปเดตเอกสาร PDF</strong><div class="meta" id="documentUploadHint"></div></div><button class="close-x" id="documentUploadClose">✕ ปิด</button></div><div class="modal-body"><input type="hidden" id="documentUploadType"/><div class="save-form-grid"><div class="field"><label>ไฟล์ PDF ฉบับใหม่</label><input id="documentUploadFile" type="file" accept="application/pdf,.pdf"/></div><div class="field"><label>ชื่อผู้ปรับปรุง</label><input id="documentUpdatedBy" value="Kimhan"/></div><div class="field"><label>รหัส PIN</label><input id="documentWritePin" type="password" inputmode="numeric" autocomplete="off" placeholder="กรอกรหัส PIN"/></div></div><div class="privacy-note">ไฟล์ใหม่จะถูกเปลี่ยนชื่ออัตโนมัติ และไฟล์ชื่อเดิมในโฟลเดอร์จะถูกย้ายไปถังขยะ</div><div class="dialog-actions"><button class="soft" id="documentUploadCancel">ยกเลิก</button><button class="primary" id="documentUploadConfirm">อัปโหลดและแทนที่</button></div></div></div></div>
-<div class="modal" id="knowledgeEditModal" aria-hidden="true">
-  <div class="modal-card save-knowledge-modal">
-    <div class="modal-head"><div><strong>✏️ บันทึกการแก้ไข Knowledge</strong><div class="meta">แก้ไขแนวทางแก้ ไฟล์ และฟิลด์ที่เกี่ยวข้อง</div></div><button class="close-x" id="knowledgeEditClose">✕ ปิด</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="knowledgeEditIndex" />
-      <div class="save-form-grid">
-        <div class="field"><label>ชื่อผู้แก้ไข</label><input id="knowledgeEditUpdatedBy" value="Kimhan" autocomplete="name" /></div>
-        <div class="field"><label>รหัส PIN</label><input id="knowledgeEditWritePin" type="password" inputmode="numeric" autocomplete="off" placeholder="กรอกรหัส PIN" /></div>
-      </div>
-      <div class="privacy-note">🔒 ระบบบันทึกเฉพาะองค์ความรู้ ไม่มีข้อมูลผู้ป่วย</div>
-      <div class="dialog-actions"><button class="soft" id="knowledgeEditCancel">ยกเลิก</button><button class="primary" id="knowledgeEditConfirm">บันทึกการแก้ไข</button></div>
-    </div>
-  </div>
-</div>
-<div class="toast-stack" id="toastStack"></div>
-<div class="dialog-overlay" id="dialogOverlay"><div class="dialog-box"><div class="dialog-icon" id="dialogIcon">ℹ️</div><h3 id="dialogTitle"></h3><p id="dialogMessage"></p><div class="dialog-actions" id="dialogActions"></div></div></div>
-<script src="assets/js/config.js?v=2.3.4"></script>
-<script src="assets/js/app.js?v=2.3.4"></script>
+  function renderApp(data){
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    document.getElementById('userBox').classList.add('show');
+    document.getElementById('userName').textContent=data.user.displayName;
+    document.getElementById('userMeta').textContent=`${data.user.email} • ${data.user.role}${data.user.department?' • '+data.user.department:''}`;
+    document.getElementById('total').textContent=data.dashboard.total.toLocaleString('th-TH');
+    document.getElementById('pending').textContent=data.dashboard.pending.toLocaleString('th-TH');
+    document.getElementById('countC').textContent=data.dashboard.c.toLocaleString('th-TH');
+    document.getElementById('countA').textContent=data.dashboard.a.toLocaleString('th-TH');
+    const modules=data.dashboard.modules||{};
+    const names={SSOCAC:'Cancer Care',STCPAP:'CPAP',STSLEEP:'Sleep Test',MAIN:'Main',CROSS:'Cross Area'};
+    const keys=Object.keys(modules);
+    document.getElementById('moduleGrid').innerHTML=keys.length
+      ? keys.map(k=>`<div class="module"><b>${escapeHtml(names[k]||k)}</b><span>${Number(modules[k]).toLocaleString('th-TH')}</span></div>`).join('')
+      : '<div class="module"><b>SSOCAC</b><span>0</span></div>';
+  }
+  function showError(err){document.getElementById('loading').classList.add('hidden');document.getElementById('errorBox').classList.remove('hidden');document.getElementById('errorText').textContent=err&&err.message?err.message:String(err)}
+  function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+</script>
 </body>
 </html>
