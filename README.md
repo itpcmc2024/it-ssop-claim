@@ -1,37 +1,17 @@
-SSOP Claim Management V2.4.4 – SSOCAC Ready
-© 2026 PCMC By Kimhan
+SSOP Claim Management V2.4.6 – Duplicate & Display Fixed
 
-ตั้งค่าให้แล้ว:
-- Apps Script Web App URL:
-  https://script.google.com/macros/s/AKfycbztQYOpzMGJ16oCWviNFuEOqMgC-wMWb0cmtusxGAA9E62SzczHp93TJxaqoXVrS_N2/exec
-- Google Sheet ID:
-  1lHOUP0tf3AJdZ3ADvLTxeHggTar-Do-__slBY1za-ro
+แก้ไขหลัก
+- ตรวจข้อมูลซ้ำทั้งกับข้อมูลเดิมใน Google Sheet และข้อมูลซ้ำภายในไฟล์ Excel เดียวกัน
+- เกณฑ์ซ้ำ: วันที่บริการ + HN + VN + Case No. + Session + Station + JobNo
+- ข้อมูลซ้ำจะถูกข้าม ไม่สร้าง CaseID ใหม่
+- แสดงจำนวน นำเข้าใหม่ / ข้ามข้อมูลซ้ำ / ไม่สำเร็จ
+- หน้า Cancer Care อ่านข้อมูลเดิมได้ แม้ Module ใน Claim_Case จะว่าง แต่มีรายละเอียดใน Case_SSOCAC
+- เพิ่มฟังก์ชัน repairClaimData สำหรับซ่อมข้อมูลเดิมและปิด Active ของแถวซ้ำ โดยไม่ลบข้อมูล
 
-ติดตั้ง Backend
-1) เปิด Apps Script โปรเจกต์ SSOP Claim Management
-2) แทนที่ Code.gs ด้วยไฟล์ในชุดนี้
-3) เลือก setupClaimSheets แล้วกด Run
-4) ตรวจว่า Execution completed
-5) Deploy > Manage deployments > Edit > New version > Deploy
-6) Execute as: Me
-7) Who has access: Anyone
-
-ติดตั้ง GitHub
-แทนที่ไฟล์:
-- index.html
-- assets/css/style.css
-- assets/js/app.js
-- assets/js/config.js
-
-หลัง Commit รอ GitHub Pages แล้วกด Ctrl+Shift+R
-
-ชีตที่ต้องมี:
-- Claim_Case
-- Case_SSOCAC
-- Claim_Attempt
-- Audit_Log
-
-ข้อควรระวัง:
-เวอร์ชันนี้ยังใช้ Mock User และ Web App endpoint แบบไม่มี Google Sign-In
-จึงเหมาะสำหรับทดสอบ Workflow และข้อมูลสมมติเท่านั้น
-ห้ามใช้ข้อมูลผู้ป่วยจริงจนกว่าจะเพิ่มการยืนยันตัวตนและตรวจสิทธิ์ System_Users
+ติดตั้ง
+1. แทนที่ Code.gs ใน Apps Script
+2. Run setupClaimSheets
+3. Run repairClaimData หนึ่งครั้ง
+4. Deploy > Manage deployments > Edit > New version > Deploy
+5. แทนที่ index.html, assets/js/app.js, assets/js/config.js และ assets/css/style.css ใน GitHub
+6. รอ GitHub Pages แล้วกด Ctrl+Shift+R
