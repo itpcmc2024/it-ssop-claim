@@ -1,26 +1,17 @@
-SSOP Claim Management V2.4.1 – SSOCAC Cute Pastel
-© 2026 PCMC By Kimhan
+SSOP Claim Management V2.4.2 – SSOCAC Pastel
 
-สิ่งที่ปรับในรุ่นนี้
-1) ปรับหน้าตาเป็นโทนพาสเทลน่ารัก สบายตา ตามภาพตัวอย่าง
-2) เปลี่ยนไอคอนเมนูและการ์ดให้สื่อความหมายมากขึ้น
-3) หน้า Cancer Care เหลือปุ่มเดียว: “นำเข้าเคสจาก Excel”
-4) เปลี่ยนเมนู “ผู้ใช้งานระบบ” เป็น “USER”
-5) เพิ่มหน้าว่างแบบน่ารักเมื่อยังไม่มีข้อมูล
-6) คงระบบ SSOCAC, การค้นหา, Batch ล่าสุด, JobNo, Timeline และ Import Excel เดิม
+เวอร์ชันนี้ปรับหน้าตาให้ใกล้เคียงภาพตัวอย่างมากขึ้น โดยคงฟังก์ชัน SSOCAC เดิม:
+- นำเข้าเคสจาก Excel
+- อ่าน/บันทึก Claim_Case, Case_SSOCAC และ Claim_Attempt
+- ค้นหาและกรองสถานะ
+- แสดง Batch ล่าสุด และ JobNo
+- Timeline เรียงเก่าไปใหม่
+- ส่งออก CSV
 
-การติดตั้ง GitHub
-- แทนที่ index.html
-- แทนที่ assets/css/style.css
-- แทนที่ assets/js/app.js
-- แทนที่ assets/js/config.js
-- รอ GitHub Pages อัปเดต แล้วกด Ctrl+Shift+R
+วิธีใช้:
+1) นำ Code.gs ไปแทนใน Apps Script เฉพาะเมื่อยังไม่ได้ใช้ Code.gs ของ V2.4.1
+2) ใน GitHub แทนที่ index.html, assets/css/style.css, assets/js/app.js และ assets/js/config.js
+3) ตรวจ apiUrl ใน config.js ให้เป็น Web App URL ปัจจุบัน
+4) Commit และกด Ctrl+Shift+R หลัง GitHub Pages อัปเดต
 
-การติดตั้ง Apps Script
-- Code.gs ใช้ไฟล์เดิมในชุดนี้ได้
-- ตรวจ SPREADSHEET_ID ให้เป็นชีตของคุณ
-- หากแก้ Code.gs ให้ Deploy > Manage deployments > Edit > New version > Deploy
-
-หมายเหตุ
-- รุ่นนี้ยังใช้ Mock User เช่นเดิม
-- ยังไม่ควรใช้ข้อมูลผู้ป่วยจริงจนกว่าจะเพิ่ม Google Sign-In และตรวจสิทธิ์ USER
+หมายเหตุ: รุ่นนี้ยังใช้ mock user และยังไม่ควรใช้กับข้อมูลผู้ป่วยจริงจนกว่าจะเพิ่ม Google Sign-In และสิทธิ์ผู้ใช้
