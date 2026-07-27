@@ -1,109 +1,25 @@
-(() => {
-  'use strict';
-  const cfg = window.SSOP_CONFIG || {};
-  const patients = [
-    {caseId:'CAC-20260727-0001',module:'SSOCAC',date:'27/07/2569',hn:'65001234',vn:'690001',cid:'1100000000001',name:'ผู้ป่วยทดสอบ 1',status:'C'},
-    {caseId:'CAC-20260726-0012',module:'SSOCAC',date:'26/07/2569',hn:'64004567',vn:'690002',cid:'1100000000002',name:'ผู้ป่วยทดสอบ 2',status:'A'},
-    {caseId:'CPA-20260725-0003',module:'CPAP',date:'25/07/2569',hn:'63007890',vn:'690003',cid:'1100000000003',name:'ผู้ป่วยทดสอบ 3',status:'PENDING'},
-    {caseId:'SLP-20260724-0004',module:'SLEEP',date:'24/07/2569',hn:'62001122',vn:'690004',cid:'1100000000004',name:'ผู้ป่วยทดสอบ 4',status:'A'}
-  ];
-
-  document.addEventListener('DOMContentLoaded', init);
-
-  function init(){
-    setUser();
-    bindNavigation();
-    bindActions();
-    fillPlaceholders();
-    renderPatients();
-    showPage(location.hash.replace('#/','') || cfg.defaultPage || 'dashboard', false);
-  }
-
-  function setUser(){
-    const u=cfg.user||{};
-    text('topUserName',u.displayName||'ผู้ใช้งาน');
-    text('topUserMeta',`${u.role||'USER'}${u.department?' • '+u.department:''}`);
-    const avatar=document.querySelector('.avatar');
-    if(avatar) avatar.textContent=(u.displayName||'U').trim().charAt(0).toUpperCase();
-  }
-
-  function bindNavigation(){
-    document.querySelectorAll('[data-page]').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.page)));
-    document.querySelectorAll('[data-page-link]').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.pageLink)));
-    document.getElementById('menuToggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
-    window.addEventListener('hashchange',()=>showPage(location.hash.replace('#/','')||'dashboard',false));
-  }
-
-  function bindActions(){
-    document.addEventListener('click',e=>{
-      const detail=e.target.closest('[data-detail]');
-      if(detail) showCase(detail.dataset.detail);
-      const action=e.target.closest('[data-action]');
-      if(action) handleAction(action.dataset.action);
-    });
-    ['patientSearch','moduleFilter','statusFilter'].forEach(id=>document.getElementById(id).addEventListener('input',renderPatients));
-    document.getElementById('modalClose').addEventListener('click',closeModal);
-    document.getElementById('modalOk').addEventListener('click',closeModal);
-    document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
-  }
-
-  function showPage(name,updateHash=true){
-    if(!document.getElementById('page-'+name)) name='dashboard';
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.getElementById('page-'+name).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===name));
-    document.getElementById('sidebar').classList.remove('open');
-    if(updateHash) location.hash='#/'+name;
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-
-  function fillPlaceholders(){
-    const pages={
-      cpap:['CPAP','Module สำหรับทะเบียนอุปกรณ์และประวัติการส่งเบิก CPAP'],
-      sleep:['Sleep Test','Module สำหรับข้อมูลการตรวจการนอนหลับ'],
-      main:['Main','Module การส่งเบิกหลัก'],
-      cross:['Cross Area','Module การส่งเบิกข้ามพื้นที่'],
-      knowledge:['Knowledge Center','ฐานความรู้ CheckCode และแนวทางแก้ไข'],
-      zip:['ZIP Editor','เครื่องมือแก้ไขไฟล์ ZIP ใน Browser โดยไม่จัดเก็บไฟล์']
-    };
-    Object.entries(pages).forEach(([id,[title,desc]])=>{
-      document.getElementById('page-'+id).innerHTML=`<div class="page-head"><div><h1>${title}</h1><p>${desc}</p></div></div><section class="panel coming"><div class="coming-icon">✓</div><h2>เตรียมพื้นที่ไว้เรียบร้อยแล้ว</h2><p>เมนูนี้ยังเป็นหน้าตัวอย่าง และจะเชื่อมข้อมูลจริงในระยะถัดไปโดยไม่เปลี่ยนรูปแบบการใช้งานหลัก</p><button class="outline-btn" data-page-link="dashboard">กลับหน้าภาพรวม</button></section>`;
-    });
-  }
-
-  function renderPatients(){
-    const q=document.getElementById('patientSearch').value.trim().toLowerCase();
-    const module=document.getElementById('moduleFilter').value;
-    const status=document.getElementById('statusFilter').value;
-    const filtered=patients.filter(p=>{
-      const hay=[p.caseId,p.module,p.date,p.hn,p.vn,p.cid,p.name,p.status].join(' ').toLowerCase();
-      return (!q||hay.includes(q))&&(!module||p.module===module)&&(!status||p.status===status);
-    });
-    document.getElementById('patientRows').innerHTML=filtered.map(p=>`<tr><td><b>${p.caseId}</b></td><td>${p.module}</td><td>${p.date}</td><td><b>${p.hn}</b><small>VN ${p.vn}</small></td><td>${p.name}</td><td><span class="badge ${statusClass(p.status)}">${statusText(p.status)}</span></td><td><button class="mini-btn" data-detail="${p.caseId}">ดูรายละเอียด</button></td></tr>`).join('');
-    document.getElementById('emptyPatients').classList.toggle('hidden',filtered.length>0);
-  }
-
-  function showCase(caseId){
-    const p=patients.find(x=>x.caseId===caseId)||patients[0];
-    openModal(`รายละเอียด ${p.caseId}`,`<div class="detail-grid"><div><label>Module</label><b>${p.module}</b></div><div><label>วันที่บริการ</label><b>${p.date}</b></div><div><label>HN</label><b>${p.hn}</b></div><div><label>VN</label><b>${p.vn}</b></div><div><label>CID</label><b>${p.cid}</b></div><div><label>ชื่อผู้ป่วย</label><b>${p.name}</b></div></div><h3 class="timeline-title">ประวัติการส่งเบิก</h3><div class="timeline"><div class="timeline-item"><span class="dot c"></span><div><b>ครั้งที่ 1 • ผล C</b><small>Batch: 6812_12_20251216-081214</small><p>CheckCode: CE3, CD1</p></div></div><div class="timeline-item"><span class="dot a"></span><div><b>ครั้งที่ 2 • ผล A</b><small>Batch: 6813_12_20251217-093021</small><p>ผ่านการตรวจสอบ</p></div></div></div>`);
-  }
-
-  function handleAction(action){
-    const messages={
-      'mock-logout':'รุ่นนี้เป็นหน้าตัวอย่าง จึงยังไม่เปิดระบบ Login จริง',
-      'mock-export':'สร้างปุ่มส่งออกไว้แล้ว จะเชื่อมข้อมูลจริงใน Phase ถัดไป',
-      'mock-import':'หน้าต่าง Import Excel จะเพิ่มหลังยืนยันโครงสร้างหน้าจอ',
-      'mock-new-case':'ฟอร์มเพิ่มเคส Cancer จะเพิ่มในขั้นตอนถัดไป',
-      'mock-add-user':'หน้าจัดการผู้ใช้จะเชื่อมกับ System_Users หลังเปิด Login จริง',
-      'mock-edit-user':'ขณะนี้เป็นข้อมูลตัวอย่าง ยังไม่มีการบันทึกลง Google Sheet'
-    };
-    showToast(messages[action]||'ฟังก์ชันนี้จะเชื่อมข้อมูลจริงในขั้นตอนถัดไป');
-  }
-
-  function openModal(title,html){text('modalTitle',title);document.getElementById('modalBody').innerHTML=html;document.getElementById('modal').classList.remove('hidden');}
-  function closeModal(){document.getElementById('modal').classList.add('hidden');}
-  function showToast(message){const t=document.getElementById('toast');t.textContent=message;t.classList.remove('hidden');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.add('hidden'),3500);}
-  function statusClass(s){return s==='A'?'a':s==='C'?'c':'p';}
-  function statusText(s){return s==='A'?'ผ่าน A':s==='C'?'ติด C':'รอดำเนินการ';}
-  function text(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
+(()=>{'use strict';
+const cfg=window.SSOP_CONFIG||{};let allCases=[];let modalMode='';let modalCaseId='';
+document.addEventListener('DOMContentLoaded',init);
+function init(){setUser();bindNav();bindActions();fillPlaceholders();showPage(location.hash.replace('#/','')||'dashboard',false);loadCases();}
+function setUser(){const u=cfg.mockUser||{};setText('userName',u.displayName||'ผู้ใช้');setText('userMeta',`${u.role||'USER'} • ${u.department||''}`);document.querySelector('.avatar').textContent=(u.displayName||'U')[0];}
+function bindNav(){document.querySelectorAll('[data-page]').forEach(a=>a.onclick=()=>showPage(a.dataset.page));document.querySelectorAll('[data-page-link]').forEach(a=>a.onclick=()=>showPage(a.dataset.pageLink));menuToggle.onclick=()=>sidebar.classList.toggle('open');window.onhashchange=()=>showPage(location.hash.replace('#/','')||'dashboard',false);}
+function bindActions(){patientSearch.oninput=renderPatients;moduleFilter.onchange=renderPatients;statusFilter.onchange=renderPatients;cancerSearch.oninput=renderCancer;cancerStatus.onchange=renderCancer;refreshBtn.onclick=loadCases;newCaseBtn.onclick=()=>openCaseForm();importBtn.onclick=()=>excelInput.click();excelInput.onchange=importExcel;exportBtn.onclick=exportCsv;logoutBtn.onclick=()=>toast('รุ่นนี้ยังใช้ผู้ใช้ทดสอบ และจะเพิ่ม Google Sign-In ในขั้นถัดไป');modalClose.onclick=closeModal;modalCancel.onclick=closeModal;modalSave.onclick=saveModal;modal.onclick=e=>{if(e.target===modal)closeModal()};document.addEventListener('click',e=>{const b=e.target.closest('[data-detail]');if(b)viewCase(b.dataset.detail);const a=e.target.closest('[data-attempt]');if(a)openAttemptForm(a.dataset.attempt);});}
+function fillPlaceholders(){const pages={main:['▦','Main','เตรียมพื้นที่สำหรับ Module Main'],cross:['⇄','Cross Area','เตรียมพื้นที่สำหรับการส่งเบิกข้ามพื้นที่'],cpap:['◉','CPAP','เตรียมพื้นที่สำหรับทะเบียน CPAP'],sleep:['☾','Sleep Test','เตรียมพื้นที่สำหรับข้อมูล Sleep Test'],knowledge:['☷','Knowledge Center','จะเชื่อมหน้าฐานความรู้เดิมในขั้นต่อไป'],zip:['▣','ZIP Editor','จะเชื่อม ZIP Editor เดิมโดยคงการประมวลผลใน Browser'],users:['⚙','ผู้ใช้งานระบบ','จะเปิดเมื่อเพิ่ม Google Sign-In'],audit:['≡','Audit Log','บันทึกกิจกรรมจะเชื่อมหลังเปิดระบบผู้ใช้']};Object.entries(pages).forEach(([id,[ico,title,desc]])=>document.getElementById('page-'+id).innerHTML=`<div class="page-head"><div><h2>${title}</h2><p>${desc}</p></div></div><div class="panel"><div class="emoji">${ico}</div><h3>เตรียมพื้นที่ไว้เรียบร้อยแล้ว</h3><p>ขณะนี้เปิดใช้งาน SSOCAC ก่อน โดยจัดลำดับเมนู Main → Cross Area → CPAP → Sleep Test → Cancer Care ตามที่กำหนด</p></div>`);}
+function showPage(name,hash=true){if(!document.getElementById('page-'+name))name='dashboard';document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');document.querySelectorAll('nav a').forEach(x=>x.classList.toggle('active',x.dataset.page===name));sidebar.classList.remove('open');if(hash)location.hash='#/'+name;}
+async function api(action,payload={}){if(!cfg.apiUrl||cfg.apiUrl.includes('PUT_YOUR'))throw new Error('กรุณาใส่ Apps Script Web App URL ใน assets/js/config.js');const r=await fetch(cfg.apiUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...payload})});const data=await r.json();if(!data.ok)throw new Error(data.message||'เกิดข้อผิดพลาด');return data;}
+async function loadCases(){loading(true);try{const d=await api('listCases',{module:'ALL',limit:5000});allCases=d.items||[];updateStats(d.summary||{});renderPatients();renderCancer();}catch(e){toast(e.message);}finally{loading(false)}}
+function updateStats(s){['Total','Pending','C','A'].forEach(k=>{setText('stat'+k,s[k.toLowerCase()]||0);setText('c'+k,s[k.toLowerCase()]||0)})}
+function filtered(searchId,statusId,module){const q=document.getElementById(searchId).value.trim().toLowerCase();const st=document.getElementById(statusId).value;return allCases.filter(x=>(!module||x.Module===module)&&(!st||st==='ALL'||statusOf(x)===st)&&(!q||[x.CaseID,x.Module,x.ServiceDate,x.HN,x.VN,x.CID,x.FullName,x.LatestBatchName,x.JobNo,x.CaseNo,x.ChemoDrug].join(' ').toLowerCase().includes(q)));}
+function renderPatients(){const mod=moduleFilter.value;const rows=allCases.filter(x=>(mod==='ALL'||x.Module===mod)).filter(x=>{const q=patientSearch.value.toLowerCase();return (statusFilter.value==='ALL'||statusOf(x)===statusFilter.value)&&(!q||[x.CaseID,x.Module,x.ServiceDate,x.HN,x.VN,x.CID,x.FullName,x.LatestBatchName,x.JobNo].join(' ').toLowerCase().includes(q))});patientRows.innerHTML=rows.map(x=>`<tr><td><b>${esc(x.CaseID)}</b></td><td>${esc(x.Module)}</td><td>${fmtDate(x.ServiceDate)}</td><td><b>${esc(x.HN)}</b><small>VN ${esc(x.VN||'-')}</small></td><td>${esc(x.FullName)}</td><td>${esc(x.LatestBatchName||'-')}</td><td>${esc(x.JobNo||'-')}</td><td>${badge(statusOf(x))}</td><td><button class="mini" data-detail="${esc(x.CaseID)}">ดูรายละเอียด</button></td></tr>`).join('');patientEmpty.classList.toggle('hidden',rows.length>0)}
+function renderCancer(){const rows=filtered('cancerSearch','cancerStatus','SSOCAC');cancerRows.innerHTML=rows.map(x=>`<tr><td><b>${esc(x.CaseID)}</b></td><td>${fmtDate(x.ServiceDate)}</td><td><b>${esc(x.HN)}</b><small>VN ${esc(x.VN||'-')}</small></td><td>${esc(x.FullName)}</td><td>${esc(x.CaseNo||'-')}</td><td>${esc(x.ChemoDrug||'-')}</td><td>${esc(x.LatestBatchName||'-')}</td><td>${esc(x.JobNo||'-')}</td><td>${badge(statusOf(x))}</td><td><button class="mini" data-detail="${esc(x.CaseID)}">รายละเอียด</button></td></tr>`).join('');cancerEmpty.classList.toggle('hidden',rows.length>0)}
+async function viewCase(id){loading(true);try{const d=await api('getCase',{caseId:id});const x=d.item,a=d.attempts||[];modalMode='view';modalCaseId=id;modalTitle.textContent='รายละเอียด '+id;modalBody.innerHTML=`<div class="detail-grid">${field('Module',x.Module)}${field('วันที่บริการ',fmtDate(x.ServiceDate))}${field('HN',x.HN)}${field('VN',x.VN)}${field('CID',x.CID)}${field('ชื่อผู้ป่วย',x.FullName)}${field('Case No.',x.CaseNo)}${field('JobNo',x.JobNo)}${field('ยา Chemo',x.ChemoDrug)}${field('Protocol',x.Protocol)}${field('Batch ล่าสุด',x.LatestBatchName||'-')}${field('สถานะ',statusText(statusOf(x)))}</div><div class="page-head" style="margin-top:18px"><h3>ประวัติการส่งเบิก (เก่า → ใหม่)</h3><button class="primary" data-attempt="${esc(id)}">+ เพิ่มครั้งส่งเบิก</button></div><div class="timeline">${a.length?a.map(t=>`<div class="timeline-item ${String(t.ResultStatus).toLowerCase()}"><b>ครั้งที่ ${t.AttemptNo} • ${statusText(t.ResultStatus)}</b><small>วันที่ส่ง: ${fmtDate(t.SentDate)} | Batch: ${esc(t.BatchName)}</small><small>Session: ${esc(t.Session||'-')} | Station: ${esc(t.Station||'-')}</small>${t.CheckCodes?`<p>CheckCode: ${esc(t.CheckCodes)}</p>`:''}${t.ResultDescription?`<p>${esc(t.ResultDescription)}</p>`:''}</div>`).join(''):'<p>ยังไม่มีประวัติการส่งเบิก</p>'}</div>`;modalSave.classList.add('hidden');modalCancel.textContent='ปิด';modal.classList.remove('hidden');}catch(e){toast(e.message)}finally{loading(false)}}
+function openCaseForm(x={}){modalMode='case';modalTitle.textContent=x.CaseID?'แก้ไขเคส':'เพิ่มเคส SSOCAC';modalBody.innerHTML=`<div class="form-grid">${input('ServiceDate','วันที่บริการ','date',toDateInput(x.ServiceDate),true)}${input('HN','HN','text',x.HN,true)}${input('VN','VN','text',x.VN)}${input('CID','CID','text',x.CID)}${input('FullName','ชื่อผู้ป่วย','text',x.FullName,true)}${input('Coverage','สิทธิการรักษา','text',x.Coverage)}${input('ChemoDrug','ยา Chemo','text',x.ChemoDrug)}${input('CaseNo','Case No.','text',x.CaseNo)}${input('Protocol','Protocol','text',x.Protocol)}${input('Tflag','Tflag','text',x.Tflag)}${input('Session','Session','text',x.Session)}${input('Station','Station','text',x.Station)}${input('JobNo','JobNo','text',x.JobNo)}</div><input type="hidden" id="CaseID" value="${esc(x.CaseID||'')}">`;modalSave.classList.remove('hidden');modalCancel.textContent='ยกเลิก';modal.classList.remove('hidden')}
+function openAttemptForm(id){modalMode='attempt';modalCaseId=id;modalTitle.textContent='เพิ่มประวัติการส่งเบิก';modalBody.innerHTML=`<div class="form-grid">${input('SentDate','วันที่ส่ง','date','',true)}${input('BatchName','BatchName','text','',true)}${input('Session','Session','text','')}${input('Station','Station','text','')}<label><span>ผลล่าสุด</span><select id="ResultStatus"><option value="PENDING">รอดำเนินการ</option><option value="C">ติด C</option><option value="A">ผ่าน A</option></select></label>${input('CheckCodes','CheckCodes','text','')}<label class="wide"><span>รายละเอียดผล</span><textarea id="ResultDescription"></textarea></label><label class="wide"><span>หมายเหตุการแก้ไข</span><textarea id="CorrectionNote"></textarea></label></div>`;modalSave.classList.remove('hidden');modalCancel.textContent='ยกเลิก';modal.classList.remove('hidden')}
+async function saveModal(){try{loading(true);if(modalMode==='case'){const ids=['CaseID','ServiceDate','HN','VN','CID','FullName','Coverage','ChemoDrug','CaseNo','Protocol','Tflag','Session','Station','JobNo'];const item={};ids.forEach(id=>item[id]=document.getElementById(id)?.value||'');await api('saveCase',{item,actor:cfg.mockUser.email});toast('บันทึกเคสเรียบร้อย');}else if(modalMode==='attempt'){const ids=['SentDate','BatchName','Session','Station','ResultStatus','CheckCodes','ResultDescription','CorrectionNote'];const item={CaseID:modalCaseId};ids.forEach(id=>item[id]=document.getElementById(id)?.value||'');await api('addAttempt',{item,actor:cfg.mockUser.email});toast('เพิ่มประวัติการส่งเบิกเรียบร้อย');}closeModal();await loadCases();}catch(e){toast(e.message)}finally{loading(false)}}
+async function importExcel(){const f=excelInput.files[0];if(!f)return;loading(true);try{const buf=await f.arrayBuffer();const wb=XLSX.read(buf,{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];const raw=XLSX.utils.sheet_to_json(ws,{defval:''});const items=raw.map(mapExcelRow);const d=await api('importCases',{items,actor:cfg.mockUser.email});toast(`นำเข้าสำเร็จ ${d.success} รายการ${d.failed?` • ไม่สำเร็จ ${d.failed}`:''}`);await loadCases();}catch(e){toast(e.message)}finally{excelInput.value='';loading(false)}}
+function mapExcelRow(r){const pick=(...names)=>{for(const n of names)if(r[n]!==undefined&&r[n]!==null&&r[n]!=='')return r[n];return''};return{ServiceDate:pick('วันที่มารับบริการ','วันที่บริการ','ServiceDate'),HN:pick('HN','hn'),VN:pick('VN','vn'),CID:pick('เลขบัตรประชาชน','CID','PID'),FullName:pick('ชื่อ-นามสกุล','ชื่อผู้ป่วย','FullName'),Coverage:pick('สิทธิการรักษา','Coverage'),ChemoDrug:pick('ชื่อยา Chemo','ChemoDrug','ยา Chemo'),CaseNo:pick('Case No.','CaseNo'),Protocol:pick('Protocol'),Tflag:pick('Tflag'),Session:pick('Session'),Station:pick('Station'),JobNo:pick('เลขที่ใบงาน','JobNo','Job No.')};}
+function exportCsv(){const rows=filtered('patientSearch','statusFilter',moduleFilter.value==='ALL'?null:moduleFilter.value);const h=['CaseID','Module','ServiceDate','HN','VN','CID','FullName','LatestBatchName','JobNo','Status'];const csv='\uFEFF'+[h,...rows.map(x=>[x.CaseID,x.Module,fmtDate(x.ServiceDate),x.HN,x.VN,x.CID,x.FullName,x.LatestBatchName,x.JobNo,statusOf(x)])].map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='SSOP_Cases.csv';a.click();URL.revokeObjectURL(a.href)}
+function closeModal(){modal.classList.add('hidden');modalMode='';modalCaseId=''}function loading(v){document.getElementById('loading').classList.toggle('hidden',!v)}function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.add('hidden'),3800)}
+function input(id,label,type='text',value='',req=false){return`<label><span>${label}${req?' *':''}</span><input id="${id}" type="${type}" value="${esc(value||'')}" ${req?'required':''}></label>`}function field(l,v){return`<div><label>${l}</label><b>${esc(v||'-')}</b></div>`}function statusOf(x){return String(x.LatestResult||x.CurrentStatus||'PENDING').toUpperCase()}function statusText(s){s=String(s).toUpperCase();return s==='A'?'ผ่าน A':s==='C'?'ติด C':'รอดำเนินการ'}function badge(s){s=String(s).toUpperCase();return`<span class="badge ${s==='A'?'a':s==='C'?'c':'p'}">${statusText(s)}</span>`}function fmtDate(v){if(!v)return'-';const d=new Date(v);if(isNaN(d))return String(v);return d.toLocaleDateString('th-TH')}function toDateInput(v){if(!v)return'';const d=new Date(v);return isNaN(d)?'':d.toISOString().slice(0,10)}function setText(id,v){const e=document.getElementById(id);if(e)e.textContent=v}function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 })();
