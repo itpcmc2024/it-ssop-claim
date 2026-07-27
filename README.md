@@ -1,32 +1,22 @@
-# SSOP Toolkit Professional Edition V2.3.4
+SSOP Claim Management V2.4 Phase 1 - Google Identity Services
 
-เวอร์ชันใช้งานจริงสำหรับ SSOCAC พร้อม SSOP Knowledge Center และ Google Sheets Knowledge API
+ไฟล์ฝั่ง Apps Script:
+- Code.gs
 
-## จุดเด่น
-- คงหน้า Home และ Cancer Care Workspace รูปแบบเดิม
-- อ่าน แก้ ตรวจ และส่งออกไฟล์ใน Browser
-- วิเคราะห์ไฟล์ตอบกลับ SSOCAC และดึง CheckCode
-- ค้นหา/บันทึกองค์ความรู้ด้วย `Module + ErrorCode`
-- หน้า SSOP Knowledge Center ค้นจาก Error Code, คำอธิบาย, สาเหตุ, วิธีแก้, ไฟล์และฟิลด์
-- ไม่จัดเก็บข้อมูลผู้ป่วยออนไลน์
+ไฟล์ฝั่ง GitHub Pages:
+- index.html
+- assets/css/style.css
+- assets/js/config.js
+- assets/js/app.js
 
-## Module codes
-- `MAIN`
-- `CROSS`
-- `SSOCAC`
-- `STCPAP`
-- `STSLEEP`
+ต้องตั้งค่า 2 ค่าให้ตรงกัน:
+1) GOOGLE_CLIENT_ID ใน Code.gs
+2) googleClientId ใน assets/js/config.js
 
-© 2026 PCMC By Kimhan · All Rights Reserved.
+และใส่ Web App URL ใน apiUrl ของ assets/js/config.js
 
+Deployment Apps Script:
+- Execute as: Me
+- Who has access: Anyone
 
-## ปรับปรุง V2.3.4
-- เปลี่ยนกล่องกรอกชื่อและ PIN เป็นหน้าต่างสวยงามภายในระบบ
-- เพิ่มช่องกรอกไฟล์ที่เกี่ยวข้องและฟิลด์ที่เกี่ยวข้องในหน้าวิเคราะห์ Error
-- เปลี่ยนตัวเลือกโมดูลเป็น Cancer Care โดยไม่แสดง SSOCAC ในวงเล็บ
-
-
-## V2.3.4
-- ปุ่มเปิดประกาศ CHI68-A02.pdf และรหัส Protocol.pdf จาก Google Drive
-- อัปโหลด PDF ฉบับใหม่และย้ายไฟล์ชื่อเดิมไปถังขยะด้วย PIN
-- คู่มือฟิลด์กลับเป็นโหมดเปิดดูอย่างเดียว และ Knowledge Center แก้ไขแนวทางแก้/ไฟล์/ฟิลด์ที่เกี่ยวข้องได้
+ระบบจะไม่ใช้ Session.getActiveUser() และไม่ใช้ google.script.run บน GitHub Pages
