@@ -1,31 +1,37 @@
-SSOP Claim Management V2.4.7 – Identifier & Request Fixed
-=============================================================
+SSOP Claim Management V2.5-A Build 1
 
-แก้ไข:
-1. HN / VN / CID / Session / Station / JobNo เก็บเป็น Plain text
-2. เลข 0 นำหน้าไม่หายสำหรับข้อมูลใหม่
-3. ตรวจข้อมูลซ้ำแบบไม่สนเลข 0 นำหน้า
-   ตัวอย่าง 000861835 และ 861835 ถือว่าเป็น HN เดียวกัน
-4. แก้ข้อความ "ไม่พบ requestId"
-5. เปลี่ยนการ POST จาก hidden iframe เป็น no-cors POST
-   จึงไม่มี X-Frame-Options sameorigin จาก iframe
-6. หน้าโปรแกรมดึงข้อมูลกลับจาก Google Sheet ได้ตามปกติ
+ไฟล์ในชุด
+- backend/code.gs
+- frontend/index.html
 
-ติดตั้ง Apps Script:
-- แทนที่ Code.gs
-- Run setupClaimSheets
-- Run repairIdentifierColumns หนึ่งครั้ง
-- Run repairClaimData หนึ่งครั้ง (หากยังมีรายการซ้ำเดิม)
-- Deploy > Manage deployments > Edit > New version > Deploy
-- Execute as Me / Who has access Anyone
+วิธีติดตั้ง Backend
+1. เปิด Google Apps Script เดิม และสำรองโค้ดเก่า
+2. เปิด backend/code.gs แล้วคัดลอกทั้งหมดไปวางในไฟล์ code.gs
+3. กด Save
+4. ที่ช่องเลือกฟังก์ชัน ให้เลือก setupSystem (ไม่มีขีดล่างท้ายชื่อ)
+5. กด Run และอนุญาตสิทธิ์
+6. เมื่อสำเร็จ สามารถเลือก testConnection แล้วกด Run เพื่อตรวจซ้ำได้
+7. Deploy > Manage deployments > Edit
+8. เลือก New version แล้ว Deploy
+9. Execute as: Me / Who has access: Anyone
 
-ติดตั้ง GitHub:
-- แทนที่ index.html
-- assets/css/style.css
-- assets/js/app.js
-- assets/js/config.js
-- Commit แล้ว Ctrl+Shift+R
+หมายเหตุสำคัญ
+- getAppBootstrap_ เป็นฟังก์ชันภายใน จึงไม่แสดงในรายการ Run เพราะลงท้ายด้วยขีดล่าง
+- ให้เลือก setupSystem แทน
+- หาก URL Web App เปลี่ยน ให้แก้ค่าตัวแปร API ใน frontend/index.html
 
-หมายเหตุ:
-เลข 0 ที่เคยหายไปแล้วใน Google Sheet ไม่สามารถเดาคืนได้อัตโนมัติ
-แต่ระบบตรวจซ้ำรุ่นนี้จะเทียบค่าเลขโดยไม่สน 0 นำหน้า จึงยังตรวจเจอรายการซ้ำได้
+วิธีติดตั้ง Frontend
+1. นำ frontend/index.html ไปแทนไฟล์ index.html ใน GitHub repository
+2. Commit changes
+3. รอ GitHub Pages อัปเดต แล้วเปิดหน้าเว็บใหม่แบบ Ctrl+F5
+
+ฟังก์ชัน Build 1
+- Dashboard
+- Import Excel และ Preview
+- ตรวจข้อมูลไม่ครบ
+- ตรวจรายการซ้ำในไฟล์และฐานข้อมูล
+- บันทึก Claim_Case, Case_SSOCAC, Case_Work_Log, Audit_Log
+- ค้นหา กรอง เรียง แบ่งหน้า และ Export CSV
+- รายละเอียดผู้ป่วยและ Timeline
+
+ยังไม่รวม ZIP Editor และ Reply ใน Build นี้
