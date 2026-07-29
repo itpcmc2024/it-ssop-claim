@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.0.0
+SSOP Toolkit Professional Edition V3.0.1
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -23,14 +23,16 @@ function goHome(){
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function openModule(name){
- if(name==='cancer'){showPage('cancerPage');return;}
+ if(name==='cancer'){showPage('registryPage');loadRegistry();return;}
  if(name==='knowledge'){showPage('knowledgePage');loadKnowledge('','ALL');return;}
  const names={main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test'};
  showDialog('เตรียมพัฒนา',`${names[name]||'โมดูลนี้'} ถูกเตรียมปุ่มและโครงสร้างไว้แล้ว
 จะเพิ่ม Parser และกฎตรวจสอบเฉพาะงานในเวอร์ชันถัดไป`,'info');
 }
 document.querySelectorAll('[data-module]').forEach(b=>b.addEventListener('click',()=>openModule(b.dataset.module)));
-document.getElementById('backHomeBtn').onclick=goHome;
+document.getElementById('backHomeBtn').onclick=()=>showPage('registryPage');
+document.getElementById('registryBackHomeBtn')?.addEventListener('click',goHome);
+document.getElementById('openCancerEditorBtn')?.addEventListener('click',()=>showPage('cancerPage'));
 document.getElementById('knowledgeBackHomeBtn').onclick=goHome;
 function toast(title,message,type='info',duration=3600){const stack=document.getElementById('toastStack'),el=document.createElement('div');const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};el.className=`toast ${type}`;el.innerHTML=`<div class="toast-icon">${icons[type]||icons.info}</div><div><div class="toast-title">${escapeHtml(title)}</div><div class="toast-msg">${escapeHtml(message)}</div></div>`;stack.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(-8px)';setTimeout(()=>el.remove(),220)},duration)}
 function showDialog(title,message,type='info',buttons=[{text:'ตกลง',value:true,className:'primary'}]){return new Promise(resolve=>{const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};document.getElementById('dialogIcon').textContent=icons[type]||icons.info;document.getElementById('dialogTitle').textContent=title;document.getElementById('dialogMessage').textContent=message;const actions=document.getElementById('dialogActions');actions.innerHTML='';buttons.forEach(btn=>{const b=document.createElement('button');b.textContent=btn.text;b.className=btn.className||'soft';b.onclick=()=>{document.getElementById('dialogOverlay').classList.remove('show');resolve(btn.value)};actions.appendChild(b)});document.getElementById('dialogOverlay').classList.add('show')})}
@@ -444,3 +446,47 @@ document.getElementById('knowledgeEditWritePin')?.addEventListener('keydown',e=>
 
 document.getElementById('analyzeReplyBtn')?.addEventListener('click',analyzeSSOCACReply);
 document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportReplyKnowledgeCSV);
+
+
+/* ======================================================
+   Cancer Care Registry V3.0.1
+====================================================== */
+const registryState={items:[],filtered:[],page:1,pageSize:20,selected:null};
+function thDate(v){if(!v)return '-';const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleDateString('th-TH',{year:'numeric',month:'2-digit',day:'2-digit'});}
+function thDateTime(v){if(!v)return '-';const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString('th-TH');}
+async function loadRegistry(){
+ const status=document.getElementById('registryStatus');if(!status)return;
+ status.textContent='กำลังโหลดข้อมูล...';
+ try{const data=await apiRequest('listCases',{module:'SSOCAC',limit:5000});registryState.items=data.items||[];applyRegistryFilter();status.textContent=`เชื่อมต่อฐานข้อมูลแล้ว · ${registryState.items.length} รายการ`;}
+ catch(err){status.textContent=err.message;document.getElementById('registryBody').innerHTML=`<tr><td colspan="9" class="empty-row">${escapeHtml(err.message)}</td></tr>`;}
+}
+function applyRegistryFilter(){
+ const q=(document.getElementById('registrySearch')?.value||'').trim().toLowerCase();
+ const sort=document.getElementById('registrySort')?.value||'newest';
+ registryState.filtered=registryState.items.filter(x=>!q||[x.Case_ID,x.HN,x.VN,x.CID,x.Patient_Name,x.SSO_Case_No,x.Protocol_Code,x.Case_Status,x.Assigned_To].some(v=>String(v||'').toLowerCase().includes(q)));
+ registryState.filtered.sort((a,b)=>{if(sort==='name')return String(a.Patient_Name||'').localeCompare(String(b.Patient_Name||''),'th');const av=new Date(a.Created_At||0).getTime(),bv=new Date(b.Created_At||0).getTime();return sort==='oldest'?av-bv:bv-av;});
+ registryState.page=1;renderRegistry();
+}
+function renderRegistry(){
+ const size=Number(document.getElementById('registryPageSize')?.value||20);registryState.pageSize=size;
+ const total=registryState.filtered.length,pages=Math.max(1,Math.ceil(total/size));registryState.page=Math.min(registryState.page,pages);
+ const start=(registryState.page-1)*size,rows=registryState.filtered.slice(start,start+size),body=document.getElementById('registryBody');
+ body.innerHTML=rows.length?rows.map(x=>`<tr><td><div class="case-no">${escapeHtml(x.Case_ID||'-')}</div><div class="subline">ครั้งที่ ${escapeHtml(x.Current_Attempt_No||0)}</div></td><td><b>${escapeHtml(x.HN||'-')}</b><div class="subline">VN: ${escapeHtml(x.VN||'-')}</div></td><td><b>${escapeHtml(x.Patient_Name||'-')}</b><div class="subline">CID: ${escapeHtml(x.CID?String(x.CID).replace(/.(?=.{4})/g,'•'):'-')}</div></td><td>${thDate(x.Service_Date)}</td><td>${escapeHtml(x.SSO_Case_No||'-')}<div class="subline">${escapeHtml(x.Protocol_Code||'-')}</div></td><td><span class="status-pill">${escapeHtml(x.Case_Status||'รอเตรียมข้อมูล')}</span></td><td><span class="result-pill ${x.Latest_Result==='A'?'a':x.Latest_Result==='C'?'c':''}">${escapeHtml(x.Latest_Result||'-')}</span></td><td>${escapeHtml(x.Assigned_To||'-')}</td><td><div class="row-actions"><button class="soft" data-case-view="${escapeHtml(x.Case_ID)}">ดู</button><button class="soft" data-case-edit="${escapeHtml(x.Case_ID)}">แก้ไข</button></div></td></tr>`).join(''):`<tr><td colspan="9" class="empty-row">ยังไม่มีข้อมูลทะเบียนงาน</td></tr>`;
+ body.querySelectorAll('[data-case-view]').forEach(b=>b.onclick=()=>openCaseDetail(b.dataset.caseView));body.querySelectorAll('[data-case-edit]').forEach(b=>b.onclick=()=>openCaseModal(b.dataset.caseEdit));
+ document.getElementById('registryCountText').textContent=total?`แสดง ${start+1}-${Math.min(start+size,total)} จาก ${total} รายการ`:'0 รายการ';
+ const pageWrap=document.getElementById('registryPages');pageWrap.innerHTML='';for(let i=1;i<=pages;i++){if(pages>10&&Math.abs(i-registryState.page)>2&&i!==1&&i!==pages)continue;const b=document.createElement('button');b.textContent=i;b.className=i===registryState.page?'active':'';b.onclick=()=>{registryState.page=i;renderRegistry()};pageWrap.appendChild(b)}
+ renderRegistryStats();
+}
+function renderRegistryStats(){const all=registryState.items;const set=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=n};set('statAll',all.length);set('statPreparing',all.filter(x=>['รอเตรียมข้อมูล','รอตรวจสอบ'].includes(x.Case_Status)).length);set('statReady',all.filter(x=>['พร้อมสร้างไฟล์','สร้างไฟล์แล้ว'].includes(x.Case_Status)).length);set('statSent',all.filter(x=>['ส่งเบิกแล้ว','รอผลตอบกลับ'].includes(x.Case_Status)).length);set('statA',all.filter(x=>x.Latest_Result==='A'||x.Case_Status==='ผ่าน (A)').length);set('statC',all.filter(x=>x.Latest_Result==='C'||x.Case_Status==='ติดแก้ไข (C)').length)}
+function openCaseModal(id=''){
+ const x=id?registryState.items.find(r=>r.Case_ID===id):null;registryState.selected=x||null;document.getElementById('caseModalTitle').textContent=x?'แก้ไขงาน Cancer Care':'เพิ่มงาน Cancer Care';
+ const fields={caseId:x?.Case_ID||'',caseHN:x?.HN||'',caseVN:x?.VN||'',caseCID:x?.CID||'',casePatientName:x?.Patient_Name||'',caseServiceDate:x?.Service_Date?String(x.Service_Date).slice(0,10):'',caseCoverage:x?.Coverage||'ประกันสังคม',caseSsoNo:x?.SSO_Case_No||'',caseProtocol:x?.Protocol_Code||'',caseChemo:x?.Chemo_Drug||'',caseAssigned:x?.Assigned_To||'',caseStatus:x?.Case_Status||'รอเตรียมข้อมูล',caseRemark:x?.Remark||'',caseUpdatedBy:x?.Updated_By||'Kimhan'};Object.entries(fields).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});const m=document.getElementById('caseModal');m.classList.add('show');m.setAttribute('aria-hidden','false');
+}
+function closeCaseModal(){const m=document.getElementById('caseModal');m.classList.remove('show');m.setAttribute('aria-hidden','true')}
+async function saveCase(){
+ const get=id=>document.getElementById(id).value.trim();const payload={Case_ID:get('caseId'),HN:get('caseHN'),VN:get('caseVN'),CID:get('caseCID'),Patient_Name:get('casePatientName'),Service_Date:get('caseServiceDate'),Coverage:get('caseCoverage'),Case_Status:get('caseStatus'),Assigned_To:get('caseAssigned'),Updated_By:get('caseUpdatedBy'),SSO_Case_No:get('caseSsoNo'),Protocol_Code:get('caseProtocol'),Chemo_Drug:get('caseChemo'),Remark:get('caseRemark')};
+ if(!payload.HN||!payload.Patient_Name||!payload.Service_Date){toast('ข้อมูลไม่ครบ','กรุณากรอก HN ชื่อผู้ป่วย และวันที่รับบริการ','warning');return}const btn=document.getElementById('caseSaveBtn');btn.disabled=true;btn.textContent='กำลังบันทึก...';try{await apiRequest('saveCase',{item:payload});closeCaseModal();toast('บันทึกสำเร็จ',payload.Case_ID?'แก้ไขทะเบียนงานแล้ว':'สร้างทะเบียนงานใหม่แล้ว','success');await loadRegistry()}catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500)}finally{btn.disabled=false;btn.textContent='บันทึก'}
+}
+async function openCaseDetail(id){try{const data=await apiRequest('getCase',{caseId:id});const x=data.item||{};document.getElementById('caseDetailTitle').textContent=`รายละเอียด ${x.Case_ID||''}`;document.getElementById('caseDetailSub').textContent=x.Patient_Name||'';const pairs=[['HN',x.HN],['VN',x.VN],['ชื่อผู้ป่วย',x.Patient_Name],['วันที่รับบริการ',thDate(x.Service_Date)],['สิทธิ',x.Coverage],['สถานะ',x.Case_Status],['Case Number',x.SSO_Case_No],['Protocol',x.Protocol_Code],['ยา Chemo',x.Chemo_Drug],['ผู้รับผิดชอบ',x.Assigned_To],['ผลล่าสุด',x.Latest_Result],['หมายเหตุ',x.Remark]];document.getElementById('caseDetailGrid').innerHTML=pairs.map(([k,v])=>`<div class="detail-item"><label>${escapeHtml(k)}</label><strong>${escapeHtml(v||'-')}</strong></div>`).join('');document.getElementById('caseTimeline').innerHTML=(data.timeline||[]).length?(data.timeline||[]).map(t=>`<div class="timeline-item"><b>${escapeHtml(t.Detail||t.Action_Type||'-')}</b><small>${thDateTime(t.Action_Date||t.Created_At)} · ${escapeHtml(t.Performed_By||'-')}</small></div>`).join(''):'<div class="meta">ยังไม่มี Timeline</div>';const m=document.getElementById('caseDetailModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}catch(err){toast('เปิดรายละเอียดไม่สำเร็จ',err.message,'error')}}
+function exportRegistryCsv(){const headers=['Case_ID','HN','VN','CID','Patient_Name','Service_Date','Coverage','Case_Status','SSO_Case_No','Protocol_Code','Assigned_To','Latest_Result'];const rows=registryState.filtered.map(x=>headers.map(h=>x[h]||''));const csv='\uFEFF'+[headers,...rows].map(r=>r.map(csvCell).join(',')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`SSOCAC_Registry_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegistry);document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseDetailClose')?.addEventListener('click',()=>document.getElementById('caseDetailModal').classList.remove('show'));
