@@ -244,13 +244,13 @@
 
 <div class="modal" id="zipReaderModal" aria-hidden="true"><div class="modal-card zip-reader-modal"><div class="modal-head"><div><strong>🗜️ ZIP Reader — Cancer Care</strong><div class="meta" id="zipReaderCaseText">อ่านไฟล์ ZIP ภายใน Browser โดยไม่อัปโหลดไฟล์ผู้ป่วยขึ้นฐานข้อมูล</div></div><button class="close-x" id="zipReaderClose">✕ ปิด</button></div><div class="modal-body">
   <div id="zipChooseStep"><div class="drop-zone" id="zipDropZone"><div class="drop-icon">🗂️</div><strong>ลาก ZIP ผู้ป่วยมาวางที่นี่</strong><span>รองรับ 1 ZIP ต่อผู้ป่วย 1 ราย</span><input id="zipFileInput" type="file" accept=".zip,application/zip"><button class="primary" id="zipChooseBtn">เลือกไฟล์ ZIP</button></div><div class="privacy-note">🔒 ระบบอ่านไฟล์ทั้งหมดใน Browser เท่านั้น เวอร์ชันนี้ยังไม่บันทึกหรือส่งเนื้อหาไฟล์ผู้ป่วยไป Google Sheets</div></div>
-  <div id="zipWorkspace" class="hidden"><div class="zip-summary" id="zipSummary"></div><div class="zip-layout"><aside class="zip-file-panel"><div class="row"><strong class="grow">ไฟล์ภายใน ZIP</strong><button class="soft" id="zipChangeBtn">เปลี่ยน ZIP</button></div><div id="zipFileList" class="zip-file-list"></div></aside><section class="zip-preview-panel"><div class="row zip-preview-head"><div class="grow"><strong id="zipPreviewTitle">เลือกไฟล์เพื่อดูข้อมูล</strong><div class="meta" id="zipPreviewMeta"></div></div><input id="zipTableSearch" placeholder="ค้นหาในไฟล์..." disabled></div><div class="table-wrap zip-table-wrap"><table class="data-table"><thead id="zipPreviewHead"></thead><tbody id="zipPreviewBody"><tr><td class="empty-row">กรุณาเลือกไฟล์จากด้านซ้าย</td></tr></tbody></table></div></section></div></div>
+  <div id="zipWorkspace" class="hidden"><div class="zip-summary" id="zipSummary"></div><div class="zip-layout"><aside class="zip-file-panel"><div class="row"><strong class="grow">ไฟล์ภายใน ZIP</strong><button class="soft" id="zipChangeBtn">เปลี่ยน ZIP</button></div><div id="zipFileList" class="zip-file-list"></div></aside><section class="zip-preview-panel"><div class="row zip-preview-head"><div class="grow"><strong id="zipPreviewTitle">เลือกไฟล์เพื่อดูข้อมูล</strong><div class="meta" id="zipPreviewMeta"></div></div><input id="zipTableSearch" placeholder="ค้นหาในไฟล์..." disabled></div><div id="zipSectionTabs" class="zip-section-tabs"></div><div class="table-wrap zip-table-wrap"><table class="data-table"><thead id="zipPreviewHead"></thead><tbody id="zipPreviewBody"><tr><td class="empty-row">กรุณาเลือกไฟล์จากด้านซ้าย</td></tr></tbody></table></div></section></div></div>
 </div></div></div>
 <div class="toast-stack" id="toastStack"></div>
 <div class="dialog-overlay" id="dialogOverlay"><div class="dialog-box"><div class="dialog-icon" id="dialogIcon">ℹ️</div><h3 id="dialogTitle"></h3><p id="dialogMessage"></p><div class="dialog-actions" id="dialogActions"></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="assets/js/config.js?v=3.2.0"></script>
-<script src="assets/js/app.js?v=3.2.0"></script>
+<script src="assets/js/config.js?v=3.2.1"></script>
+<script src="assets/js/app.js?v=3.2.1"></script>
 </body>
 </html>
