@@ -6,4 +6,3 @@ window.SSOP_CONFIG = {
   repository: 'it-ssop-claim',
   defaultModule: 'SSOCAC'
 };
-
