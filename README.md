@@ -1,37 +1,27 @@
-SSOP Claim Management V2.5-A Build 1
+# it-ssop-claim — SSOP Toolkit Professional V3.0.0 Base
 
-ไฟล์ในชุด
-- backend/code.gs
-- frontend/index.html
+ระบบทดสอบแยกจาก SSOP Toolkit V2.3.4 โดยคงธีมพาสเทล หน้าเลือก Module, Cancer Care Editor, Knowledge Center, คู่มือฟิลด์ และการประมวลผลไฟล์ใน Browser
 
-วิธีติดตั้ง Backend
-1. เปิด Google Apps Script เดิม และสำรองโค้ดเก่า
-2. เปิด backend/code.gs แล้วคัดลอกทั้งหมดไปวางในไฟล์ code.gs
-3. กด Save
-4. ที่ช่องเลือกฟังก์ชัน ให้เลือก setupSystem (ไม่มีขีดล่างท้ายชื่อ)
-5. กด Run และอนุญาตสิทธิ์
-6. เมื่อสำเร็จ สามารถเลือก testConnection แล้วกด Run เพื่อตรวจซ้ำได้
-7. Deploy > Manage deployments > Edit
-8. เลือก New version แล้ว Deploy
-9. Execute as: Me / Who has access: Anyone
+## ความปลอดภัย
+- ห้ามนำ Spreadsheet ID หรือ Apps Script URL ของระบบเดิมมาใช้
+- ใช้ Google Sheets, Apps Script Deployment และ Drive Folder ใหม่เท่านั้น
+- V3.0.0 แสดงแถบ “ระบบทดสอบ” ชัดเจน
+- ตัวติดตั้งไม่ลบข้อมูลเดิม แต่ควรใช้กับ Google Sheets ใหม่
 
-หมายเหตุสำคัญ
-- getAppBootstrap_ เป็นฟังก์ชันภายใน จึงไม่แสดงในรายการ Run เพราะลงท้ายด้วยขีดล่าง
-- ให้เลือก setupSystem แทน
-- หาก URL Web App เปลี่ยน ให้แก้ค่าตัวแปร API ใน frontend/index.html
+## ไฟล์สำคัญ
+- `index.html` หน้าเว็บ GitHub Pages
+- `assets/css/style.css` รูปแบบพาสเทลเดิม
+- `assets/js/app.js` ระบบหน้าเว็บเดิม
+- `assets/js/config.js` จุดใส่ Apps Script Web App URL ใหม่
+- `Code.gs` Google Apps Script API และตัวติดตั้งฐานข้อมูล 10 TAB
+- `ติดตั้ง_V3_แบบสั้น.txt` ขั้นตอนติดตั้ง
 
-วิธีติดตั้ง Frontend
-1. นำ frontend/index.html ไปแทนไฟล์ index.html ใน GitHub repository
-2. Commit changes
-3. รอ GitHub Pages อัปเดต แล้วเปิดหน้าเว็บใหม่แบบ Ctrl+F5
+## เวอร์ชันนี้
+- เปลี่ยนชื่อโครงการเป็น `it-ssop-claim`
+- เปลี่ยนเลขเวอร์ชันเป็น `3.0.0`
+- เพิ่มสถานะ TEST
+- เพิ่ม `setupDatabase()` สำหรับสร้าง 10 TAB
+- เพิ่ม `checkDatabaseV3()` สำหรับตรวจฐานข้อมูล
+- ยังไม่แก้ระบบเดิมและยังไม่เพิ่ม Registry UI
 
-ฟังก์ชัน Build 1
-- Dashboard
-- Import Excel และ Preview
-- ตรวจข้อมูลไม่ครบ
-- ตรวจรายการซ้ำในไฟล์และฐานข้อมูล
-- บันทึก Claim_Case, Case_SSOCAC, Case_Work_Log, Audit_Log
-- ค้นหา กรอง เรียง แบ่งหน้า และ Export CSV
-- รายละเอียดผู้ป่วยและ Timeline
-
-ยังไม่รวม ZIP Editor และ Reply ใน Build นี้
+© 2026 PCMC By Kimhan · All Rights Reserved.
