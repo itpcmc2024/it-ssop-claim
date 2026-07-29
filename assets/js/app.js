@@ -449,7 +449,7 @@ document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportRe
 
 
 /* ======================================================
-   Cancer Care Registry V3.1.0
+   Cancer Care Registry V3.1.1
 ====================================================== */
 const registryState={items:[],filtered:[],page:1,pageSize:20,selected:null};
 function thDate(v){if(!v)return '-';const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleDateString('th-TH',{year:'numeric',month:'2-digit',day:'2-digit'});}
@@ -492,7 +492,7 @@ function exportRegistryCsv(){const headers=['Case_ID','HN','VN','CID','Patient_N
 document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegistry);document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseDetailClose')?.addEventListener('click',()=>document.getElementById('caseDetailModal').classList.remove('show'));
 
 
-/* Excel Import V3.1.0 */
+/* Excel Import V3.1.1 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 function openExcelImport(){resetExcelImport();const m=document.getElementById('excelImportModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}
