@@ -1,24 +1,216 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SSOP Claim V2.5-A</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><style>
-:root{--p:#d7799f;--t:#514650;--m:#8b7d87;--l:#eadfe5;--bg:#fff9fb}*{box-sizing:border-box}body{margin:0;font-family:'Noto Sans Thai',sans-serif;background:var(--bg);color:var(--t)}button,input,select{font:inherit}.hide{display:none!important}.top{height:72px;background:#fff;border-bottom:1px solid var(--l);display:flex;align-items:center;justify-content:space-between;padding:0 5vw;position:sticky;top:0;z-index:5}.brand{font-weight:700}.sub,small{color:var(--m)}main{width:min(1450px,92vw);margin:28px auto}.hero{display:flex;justify-content:space-between;align-items:center;gap:20px}.hero h1{margin:0}.hero p{margin:5px 0;color:var(--m)}.btn{border:0;border-radius:12px;padding:10px 15px;cursor:pointer;font-weight:600}.primary{background:var(--p);color:#fff}.soft{background:#f5edf1;color:#725f6a}.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:20px 0}.card{border-radius:17px;padding:16px;background:#f4edf8;border:1px solid var(--l)}.card:nth-child(2){background:#fdeef4}.card:nth-child(3){background:#fff8df}.card:nth-child(4){background:#edf6ff}.card:nth-child(5){background:#fff0f0}.card:nth-child(6){background:#effaf3}.card span{display:block;color:var(--m)}.card b{font-size:1.8rem}.panel{background:#fff;border:1px solid var(--l);border-radius:20px;padding:17px;box-shadow:0 12px 35px #6b4c5b18}.tools{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.ctl{border:1px solid var(--l);border-radius:11px;padding:10px;background:#fff}.grow{flex:1;min-width:250px}.wrap{overflow:auto;border:1px solid var(--l);border-radius:14px}table{border-collapse:collapse;width:100%;min-width:1050px}th,td{padding:11px 12px;border-bottom:1px solid #f1e9ed;text-align:left;vertical-align:top}th{background:#fbf5f8;color:#76636e;white-space:nowrap}.empty{text-align:center;padding:35px;color:var(--m)}.badge{display:inline-block;border-radius:999px;padding:5px 9px;font-size:.78rem;font-weight:600}.wait{background:#fdebf2;color:#a94e76}.edit{background:#fff4d5;color:#8e6b14}.reply{background:#e8f3ff;color:#3d78a5}.c{background:#ffe9e9;color:#b44343}.a{background:#e8f8ee;color:#39845a}.default{background:#eee;color:#666}.link{border:0;background:#f6eaf0;color:#a24d75;border-radius:9px;padding:7px 10px;cursor:pointer}.pager{display:flex;justify-content:space-between;align-items:center;margin-top:13px;color:var(--m)}.pager button{border:1px solid var(--l);background:#fff;border-radius:8px;padding:6px 11px}.loading{position:fixed;inset:0;background:#fff9fbd9;z-index:50;display:flex;align-items:center;justify-content:center;flex-direction:column}.spin{width:42px;height:42px;border:4px solid #efd8e2;border-top-color:var(--p);border-radius:50%;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}.toast{position:fixed;right:24px;bottom:24px;background:#4d4249;color:#fff;padding:12px 15px;border-radius:11px;z-index:70}.toast.err{background:#a84242}.toast.ok{background:#3f8059}.modal{position:fixed;inset:0;background:#3a2c346b;z-index:40;display:flex;align-items:center;justify-content:center;padding:18px}.box{background:#fff;border-radius:21px;padding:21px;width:min(1150px,96vw);max-height:90vh;overflow:auto}.head{display:flex;justify-content:space-between}.head h2{margin:0}.x{border:0;background:#f4ebef;border-radius:50%;width:36px;height:36px;font-size:1.3rem}.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:14px 0}.sum{background:#faf3f7;border-radius:11px;padding:11px}.sum span{display:block;color:var(--m);font-size:.8rem}.sum b{font-size:1.25rem}.actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}.details{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.di{border:1px solid var(--l);border-radius:11px;padding:10px}.di span{display:block;color:var(--m);font-size:.78rem}.timeline{border-left:3px solid #ead3dd;margin-left:8px;padding-left:18px}.ti{margin:0 0 15px;position:relative}.ti:before{content:'';position:absolute;left:-25px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--p)}footer{text-align:center;color:var(--m);padding:25px}@media(max-width:950px){.cards{grid-template-columns:repeat(3,1fr)}.details{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.cards{grid-template-columns:repeat(2,1fr)}.hero{align-items:flex-start;flex-direction:column}.tools>*{width:100%}.summary{grid-template-columns:repeat(2,1fr)}.details{grid-template-columns:1fr}}
-</style></head><body>
-<div id="load" class="loading"><div class="spin"></div><p>กำลังประมวลผล...</p></div><div id="toast" class="toast hide"></div>
-<header class="top"><div><div class="brand">SSOP Claim Management</div><div class="sub">Cancer Care Registry · V2.5-A</div></div><div style="text-align:right"><b id="uname">ผู้ใช้งานทดสอบ</b><br><small id="urole">ADMIN</small></div></header>
-<main><section class="hero"><div><h1>ทะเบียนผู้ป่วย Cancer Care</h1><p>นำเข้ารายชื่อจาก Excel ตรวจสอบรายการซ้ำ และติดตามสถานะงาน</p></div><button class="btn primary" id="pick">＋ นำเข้า Excel</button><input type="file" id="file" accept=".xlsx,.xls" hidden></section>
-<section class="cards"><div class="card"><span>ทั้งหมด</span><b id="d0">0</b></div><div class="card"><span>รอดึง ZIP</span><b id="d1">0</b></div><div class="card"><span>กำลังแก้ไข</span><b id="d2">0</b></div><div class="card"><span>รอ Reply</span><b id="d3">0</b></div><div class="card"><span>ติด C</span><b id="d4">0</b></div><div class="card"><span>ผ่าน A</span><b id="d5">0</b></div></section>
-<section class="panel"><div class="tools"><input id="q" class="ctl grow" placeholder="ค้นหา HN, VN, ชื่อ, Case No., JobNo"><select id="st" class="ctl"><option value="">ทุกสถานะ</option><option value="WAITING_ZIP">รอดึง ZIP</option><option value="EDITING">กำลังแก้ไข</option><option value="WAITING_REPLY">รอ Reply</option><option value="RESULT_C">ติด C</option><option value="RESULT_A">ผ่าน A</option></select><select id="sort" class="ctl"><option value="desc">ใหม่ → เก่า</option><option value="asc">เก่า → ใหม่</option></select><select id="size" class="ctl"><option>5</option><option selected>10</option><option>20</option><option>50</option><option value="all">ทั้งหมด</option></select><button class="btn soft" id="reload">↻ โหลดใหม่</button><button class="btn soft" id="csv">⇩ CSV</button></div><div class="wrap"><table><thead><tr><th>วันที่รับบริการ</th><th>HN / VN</th><th>ชื่อ-นามสกุล</th><th>Case No.</th><th>ยา Chemo</th><th>JobNo</th><th>สถานะ</th><th>ผลล่าสุด</th><th></th></tr></thead><tbody id="body"><tr><td colspan="9" class="empty">กำลังโหลด...</td></tr></tbody></table></div><div class="pager"><span id="info">0 รายการ</span><div><button id="prev">‹</button> <span id="page">1 / 1</span> <button id="next">›</button></div></div></section></main><footer>© 2026 PCMC By Kimhan</footer>
-<div id="imodal" class="modal hide"><div class="box"><div class="head"><div><h2>ตรวจสอบข้อมูลนำเข้า</h2><small id="fname"></small></div><button class="x" data-close="imodal">×</button></div><div id="summary" class="summary"></div><div class="wrap" style="max-height:48vh"><table><thead><tr><th>แถว</th><th>วันที่</th><th>HN</th><th>ชื่อ</th><th>Case No.</th><th>JobNo</th><th>สถานะ</th></tr></thead><tbody id="ibody"></tbody></table></div><div class="actions"><button class="btn soft" data-close="imodal">ยกเลิก</button><button class="btn primary" id="commit">บันทึกรายการใหม่</button></div></div></div>
-<div id="dmodal" class="modal hide"><div class="box"><div class="head"><div><h2 id="dname">รายละเอียดผู้ป่วย</h2><small id="did"></small></div><button class="x" data-close="dmodal">×</button></div><div id="detail"></div><div class="actions"><button class="btn soft" data-close="dmodal">ปิด</button><button class="btn" disabled>ZIP Editor — Release ถัดไป</button></div></div></div>
-<script>
-const API='https://script.google.com/macros/s/AKfycbztQYOpzMGJ16oCWviNFuEOqMgC-wMWb0cmtusxGAA9E62SzczHp93TJxaqoXVrS_N2/exec',S={rows:[],filtered:[],page:1,size:10,import:[]};const $=s=>document.querySelector(s);document.addEventListener('DOMContentLoaded',()=>{bind();start()});function bind(){$('#pick').onclick=()=>$('#file').click();$('#file').onchange=excel;$('#reload').onclick=loadCases;$('#csv').onclick=csv;$('#q').oninput=filter;$('#st').onchange=filter;$('#sort').onchange=filter;$('#size').onchange=()=>{S.size=$('#size').value==='all'?Infinity:+$('#size').value;S.page=1;render()};$('#prev').onclick=()=>{S.page--;render()};$('#next').onclick=()=>{S.page++;render()};$('#commit').onclick=commit;document.onclick=e=>{if(e.target.dataset.close)hide(e.target.dataset.close);if(e.target.dataset.id)detail(e.target.dataset.id)}}
-async function start(){loading(1);try{let r=await api('getAppBootstrap');ok(r);$('#uname').textContent=r.data.currentUser.displayName;$('#urole').textContent=r.data.currentUser.role;dash(r.data.dashboard);await loadCases(0)}catch(e){toast(e.message,1)}finally{loading(0)}}async function loadCases(sp=1){if(sp)loading(1);try{let r=await api('getCases',{module:'SSOCAC'});ok(r);S.rows=r.data.rows||[];dash(r.data.dashboard);filter()}catch(e){toast(e.message,1)}finally{if(sp)loading(0)}}
-function filter(){let q=norm($('#q').value),st=$('#st').value;S.filtered=S.rows.filter(r=>(!st||r.WorkflowStatus===st)&&(!q||norm([r.ServiceDate,r.HN,r.VN,r.CID,r.FullName,r.Coverage,r.CaseNo,r.ChemoDrug,r.JobNo,r.WorkflowStatus,r.LatestResult].join(' ')).includes(q)));S.filtered.sort((a,b)=>($('#sort').value==='asc'?1:-1)*String(a.ServiceDate||a.CreatedAt||'').localeCompare(String(b.ServiceDate||b.CreatedAt||'')));S.page=1;render()}
-function render(){let n=S.filtered.length,p=S.size===Infinity?1:Math.max(1,Math.ceil(n/S.size));S.page=Math.min(Math.max(1,S.page),p);let st=S.size===Infinity?0:(S.page-1)*S.size,rs=S.size===Infinity?S.filtered:S.filtered.slice(st,st+S.size);$('#body').innerHTML=rs.length?rs.map(r=>`<tr><td>${fd(r.ServiceDate)}</td><td><b>${safe(r.HN)}</b><br><small>VN ${safe(r.VN||'-')}</small></td><td><b>${safe(r.FullName)}</b><br><small>${safe(r.Coverage||'-')}</small></td><td>${safe(r.CaseNo||'-')}</td><td>${safe(r.ChemoDrug||'-')}</td><td>${safe(r.JobNo||'-')}</td><td>${badge(r.WorkflowStatus)}</td><td>${result(r.LatestResult)}</td><td><button class="link" data-id="${attr(r.CaseID)}">รายละเอียด</button></td></tr>`).join(''):'<tr><td colspan="9" class="empty">ไม่พบข้อมูล</td></tr>';$('#info').textContent=n?`แสดง ${st+1}-${Math.min(st+rs.length,n)} จาก ${n} รายการ`:'0 รายการ';$('#page').textContent=`${S.page} / ${p}`;$('#prev').disabled=S.page<=1;$('#next').disabled=S.page>=p}
-async function excel(e){let f=e.target.files[0];e.target.value='';if(!f)return;loading(1);try{let wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true}),ws=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});if(!rows.length)throw Error('ไม่พบข้อมูลใน Excel');S.import=rows;$('#fname').textContent=f.name;let r=await api('previewCaseImport',{module:'SSOCAC',rows});ok(r);preview(r.data);show('imodal')}catch(x){toast(x.message,1)}finally{loading(0)}}
-function preview(d){let s=d.summary||{};$('#summary').innerHTML=[['ทั้งหมด',s.total],['พร้อมบันทึก',s.ready],['ข้อมูลไม่ครบ',s.invalid],['ซ้ำในฐานข้อมูล',s.duplicateDatabase],['ซ้ำในไฟล์',s.duplicateFile]].map(x=>`<div class="sum"><span>${x[0]}</span><b>${x[1]||0}</b></div>`).join('');$('#ibody').innerHTML=d.rows.map(x=>{let r=x.data;return`<tr><td>${x.rowNo}</td><td>${fd(r.ServiceDate)}</td><td>${safe(r.HN)}</td><td>${safe(r.FullName)}</td><td>${safe(r.CaseNo)}</td><td>${safe(r.JobNo)}</td><td>${ist(x)}</td></tr>`}).join('');$('#commit').disabled=!s.ready}
-async function commit(){loading(1);try{let r=await api('commitCaseImport',{module:'SSOCAC',rows:S.import});ok(r);hide('imodal');toast(r.message,0);S.import=[];await loadCases(0)}catch(e){toast(e.message,1)}finally{loading(0)}}
-async function detail(id){loading(1);try{let r=await api('getCaseDetail',{caseId:id});ok(r);let c=r.data.case,s=r.data.ssocac||{},f=[['วันที่รับเอกสาร',c.ReceivedDate],['วันที่มารับบริการ',c.ServiceDate],['HN',c.HN],['VN',c.VN],['เลขบัตรประชาชน',c.CID],['สิทธิการรักษา',c.Coverage],['ยา Chemo',s.ChemoDrug],['Case No.',s.CaseNo],['Protocol',s.Protocol],['TFlag',s.Tflag],['Session',s.Session],['Station',s.Station],['JobNo',s.JobNo],['สถานะ',status(c.WorkflowStatus)],['ผลล่าสุด',c.LatestResult]];$('#dname').textContent=c.FullName;$('#did').textContent='CaseID: '+c.CaseID;$('#detail').innerHTML=`<div class="details">${f.map(x=>`<div class="di"><span>${x[0]}</span><b>${safe(x[1]||'-')}</b></div>`).join('')}</div><h3>Timeline</h3><div class="timeline">${r.data.timeline.length?r.data.timeline.map(t=>`<div class="ti"><b>${safe(action(t.Action))}</b><div>${safe(t.Detail||'')}</div><small>${safe(String(t.Timestamp||'').replace('T',' ').replace('+07:00',''))} · ${safe(t.Email||'-')}</small></div>`).join(''):'ยังไม่มี Timeline'}</div>`;show('dmodal')}catch(e){toast(e.message,1)}finally{loading(0)}}
-function csv(){if(!S.filtered.length)return toast('ไม่มีข้อมูล',1);let h=['วันที่','HN','VN','ชื่อ','สิทธิ','Case No.','ยา Chemo','JobNo','สถานะ','ผล'],r=S.filtered.map(x=>[x.ServiceDate,x.HN,x.VN,x.FullName,x.Coverage,x.CaseNo,x.ChemoDrug,x.JobNo,x.WorkflowStatus,x.LatestResult]),s='\uFEFF'+[h,...r].map(x=>x.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download='SSOCAC_'+new Date().toISOString().slice(0,10)+'.csv';a.click()}
-async function api(action,p={}){let r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...p}),redirect:'follow'});if(!r.ok)throw Error('HTTP '+r.status);return r.json()}function ok(r){if(!r||!r.ok)throw Error(r?.message||'ระบบตอบกลับไม่สำเร็จ')}function dash(d){['total','waitingZip','editing','waitingReply','resultC','resultA'].forEach((k,i)=>$('#d'+i).textContent=d?.[k]||0)}
-function badge(s){let m={WAITING_ZIP:['รอดึง ZIP','wait'],ZIP_LOADED:['โหลด ZIP แล้ว','edit'],EDITING:['กำลังแก้ไข','edit'],READY_TO_EXPORT:['พร้อมส่งออก','edit'],EXPORTED:['ส่งออกแล้ว','reply'],WAITING_REPLY:['รอ Reply','reply'],RESULT_C:['ติด C','c'],RESULT_A:['ผ่าน A','a']}[s]||[s||'-','default'];return`<span class="badge ${m[1]}">${m[0]}</span>`}function result(s){return s==='A'?'<span class="badge a">A</span>':s==='C'?'<span class="badge c">C</span>':'<span class="badge default">PENDING</span>'}function ist(x){return x.status==='READY'?'<span class="badge a">พร้อมบันทึก</span>':x.status==='DUPLICATE_DATABASE'?`<span class="badge c">ซ้ำในฐานข้อมูล</span><br><small>${safe(x.duplicateCaseId)}</small>`:x.status==='DUPLICATE_FILE'?'<span class="badge edit">ซ้ำในไฟล์</span>':`<span class="badge c">ข้อมูลไม่ครบ</span><br><small>${safe(x.errors.join(', '))}</small>`}function status(s){return{WAITING_ZIP:'รอดึง ZIP',ZIP_LOADED:'โหลด ZIP แล้ว',EDITING:'กำลังแก้ไข',READY_TO_EXPORT:'พร้อมส่งออก',EXPORTED:'ส่งออกแล้ว',WAITING_REPLY:'รอ Reply',RESULT_C:'ติด C',RESULT_A:'ผ่าน A'}[s]||s||'-'}function action(a){return{IMPORT_EXCEL:'นำเข้ารายชื่อจาก Excel',UPDATE_CASE:'แก้ไขข้อมูล',UPLOAD_ZIP:'อัปโหลด ZIP',EXPORT_ZIP:'ส่งออก ZIP',IMPORT_REPLY:'นำเข้า Reply'}[a]||a||'-'}
-function show(id){$('#'+id).classList.remove('hide');document.body.style.overflow='hidden'}function hide(id){$('#'+id).classList.add('hide');document.body.style.overflow=''}function loading(v){$('#load').classList.toggle('hide',!v)}function toast(m,e){let t=$('#toast');t.textContent=m;t.className='toast '+(e?'err':'ok');clearTimeout(toast.x);toast.x=setTimeout(()=>t.classList.add('hide'),4000)}function norm(v){return String(v||'').trim().toLowerCase()}function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function attr(v){return String(v??'').replace(/"/g,'&quot;')}function fd(v){let m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[3]}/${m[2]}/${m[1]}`:(v||'-')}
-</script></body></html>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SSOP Toolkit | PCMC By Kimhan</title>
+  <meta name="author" content="PCMC By Kimhan" />
+  <meta name="copyright" content="© 2026 PCMC By Kimhan" />
+  <meta name="application-name" content="SSOP Toolkit" />
+  <meta name="generator" content="SSOP Toolkit Version 3.0.0" />
+  <!--
+  ======================================================
+  SSOP Toolkit Version 3.0.0
+  Copyright © 2026 PCMC By Kimhan
+  All Rights Reserved.
+  ======================================================
+  -->
+  <link rel="stylesheet" href="assets/css/style.css?v=3.0.0" />
+</head>
+<body>
+  <div class="test-system-banner">ระบบทดสอบ SSOP Toolkit V3 · ยังไม่ใช่ระบบใช้งานจริง</div>
+<div id="splashScreen" class="splash-screen" aria-hidden="true">
+  <div class="splash-card">
+    <div class="splash-logo">🩺</div>
+    <h1>SSOP Toolkit</h1>
+    <p>Professional Edition · Version 3.0.0</p>
+    <div class="splash-loader"></div>
+    <small>© 2026 PCMC By Kimhan</small>
+  </div>
+</div>
+<div class="app-shell">
+  <section id="homePage" class="home-page">
+    <header class="home-hero"><div class="top-row"><div><h1>SSOP Toolkit <span class="version">V3.0.0</span></h1><p>ศูนย์รวมเครื่องมือจัดการไฟล์ส่งเบิกประกันสังคม เลือกประเภทงานที่ต้องการใช้งาน</p></div><div class="row"><div class="module-badge">ข้อมูลประมวลผลในเบราว์เซอร์</div><button class="about-btn" data-open-about>ℹ เกี่ยวกับโปรแกรม</button></div></div></header>
+    <main class="wrap">
+      <section class="card"><div class="section-title">เลือกระบบงานประกันสังคม</div><div class="module-grid">
+        <button class="module-card planned" data-module="main"><div class="module-icon">🏥</div><h3>ประกันสังคม Main</h3><p>พื้นที่สำหรับตรวจและแก้ไขไฟล์ส่งเบิกผู้ป่วยนอกประกันสังคมทั่วไป</p><span class="module-badge">เตรียมพัฒนา</span></button>
+        <button class="module-card planned" data-module="cross"><div class="module-icon">🧭</div><h3>ประกันสังคมข้ามเขต</h3><p>รองรับกฎและเงื่อนไขการส่งเบิกกรณีผู้รับบริการข้ามเขต</p><span class="module-badge">เตรียมพัฒนา</span></button>
+        <button class="module-card ready" data-module="cancer"><div class="module-icon">🎗️</div><h3>ประกันสังคม Cancer Care</h3><p>แก้ไข BILLTRAN, BILLDISP และ OPServices พร้อมตรวจเงื่อนไข SSOCAC</p><span class="module-badge">พร้อมใช้งาน</span></button>
+        <button class="module-card planned" data-module="cpap"><div class="module-icon">🫁</div><h3>ประกันสังคม CPAP</h3><p>เตรียมพื้นที่สำหรับไฟล์ส่งเบิกอุปกรณ์และบริการ CPAP</p><span class="module-badge">เตรียมพัฒนา</span></button>
+        <button class="module-card planned" data-module="sleep"><div class="module-icon">😴</div><h3>ประกันสังคม Sleep Test</h3><p>เตรียมพื้นที่สำหรับการตรวจสอบและแก้ไขข้อมูล Sleep Test</p><span class="module-badge">เตรียมพัฒนา</span></button>
+        <button class="module-card ready" data-module="knowledge"><div class="module-icon">📚</div><h3>SSOP Knowledge Center</h3><p>ค้นหา Error Code คำอธิบาย สาเหตุ วิธีแก้ ไฟล์และฟิลด์ที่เกี่ยวข้อง</p><span class="module-badge">พร้อมใช้งานร่วมกับ SSOCAC</span></button>
+      </div></section>
+      <section class="card future-card"><div class="section-title">🔒 แนวทางความเป็นส่วนตัวของข้อมูล</div><p class="meta">ไฟล์ตอบกลับและไฟล์ส่งเบิกทั้งหมดอ่านและประมวลผลภายในเบราว์เซอร์ ระบบไม่จัดเก็บข้อมูลผู้ป่วยออนไลน์</p><ul class="future-list"><li>ฐานความรู้ออนไลน์เก็บเฉพาะประเภทการส่งเบิก, Error Code, คำอธิบาย, สาเหตุ และแนวทางแก้</li><li>ไม่บันทึก HN, PID, Invoice, วันที่รักษา, จำนวนเงิน หรือเนื้อหาไฟล์ตอบกลับ</li><li>รองรับการค้นหาความรู้จากทุกโมดูลผ่าน SSOP Knowledge Center</li></ul></section>
+      <footer class="copyright-footer"><strong>SSOP Toolkit Version 3.0.0</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
+    </main>
+  </section>
+  <section id="cancerPage" class="module-page">
+  <header class="top"><div class="top-row"><div><h1>SSO Cancer Care Editor <span class="version">V3.0.0</span></h1><p>อัปโหลด แยกข้อมูล แก้ไข ตรวจสอบ และส่งออกกลับชื่อเดิม</p></div><div class="row header-actions"><button class="back-home" id="backHomeBtn">← หน้าหลัก</button><div class="split-doc-action"><button class="doc-view-btn" id="announcementBtn">📢 ประกาศ</button><button class="doc-upload-btn" data-document-type="ANNOUNCEMENT" title="อัปโหลดประกาศฉบับใหม่">⬆</button></div><div class="split-doc-action"><button class="doc-view-btn" id="protocolBtn">🧬 รหัส Protocol</button><button class="doc-upload-btn" data-document-type="PROTOCOL" title="อัปโหลดรหัส Protocol ฉบับใหม่">⬆</button></div><button class="guide-btn" id="dictionaryBtn">📖 คู่มือฟิลด์</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
+  <main class="wrap">
+    <section class="card reply-card" id="ssocacReplyCard">
+      <div class="row">
+        <div class="grow">
+          <div class="section-title">📥 รับไฟล์ตอบกลับ SSOCAC</div>
+          <p class="meta">เลือกไฟล์ตอบกลับ .BIL หรือ .txt ระบบจะอ่านเฉพาะ CheckCode และคำอธิบายเพื่อสร้างฐานความรู้ โดยไม่เก็บข้อมูลผู้ป่วย</p>
+        </div>
+        <span class="privacy-badge">🔒 Local Processing</span>
+      </div>
+      <div class="reply-upload-grid">
+        <div class="field">
+          <label>ประเภทการส่งเบิก</label>
+          <select id="replyModule" disabled><option value="SSOCAC" selected>Cancer Care</option></select>
+        </div>
+        <div class="field">
+          <label>ไฟล์ตอบกลับ</label>
+          <input id="replyFileInput" type="file" accept=".bil,.txt,text/plain" />
+        </div>
+        <div class="field reply-action-field">
+          <label>&nbsp;</label>
+          <button class="primary" id="analyzeReplyBtn">วิเคราะห์ Error</button>
+        </div>
+      </div>
+      <div class="privacy-note">ไฟล์จะถูกอ่านภายในเบราว์เซอร์เท่านั้น ระบบจะไม่นำ HN, เลขบัตรประชาชน, Invoice หรือรายละเอียดผู้ป่วยไปบันทึก</div>
+      <div id="replySummary" class="hidden"></div>
+      <div id="replyKnowledgeWrap" class="hidden">
+        <div class="row reply-result-head"><div class="section-title grow">Error Knowledge ที่พบ</div><div class="row"><button class="soft" id="exportKnowledgeBtn">สำรองเป็น CSV</button><button class="primary" id="saveKnowledgeBtn">💾 บันทึกเข้าสู่ Knowledge Center</button></div></div>
+        <div class="table-wrap"><table class="data-table reply-table"><thead><tr><th>Error Code</th><th>คำอธิบายจากไฟล์ตอบกลับ</th><th>สาเหตุ/ข้อสังเกต</th><th>แนวทางแก้</th><th>ไฟล์ที่เกี่ยวข้อง</th><th>ฟิลด์ที่เกี่ยวข้อง</th><th>จำนวนที่พบ</th><th>สถานะฐานข้อมูล</th></tr></thead><tbody id="replyKnowledgeBody"></tbody></table></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="upload" id="dropZone">
+        <input id="fileInput" type="file" accept=".txt,text/plain" />
+        <div style="font-size:40px">📄</div>
+        <h3>ลากไฟล์ .txt มาวาง หรือเลือกไฟล์</h3>
+        <p class="meta">รองรับ BILLTRAN, BILLDISP และ OPServices รูปแบบ Windows-874</p>
+        <label class="btn blue" for="fileInput">เลือกไฟล์</label>
+      </div>
+      <div id="fileMeta" class="row hidden" style="margin-top:14px">
+        <div class="grow"><b id="fileName"></b><div class="meta" id="fileInfo"></div></div>
+        <button class="soft" id="clearBtn">ล้างไฟล์</button>
+      </div>
+    </section>
+
+    <div id="workspace" class="hidden">
+      <section class="card rules-card">
+        <div class="section-title">เงื่อนไขสำคัญสำหรับโครงการ SSO Cancer Care (SSOCAC)</div>
+        <div class="rules-grid">
+          <div class="rule-item"><div class="rule-icon">!</div><div><strong>OPServices · PrdSeCode = SSOCAC</strong><small>ต้องระบุรหัสโครงการในข้อมูลบริการ เพื่อให้ระบบ สกส. จำแนกการเบิกเฉพาะโครงการได้</small></div></div>
+          <div class="rule-item"><div class="rule-icon">!</div><div><strong>BILLTRAN · MemberNo = Case Number</strong><small>ใช้เลข Case Number ของผู้ป่วยที่ได้รับอนุมัติในระบบ SSO Cancer Care</small></div></div>
+          <div class="rule-item"><div class="rule-icon">!</div><div><strong>OPServices / OPDx · VerCode = Protocol Code</strong><small>ระบุรหัสโปรโตคอลการรักษามะเร็ง เช่น C0111 ตามการอนุมัติ</small></div></div>
+          <div class="rule-item"><div class="rule-icon">!</div><div><strong>BillItems / DispensedItems · ClaimCat = OPR</strong><small>ใช้กับรายการยาและค่าใช้จ่ายที่สำนักงานประกันสังคมจ่ายเพิ่มในโครงการ</small></div></div>
+        </div>
+        <div id="ruleResults" class="validation-list"></div><div id="healthDashboard" class="health-dashboard"></div>
+      </section>
+      <section class="card">
+        <div class="section-title">ข้อมูล Header</div>
+        <div id="headerGrid" class="grid"></div>
+      </section>
+
+      <section class="card">
+        <div class="row"><div class="section-title grow">ข้อมูลในไฟล์</div><div id="statusBox" class="status">พร้อมแก้ไข</div></div>
+        <div id="tabs" class="tabs"></div>
+        <div id="sectionNote" class="section-note"></div>
+        <div class="toolbar">
+          <input id="searchInput" placeholder="ค้นหาข้อมูล..." />
+          <select id="pageSize"><option>20</option><option>50</option><option>100</option><option value="99999">ทั้งหมด</option></select>
+          <button class="soft" id="addRowBtn">+ เพิ่มแถว</button>
+          <button class="danger" id="deleteRowsBtn">ลบแถวที่เลือก</button>
+          <span class="meta" id="countText"></span>
+        </div>
+        <div class="table-wrap"><table class="data-table"><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">ตัวอย่างท้ายไฟล์</div>
+        <div class="grid">
+          <div class="field"><label>ชื่อไฟล์ส่งออก</label><input id="outputName" /></div>
+          <div class="field"><label>Checksum ใหม่</label><input id="checksumPreview" readonly /></div>
+        </div>
+        <p class="meta">ระบบคำนวณ MD5 จากข้อมูลทั้งหมดก่อนบรรทัด EndNote และสร้าง Checksum ใหม่ให้อัตโนมัติ</p>
+      </section>
+
+      <div class="footer-actions">
+        <button class="soft" id="undoBtn">ย้อนกลับทั้งหมด</button>
+        <button class="peach" id="previewBtn">ตรวจสอบไฟล์</button>
+        <button class="primary" id="downloadBtn">ดาวน์โหลดชื่อเดิม</button>
+      </div>
+    </div>
+    <footer class="copyright-footer"><strong>SSOP Toolkit · SSO Cancer Care Editor Version 3.0.0</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
+  </main>
+  </section>
+  <section id="knowledgePage" class="module-page">
+    <header class="top"><div class="top-row"><div><h1>📚 SSOP Knowledge Center <span class="version">V3.0.0</span></h1><p>ค้นหาและจัดการองค์ความรู้ Error โดยไม่จัดเก็บข้อมูลผู้ป่วย</p></div><div class="row"><button class="back-home" id="knowledgeBackHomeBtn">← หน้าหลัก</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
+    <main class="wrap">
+      <section class="card">
+        <div class="knowledge-toolbar">
+          <div class="field grow"><label>ค้นหา Error Code / คำอธิบาย / สาเหตุ / วิธีแก้ / ไฟล์ / ฟิลด์</label><input id="knowledgeSearchInput" placeholder="เช่น CE3, Protocol, VerCode, BILLTRAN" /></div>
+          <div class="field"><label>ประเภทการส่งเบิก</label><select id="knowledgeModuleFilter"><option value="ALL">ทั้งหมด</option><option value="MAIN">Main</option><option value="SSOCAC">Cancer Care</option><option value="STCPAP">CPAP</option><option value="STSLEEP">Sleep Test</option><option value="CROSS">ข้ามเขต</option></select></div>
+          <div class="field knowledge-action"><label>&nbsp;</label><button class="primary" id="knowledgeSearchBtn">ค้นหา</button></div>
+        </div>
+        <div class="privacy-note">🔒 หน้าเว็บส่งไปยังฐานข้อมูลเฉพาะคำค้นและข้อมูล Knowledge เท่านั้น ไม่มีข้อมูลผู้ป่วย</div>
+        <div id="knowledgeStatus" class="meta knowledge-status">กรุณาตั้งค่า Apps Script Web App URL ใน assets/js/config.js</div>
+      </section>
+      <section class="card">
+        <div class="row"><div class="section-title grow">ผลการค้นหา</div><button class="soft" id="knowledgeReloadBtn">โหลดข้อมูลทั้งหมด</button></div>
+        <div id="knowledgeResults" class="knowledge-results"><div class="knowledge-empty">ยังไม่มีผลการค้นหา</div></div>
+      </section>
+      <footer class="copyright-footer"><strong>SSOP Toolkit · SSOP Knowledge Center Version 3.0.0</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
+    </main>
+  </section>
+</div>
+
+  <div class="tooltip" id="fieldTooltip"></div>
+  <div class="modal" id="dictionaryModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head"><div><strong>📖 คู่มือฟิลด์ SSOCAC</strong><div class="meta">ใช้สำหรับเปิดดูความหมาย เงื่อนไข และตัวอย่างของแต่ละฟิลด์</div></div><button class="close-x" id="dictionaryClose">✕ ปิด</button></div>
+      <div class="modal-body" id="dictionaryBody"></div>
+    </div>
+  </div>
+<div class="modal" id="aboutModal" aria-hidden="true">
+  <div class="modal-card" style="width:min(620px,96vw)">
+    <div class="modal-head"><strong>ℹ เกี่ยวกับโปรแกรม</strong><button class="close-x" id="aboutClose">✕ ปิด</button></div>
+    <div class="modal-body">
+      <div class="about-brand">
+        <div class="about-logo">🩺</div>
+        <h2>SSOP Toolkit</h2>
+        <p>Professional Edition · Version 3.0.0<br>ระบบช่วยตรวจสอบ แก้ไข และจัดการไฟล์ส่งเบิกประกันสังคม</p>
+      </div>
+      <div class="about-credit">Developed by<strong>PCMC By Kimhan</strong>© 2026 All Rights Reserved.</div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="saveKnowledgeModal" aria-hidden="true">
+  <div class="modal-card save-knowledge-modal">
+    <div class="modal-head"><div><strong>💾 บันทึกเข้าสู่ Knowledge Center</strong><div class="meta">ยืนยันผู้บันทึกและรหัส PIN ก่อนส่งข้อมูล</div></div><button class="close-x" id="saveKnowledgeClose">✕ ปิด</button></div>
+    <div class="modal-body">
+      <div class="save-form-grid">
+        <div class="field"><label>ชื่อผู้บันทึก/ผู้แก้ไข</label><input id="saveUpdatedBy" value="Kimhan" autocomplete="name" /></div>
+        <div class="field"><label>รหัส PIN</label><input id="saveWritePin" type="password" inputmode="numeric" autocomplete="off" placeholder="กรอกรหัส PIN" /></div>
+      </div>
+      <div class="privacy-note">🔒 ระบบส่งเฉพาะข้อมูล Knowledge เท่านั้น ไม่ส่งข้อมูลผู้ป่วยหรือเนื้อหาไฟล์ตอบกลับ</div>
+      <div class="dialog-actions"><button class="soft" id="saveKnowledgeCancel">ยกเลิก</button><button class="primary" id="saveKnowledgeConfirm">บันทึกข้อมูล</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="documentUploadModal" aria-hidden="true"><div class="modal-card save-knowledge-modal"><div class="modal-head"><div><strong id="documentUploadTitle">⬆ อัปเดตเอกสาร PDF</strong><div class="meta" id="documentUploadHint"></div></div><button class="close-x" id="documentUploadClose">✕ ปิด</button></div><div class="modal-body"><input type="hidden" id="documentUploadType"/><div class="save-form-grid"><div class="field"><label>ไฟล์ PDF ฉบับใหม่</label><input id="documentUploadFile" type="file" accept="application/pdf,.pdf"/></div><div class="field"><label>ชื่อผู้ปรับปรุง</label><input id="documentUpdatedBy" value="Kimhan"/></div><div class="field"><label>รหัส PIN</label><input id="documentWritePin" type="password" inputmode="numeric" autocomplete="off" placeholder="กรอกรหัส PIN"/></div></div><div class="privacy-note">ไฟล์ใหม่จะถูกเปลี่ยนชื่ออัตโนมัติ และไฟล์ชื่อเดิมในโฟลเดอร์จะถูกย้ายไปถังขยะ</div><div class="dialog-actions"><button class="soft" id="documentUploadCancel">ยกเลิก</button><button class="primary" id="documentUploadConfirm">อัปโหลดและแทนที่</button></div></div></div></div>
+<div class="modal" id="knowledgeEditModal" aria-hidden="true">
+  <div class="modal-card save-knowledge-modal">
+    <div class="modal-head"><div><strong>✏️ บันทึกการแก้ไข Knowledge</strong><div class="meta">แก้ไขแนวทางแก้ ไฟล์ และฟิลด์ที่เกี่ยวข้อง</div></div><button class="close-x" id="knowledgeEditClose">✕ ปิด</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="knowledgeEditIndex" />
+      <div class="save-form-grid">
+        <div class="field"><label>ชื่อผู้แก้ไข</label><input id="knowledgeEditUpdatedBy" value="Kimhan" autocomplete="name" /></div>
+        <div class="field"><label>รหัส PIN</label><input id="knowledgeEditWritePin" type="password" inputmode="numeric" autocomplete="off" placeholder="กรอกรหัส PIN" /></div>
+      </div>
+      <div class="privacy-note">🔒 ระบบบันทึกเฉพาะองค์ความรู้ ไม่มีข้อมูลผู้ป่วย</div>
+      <div class="dialog-actions"><button class="soft" id="knowledgeEditCancel">ยกเลิก</button><button class="primary" id="knowledgeEditConfirm">บันทึกการแก้ไข</button></div>
+    </div>
+  </div>
+</div>
+<div class="toast-stack" id="toastStack"></div>
+<div class="dialog-overlay" id="dialogOverlay"><div class="dialog-box"><div class="dialog-icon" id="dialogIcon">ℹ️</div><h3 id="dialogTitle"></h3><p id="dialogMessage"></p><div class="dialog-actions" id="dialogActions"></div></div></div>
+<script src="assets/js/config.js?v=3.0.0"></script>
+<script src="assets/js/app.js?v=3.0.0"></script>
+</body>
+</html>
