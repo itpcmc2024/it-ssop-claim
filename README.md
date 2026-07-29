@@ -1,11 +1,10 @@
-# it-ssop-claim V3.2.0
+# SSOP Toolkit V3.2.1
 
-เพิ่ม ZIP Reader สำหรับ Cancer Care แบบประมวลผลใน Browser
+แก้ ZIP Reader ให้แยกข้อมูลตาม XML section และแสดงชื่อฟิลด์เป็นคอลัมน์เหมือน V2.3.4
 
-- เปิด ZIP ต่อผู้ป่วย 1 ราย
-- แสดงรายการไฟล์ภายใน ZIP
-- จำแนก BILLTRAN, OPServices, OPDx, BillItems/BILLDISP และ DispensItems
-- อ่านข้อความ Windows-874/UTF-8
-- แสดงข้อมูลแบบตารางและค้นหาในไฟล์
-- ไม่บันทึกเนื้อหาไฟล์ผู้ป่วยลง Google Sheets
-- ยังไม่แก้ไขหรือสร้าง ZIP ใหม่ในเวอร์ชันนี้
+- BILLTRAN / BillItems
+- Dispensing / DispensedItems
+- OPServices / OPDx
+- มีแท็บส่วนข้อมูลภายในแต่ละไฟล์
+- เน้นคอลัมน์สำคัญของ SSOCAC
+- อ่านทั้งหมดใน Browser
