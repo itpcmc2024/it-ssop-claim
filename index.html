@@ -30,7 +30,7 @@
 </div>
 <div class="app-shell">
   <section id="homePage" class="home-page">
-    <header class="home-hero"><div class="top-row"><div><h1>SSOP Toolkit <span class="version">V3.0.1</span></h1><p>ศูนย์รวมเครื่องมือจัดการไฟล์ส่งเบิกประกันสังคม เลือกประเภทงานที่ต้องการใช้งาน</p></div><div class="row"><div class="module-badge">ข้อมูลประมวลผลในเบราว์เซอร์</div><button class="about-btn" data-open-about>ℹ เกี่ยวกับโปรแกรม</button></div></div></header>
+    <header class="home-hero"><div class="top-row"><div><h1>SSOP Toolkit <span class="version">V3.1.0</span></h1><p>ศูนย์รวมเครื่องมือจัดการไฟล์ส่งเบิกประกันสังคม เลือกประเภทงานที่ต้องการใช้งาน</p></div><div class="row"><div class="module-badge">ข้อมูลประมวลผลในเบราว์เซอร์</div><button class="about-btn" data-open-about>ℹ เกี่ยวกับโปรแกรม</button></div></div></header>
     <main class="wrap">
       <section class="card"><div class="section-title">เลือกระบบงานประกันสังคม</div><div class="module-grid">
         <button class="module-card planned" data-module="main"><div class="module-icon">🏥</div><h3>ประกันสังคม Main</h3><p>พื้นที่สำหรับตรวจและแก้ไขไฟล์ส่งเบิกผู้ป่วยนอกประกันสังคมทั่วไป</p><span class="module-badge">เตรียมพัฒนา</span></button>
@@ -57,7 +57,7 @@
         <div class="stat-card"><span>ต้องแก้ (C)</span><strong id="statC">0</strong></div>
       </section>
       <section class="card">
-        <div class="row registry-head"><div class="grow"><div class="section-title">รายการทะเบียนงาน</div><div class="meta" id="registryStatus">กำลังเชื่อมต่อฐานข้อมูล...</div></div><button class="soft" id="registryReloadBtn">↻ โหลดข้อมูล</button><button class="primary" id="addCaseBtn">+ เพิ่มงาน</button></div>
+        <div class="row registry-head"><div class="grow"><div class="section-title">รายการทะเบียนงาน</div><div class="meta" id="registryStatus">กำลังเชื่อมต่อฐานข้อมูล...</div></div><button class="soft" id="registryReloadBtn">↻ โหลดข้อมูล</button><button class="soft import-btn" id="importExcelBtn">📥 นำเข้า Excel</button><button class="primary" id="addCaseBtn">+ เพิ่มเอง</button></div>
         <div class="registry-toolbar"><input id="registrySearch" placeholder="ค้นหาเลขงาน, HN, VN, ชื่อผู้ป่วย, Case Number..."><select id="registrySort"><option value="newest">ใหม่ → เก่า</option><option value="oldest">เก่า → ใหม่</option><option value="name">ชื่อผู้ป่วย ก → ฮ</option></select><select id="registryPageSize"><option>10</option><option selected>20</option><option>50</option><option>100</option><option value="99999">ทั้งหมด</option></select><button class="soft" id="registryCsvBtn">ส่งออก CSV</button></div>
         <div class="table-wrap"><table class="data-table registry-table"><thead><tr><th>เลขงาน</th><th>HN / VN</th><th>ผู้ป่วย</th><th>วันที่รับบริการ</th><th>Case Number / Protocol</th><th>สถานะ</th><th>ผลล่าสุด</th><th>ผู้รับผิดชอบ</th><th>ดำเนินการ</th></tr></thead><tbody id="registryBody"></tbody></table></div>
         <div class="registry-pagination"><span id="registryCountText"></span><div id="registryPages" class="page-buttons"></div></div>
@@ -231,13 +231,20 @@
   </div>
 </div>
 
+
+<div class="modal" id="excelImportModal" aria-hidden="true"><div class="modal-card import-modal"><div class="modal-head"><div><strong>📥 นำเข้า Excel — Cancer Care</strong><div class="meta">รองรับรูปแบบไฟล์ตัวอย่าง DATA และตรวจรายการซ้ำก่อนบันทึก</div></div><button class="close-x" id="excelImportClose">✕ ปิด</button></div><div class="modal-body">
+<div class="import-step" id="importChooseStep"><div class="drop-zone" id="excelDropZone"><div class="drop-icon">📊</div><strong>ลากไฟล์ Excel มาวางที่นี่</strong><span>หรือเลือกไฟล์ .xlsx / .xls</span><input id="excelImportFile" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"><button class="primary" id="excelChooseBtn">เลือกไฟล์ Excel</button></div><div class="privacy-note">ระบบอ่านไฟล์ใน Browser และส่งเฉพาะข้อมูลที่ยืนยันแล้วไปยัง Google Sheets</div></div>
+<div class="import-step hidden" id="importPreviewStep"><div class="import-summary" id="importSummary"></div><div class="import-file-line"><b id="importFileName"></b><span id="importSheetName"></span><button class="soft" id="importChangeFileBtn">เปลี่ยนไฟล์</button></div><div class="table-wrap import-table-wrap"><table class="data-table import-table"><thead><tr><th>#</th><th>สถานะ</th><th>วันที่</th><th>HN / VN</th><th>ผู้ป่วย</th><th>Case / Protocol</th><th>การจัดการเมื่อซ้ำ</th></tr></thead><tbody id="importPreviewBody"></tbody></table></div><div class="dialog-actions"><button class="soft" id="importCancelBtn">ยกเลิก</button><button class="primary" id="importConfirmBtn">ยืนยันนำเข้า</button></div></div>
+<div class="import-step hidden" id="importResultStep"><div class="import-result" id="importResultBox"></div><div class="dialog-actions"><button class="primary" id="importDoneBtn">เสร็จสิ้น</button></div></div>
+</div></div></div>
 <div class="modal" id="caseModal" aria-hidden="true"><div class="modal-card registry-modal"><div class="modal-head"><div><strong id="caseModalTitle">เพิ่มงาน Cancer Care</strong><div class="meta">กรอกข้อมูลผู้ป่วยหลัง Discharge เพื่อเตรียมส่งเบิก</div></div><button class="close-x" id="caseModalClose">✕ ปิด</button></div><div class="modal-body"><input type="hidden" id="caseId"><div class="case-form-grid">
 <div class="field"><label>HN *</label><input id="caseHN"></div><div class="field"><label>VN</label><input id="caseVN"></div><div class="field"><label>เลขบัตรประชาชน</label><input id="caseCID" maxlength="13"></div><div class="field"><label>ชื่อ-นามสกุล *</label><input id="casePatientName"></div><div class="field"><label>วันที่รับบริการ *</label><input id="caseServiceDate" type="date"></div><div class="field"><label>สิทธิการรักษา</label><input id="caseCoverage" value="ประกันสังคม"></div><div class="field"><label>Case Number</label><input id="caseSsoNo"></div><div class="field"><label>Protocol Code</label><input id="caseProtocol"></div><div class="field"><label>ชื่อยา Chemo</label><input id="caseChemo"></div><div class="field"><label>ผู้รับผิดชอบ</label><input id="caseAssigned"></div><div class="field"><label>สถานะงาน</label><select id="caseStatus"><option>รอเตรียมข้อมูล</option><option>รอตรวจสอบ</option><option>พร้อมสร้างไฟล์</option><option>สร้างไฟล์แล้ว</option><option>ส่งเบิกแล้ว</option><option>รอผลตอบกลับ</option><option>ผ่าน (A)</option><option>ติดแก้ไข (C)</option></select></div><div class="field"><label>ผู้บันทึก</label><input id="caseUpdatedBy" value="Kimhan"></div><div class="field full"><label>หมายเหตุ</label><textarea id="caseRemark" rows="3"></textarea></div></div><div class="dialog-actions"><button class="soft" id="caseModalCancel">ยกเลิก</button><button class="primary" id="caseSaveBtn">บันทึก</button></div></div></div></div>
 <div class="modal" id="caseDetailModal" aria-hidden="true"><div class="modal-card registry-detail-modal"><div class="modal-head"><div><strong id="caseDetailTitle">รายละเอียดงาน</strong><div class="meta" id="caseDetailSub"></div></div><button class="close-x" id="caseDetailClose">✕ ปิด</button></div><div class="modal-body"><div id="caseDetailGrid" class="detail-grid"></div><div class="section-title timeline-title">Timeline การทำงาน</div><div id="caseTimeline" class="timeline"></div></div></div></div>
 
 <div class="toast-stack" id="toastStack"></div>
 <div class="dialog-overlay" id="dialogOverlay"><div class="dialog-box"><div class="dialog-icon" id="dialogIcon">ℹ️</div><h3 id="dialogTitle"></h3><p id="dialogMessage"></p><div class="dialog-actions" id="dialogActions"></div></div></div>
-<script src="assets/js/config.js?v=3.0.1"></script>
-<script src="assets/js/app.js?v=3.0.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="assets/js/config.js?v=3.1.0"></script>
+<script src="assets/js/app.js?v=3.1.0"></script>
 </body>
 </html>
