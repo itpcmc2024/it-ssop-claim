@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.4.5
+SSOP Toolkit Professional Edition V3.4.6
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -456,6 +456,7 @@ function thDate(v){if(!v)return '-';const d=new Date(v);if(Number.isNaN(d.getTim
 function thDateTime(v){if(!v)return '-';const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString('th-TH');}
 async function loadRegistry(){
  const status=document.getElementById('registryStatus');if(!status)return;
+ const searchInput=document.getElementById('registrySearch');if(searchInput)searchInput.value='';
  status.textContent='กำลังโหลดข้อมูล...';
  try{const data=await apiRequest('listCases',{module:'SSOCAC',limit:5000});registryState.items=data.items||[];applyRegistryFilter();status.textContent=`เชื่อมต่อฐานข้อมูลแล้ว · ${registryState.items.length} รายการ`;}
  catch(err){status.textContent=err.message;document.getElementById('registryBody').innerHTML=`<tr><td colspan="10" class="empty-row">${escapeHtml(err.message)}</td></tr>`;}
@@ -547,7 +548,7 @@ async function markZipLoadedForCase(fileName){
  if(result?.changed){
   zipReaderState.caseItem.Case_Status='รอตรวจสอบ';
   const local=registryState.items.find(x=>x.Case_ID===zipReaderState.caseItem.Case_ID);if(local)local.Case_Status='รอตรวจสอบ';
-  applyRegistryFilters();renderRegistryStats();
+  applyRegistryFilter();renderRegistryStats();
   toast('อัปโหลด ZIP แล้ว','เปลี่ยนสถานะเป็น “รอตรวจสอบ” อัตโนมัติ','success',4500);
  }
  return result;
@@ -586,7 +587,7 @@ async function recordGeneratedZip(caseItem,fileName){
   if(!caseItem?.Case_ID)return null;
   return apiRequest('recordGeneratedSubmission',{Case_ID:caseItem.Case_ID,Period_Key:extractPeriodKeyFromName(fileName),Work_Order_No:caseItem.Work_Order_No||'',Source_ZIP_Name:zipReaderState.file?.name||fileName,Submission_File_Name:zipReaderState.file?.name||fileName,Generated_File_Name:fileName,updatedBy:'ZIP EDITOR'});
 }
-async function downloadEditedZip(){if(!zipReaderState.zip||!zipReaderState.file)return;try{updateZipEditStatus('กำลังสร้าง ZIP...');for(const item of zipReaderState.entries){if(item.modified){const rebuilt=rebuildZipEntry(item);zipReaderState.zip.file(item.name,cp874Bytes(rebuilt));item.text=rebuilt}}const blob=await zipReaderState.zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=zipReaderState.file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);let tracked=false;if(zipReaderState.caseItem){await recordGeneratedZip(zipReaderState.caseItem,a.download);tracked=true;zipReaderState.caseItem.Case_Status='รอตรวจสอบ';const local=registryState.items.find(x=>x.Case_ID===zipReaderState.caseItem.Case_ID);if(local)local.Case_Status='รอตรวจสอบ';applyRegistryFilters();renderRegistryStats()}updateZipEditStatus('สร้าง ZIP เรียบร้อย');toast('สร้าง ZIP สำเร็จ',tracked?`ดาวน์โหลด ${a.download} และบันทึกชื่อไฟล์/งวดส่งในประวัติแล้ว`:`ดาวน์โหลด ${a.download} แล้ว แต่ยังไม่ได้ผูกกับทะเบียน กรุณาเปิดจากปุ่ม “แก้ไข ZIP” ในแถวผู้ป่วยเพื่อบันทึกประวัติ`,'success',7000)}catch(err){updateZipEditStatus('สร้าง ZIP ไม่สำเร็จ');toast('สร้าง ZIP ไม่สำเร็จ',err.message,'error',7000)}}
+async function downloadEditedZip(){if(!zipReaderState.zip||!zipReaderState.file)return;try{updateZipEditStatus('กำลังสร้าง ZIP...');for(const item of zipReaderState.entries){if(item.modified){const rebuilt=rebuildZipEntry(item);zipReaderState.zip.file(item.name,cp874Bytes(rebuilt));item.text=rebuilt}}const blob=await zipReaderState.zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=zipReaderState.file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);let tracked=false;if(zipReaderState.caseItem){await recordGeneratedZip(zipReaderState.caseItem,a.download);tracked=true;zipReaderState.caseItem.Case_Status='รอตรวจสอบ';const local=registryState.items.find(x=>x.Case_ID===zipReaderState.caseItem.Case_ID);if(local)local.Case_Status='รอตรวจสอบ';applyRegistryFilter();renderRegistryStats()}updateZipEditStatus('สร้าง ZIP เรียบร้อย');toast('สร้าง ZIP สำเร็จ',tracked?`ดาวน์โหลด ${a.download} และบันทึกชื่อไฟล์/งวดส่งในประวัติแล้ว`:`ดาวน์โหลด ${a.download} แล้ว แต่ยังไม่ได้ผูกกับทะเบียน กรุณาเปิดจากปุ่ม “แก้ไข ZIP” ในแถวผู้ป่วยเพื่อบันทึกประวัติ`,'success',7000)}catch(err){updateZipEditStatus('สร้าง ZIP ไม่สำเร็จ');toast('สร้าง ZIP ไม่สำเร็จ',err.message,'error',7000)}}
 document.getElementById('openZipReaderBtn')?.addEventListener('click',()=>openZipReader());document.getElementById('zipReaderClose')?.addEventListener('click',closeZipReader);document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
 /* Excel Import V3.1.1 */
