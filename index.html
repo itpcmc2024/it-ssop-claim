@@ -49,12 +49,12 @@
     <header class="top"><div class="top-row"><div><h1>🎗️ ทะเบียนงาน Cancer Care <span class="version">V3.4.3</span></h1><p>ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC</p></div><div class="row"><button class="back-home" id="registryBackHomeBtn">← หน้าหลัก</button><button class="soft" id="openCancerEditorBtn">เครื่องมือ SSOCAC เดิม (สำรอง)</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
     <main class="wrap">
       <section class="registry-dashboard">
-        <div class="stat-card"><span>ทั้งหมด</span><strong id="statAll">0</strong></div>
-        <div class="stat-card"><span>รอเตรียมข้อมูล</span><strong id="statPreparing">0</strong></div>
-        <div class="stat-card"><span>พร้อมส่ง</span><strong id="statReady">0</strong></div>
-        <div class="stat-card"><span>ส่งแล้ว/รอผล</span><strong id="statSent">0</strong></div>
-        <div class="stat-card"><span>ผ่าน (A)</span><strong id="statA">0</strong></div>
-        <div class="stat-card"><span>ต้องแก้ (C)</span><strong id="statC">0</strong></div>
+        <div class="stat-card all"><span>ทั้งหมด</span><strong id="statAll">0</strong></div>
+        <div class="stat-card preparing"><span>รอเตรียม/รอตรวจสอบ</span><strong id="statPreparing">0</strong></div>
+        <div class="stat-card ready"><span>พร้อมส่ง</span><strong id="statReady">0</strong></div>
+        <div class="stat-card sent"><span>ส่งแล้ว/รอผล</span><strong id="statSent">0</strong></div>
+        <div class="stat-card passed"><span>ผ่าน (A)</span><strong id="statA">0</strong></div>
+        <div class="stat-card fix"><span>ต้องแก้ (C)</span><strong id="statC">0</strong></div>
       </section>
       <section class="card">
         <div class="row registry-head"><div class="grow"><div class="section-title">รายการทะเบียนงาน</div><div class="meta" id="registryStatus">กำลังเชื่อมต่อฐานข้อมูล...</div></div><button class="soft" id="registryReloadBtn">↻ โหลดข้อมูล</button><button class="soft import-btn" id="importExcelBtn">📥 นำเข้า Excel</button><button class="soft zip-btn" id="openZipReaderBtn">🗜️ เปิด ZIP ผู้ป่วย</button><button class="soft reply-import-btn" id="openReplyImportBtn">📨 นำเข้าผลตอบกลับ</button><button class="primary" id="addCaseBtn">+ เพิ่มเอง</button></div>
