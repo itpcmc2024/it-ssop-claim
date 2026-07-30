@@ -1,15 +1,16 @@
-# it-ssop-claim V3.5.0 Stable
+# it-ssop-claim V3.4.3 Recovery Stable
 
-เวอร์ชันฐานเสถียรสำหรับ GitHub Pages + Google Apps Script
+ชุดกู้คืนจาก V3.4.3 ซึ่งเป็นเวอร์ชันสุดท้ายที่ผู้ใช้ยืนยันว่าโหลดข้อมูลและเปิดระบบได้ ก่อนเริ่มเปลี่ยนวิธีเชื่อมต่อ API ใน V3.4.4–V3.5.0
 
-- ใช้ JSONP สำหรับการเชื่อมต่อ Web App จึงไม่ติด CORS
-- ใส่ Spreadsheet ID, Document Folder ID และ apiUrl ให้แล้ว
-- เลขเวอร์ชัน V3.5.0 ตรงกันทุกส่วน
-- คงฟังก์ชัน Registry, ZIP Editor, Reply Import, Knowledge Base และการป้องกัน Work Order No.
+ค่าที่ใส่ให้แล้ว:
+- Spreadsheet ID
+- Document Folder ID
+- Apps Script Web App URL
 
-## ติดตั้ง
-1. นำไฟล์ทั้งหมดขึ้น GitHub แทนชุดเดิม
+ติดตั้ง:
+1. อัปโหลดไฟล์หน้าเว็บทั้งหมดขึ้น GitHub แทนชุดปัจจุบัน
 2. นำ Code.gs ไปแทนใน Apps Script
 3. Deploy เป็น New version โดยใช้ Deployment เดิม
-4. ตั้ง Web App ให้ Execute as: Me และ Who has access: Anyone
-5. กลับหน้าเว็บ กด Ctrl+F5
+4. เปิด GitHub Pages แล้วกด Ctrl+F5
+
+หมายเหตุ: ชุดนี้ตั้งใจคืนระบบให้โหลดข้อมูลได้ก่อน โดยไม่ใช้ iframe/postMessage หรือ JSONP และไม่มี routeApiAction_ ที่ทำให้ V3.5.0 ล้มเหลว
