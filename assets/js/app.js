@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.4.1
+SSOP Toolkit Professional Edition V3.4.2
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -596,10 +596,10 @@ document.getElementById('importExcelBtn')?.addEventListener('click',openExcelImp
    Central Reply Import V3.4.0 (Revised from real .BIL)
    จับคู่ด้วย CID + วันที่บริการ และเชื่อม Period Key
 ====================================================== */
-const replyImportState={file:null,zip:null,matches:[],unmatched:[],sourceFiles:[],meta:{}};
+const replyImportState={file:null,zip:null,matches:[],unmatched:[],sourceFiles:[],meta:{},knowledgeByCode:{},knowledgeKnown:0,knowledgeUnknown:0};
 function openReplyImport(){resetReplyImport();const m=document.getElementById('replyImportModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}
 function closeReplyImport(){const m=document.getElementById('replyImportModal');m.classList.remove('show');m.setAttribute('aria-hidden','true')}
-function resetReplyImport(){replyImportState.file=null;replyImportState.zip=null;replyImportState.matches=[];replyImportState.unmatched=[];replyImportState.sourceFiles=[];replyImportState.meta={};const i=document.getElementById('replyImportFile');if(i)i.value='';document.getElementById('replyImportChoose')?.classList.remove('hidden');document.getElementById('replyImportWorkspace')?.classList.add('hidden')}
+function resetReplyImport(){replyImportState.file=null;replyImportState.zip=null;replyImportState.matches=[];replyImportState.unmatched=[];replyImportState.sourceFiles=[];replyImportState.meta={};replyImportState.knowledgeByCode={};replyImportState.knowledgeKnown=0;replyImportState.knowledgeUnknown=0;const i=document.getElementById('replyImportFile');if(i)i.value='';document.getElementById('replyImportChoose')?.classList.remove('hidden');document.getElementById('replyImportWorkspace')?.classList.add('hidden')}
 function normalizeReplyText(text){return String(text||'').replace(/\u0000/g,'').replace(/\r\n?/g,'\n')}
 function normalizeDigits(v){return String(v||'').replace(/\D/g,'')}
 function normalizeThaiDateKey(v){
@@ -644,23 +644,41 @@ async function handleReplyImportFile(file){
     if(!allRows.length)throw new Error('ไม่พบรายการผล A/C ในไฟล์ SOCDBIL');
     const matches=[],unmatched=[];
     allRows.forEach(row=>{const hit=matchReplyRow(row);if(!hit){unmatched.push(`${row.CID || '-'} · ${row.Service_Date || '-'} · InvNo ${row.InvNo||'-'}`);return}matches.push({...row,Case_ID:hit.item.Case_ID,HN:hit.item.HN,VN:hit.item.VN,Patient_Name:hit.item.Patient_Name,Work_Order_No:hit.item.Work_Order_No||'',Match_Score:hit.score,Match_Label:hit.label,Reply_File_Name:file.name,selected:true})});
-    replyImportState.file=file;replyImportState.zip=zip;replyImportState.matches=matches;replyImportState.sourceFiles=docs.map(x=>x.name);replyImportState.unmatched=unmatched;replyImportState.meta=mainMeta;renderReplyImport();
+    replyImportState.file=file;replyImportState.zip=zip;replyImportState.matches=matches;replyImportState.sourceFiles=docs.map(x=>x.name);replyImportState.unmatched=unmatched;replyImportState.meta=mainMeta;await hydrateReplyImportKnowledge();renderReplyImport();
   }catch(err){toast('อ่านผลตอบกลับไม่สำเร็จ',err.message||String(err),'error',7000)}
 }
+
+async function hydrateReplyImportKnowledge(){
+  const codes=[...new Set(replyImportState.matches.flatMap(x=>String(x.Error_Codes||'').split(',').map(v=>v.trim().toUpperCase()).filter(Boolean)))];
+  replyImportState.knowledgeByCode={};replyImportState.knowledgeKnown=0;replyImportState.knowledgeUnknown=0;
+  if(!codes.length)return;
+  try{
+    const data=await apiRequest('getByCodes',{module:'SSOCAC',codes});
+    (data.items||[]).forEach(x=>replyImportState.knowledgeByCode[String(x.ErrorCode||'').toUpperCase()]=x);
+  }catch(err){console.warn('Knowledge lookup failed',err)}
+  replyImportState.knowledgeKnown=codes.filter(c=>replyImportState.knowledgeByCode[c]).length;
+  replyImportState.knowledgeUnknown=codes.length-replyImportState.knowledgeKnown;
+}
+function replyKnowledgeHtml(errorCodes){
+  const codes=String(errorCodes||'').split(',').map(v=>v.trim().toUpperCase()).filter(Boolean);
+  if(!codes.length)return '<span class="knowledge-none">ไม่มีรหัสแจ้งเตือน</span>';
+  return codes.map(code=>{const k=replyImportState.knowledgeByCode[code];if(!k)return `<div class="reply-knowledge-item unknown"><b>${escapeHtml(code)}</b><span>ยังไม่มีใน Knowledge Base</span></div>`;const desc=k.Description||'มีข้อมูลใน Knowledge Base',sol=k.Solution||k.Tips||'';return `<div class="reply-knowledge-item known"><b>${escapeHtml(code)}</b><span>${escapeHtml(desc)}</span>${sol?`<small>แนวทาง: ${escapeHtml(sol)}</small>`:''}</div>`}).join('');
+}
+
 function renderReplyImport(){
   const items=replyImportState.matches,file=replyImportState.file,m=replyImportState.meta||{};
   document.getElementById('replyImportChoose')?.classList.add('hidden');document.getElementById('replyImportWorkspace')?.classList.remove('hidden');
   document.getElementById('replyImportFileName').textContent=file?.name||'';
   document.getElementById('replyImportMeta').textContent=`งวดส่ง ${m.Period_Key||'-'} · เลขตอบรับ ${m.Reply_No||'-'} · ไฟล์ภายใน ${replyImportState.sourceFiles.length} ไฟล์ · จับคู่ ${items.length} รายการ`;
   const a=items.filter(x=>x.Result_Code==='A').length,c=items.filter(x=>x.Result_Code==='C').length;
-  document.getElementById('replyImportSummary').innerHTML=`<div><b>${items.length}</b><span>จับคู่ได้</span></div><div><b>${a}</b><span>ผล A</span></div><div><b>${c}</b><span>ผล C</span></div><div><b>${replyImportState.unmatched.length}</b><span>ยังจับคู่ไม่ได้</span></div>`;
-  const body=document.getElementById('replyImportBody');body.innerHTML=items.length?items.map((x,i)=>`<tr><td>${i+1}</td><td><b>${escapeHtml(x.Case_ID)}</b><div class="subline">${escapeHtml(x.Patient_Name||'-')}</div></td><td>${escapeHtml(x.HN||'-')}<div class="subline">CID: ${escapeHtml(x.CID||'-')}</div></td><td><select data-reply-result="${i}"><option value="A" ${x.Result_Code==='A'?'selected':''}>A</option><option value="C" ${x.Result_Code==='C'?'selected':''}>C</option></select></td><td><input data-reply-codes="${i}" value="${escapeAttr(x.Error_Codes||'')}" placeholder="เช่น W07,C03"></td><td>${escapeHtml(x.Period_Key||'-')}<div class="subline">${escapeHtml(x.Source_Entry||'-')}</div></td><td><label class="reply-match-check"><input type="checkbox" data-reply-select="${i}" ${x.selected?'checked':''}> ยืนยัน</label><div class="subline">${escapeHtml(x.Match_Label||'')} · ${x.Match_Score}</div></td></tr>`).join(''):`<tr><td colspan="7" class="empty-row">ยังจับคู่ผู้ป่วยไม่ได้</td></tr>`;
-  body.querySelectorAll('[data-reply-result]').forEach(el=>el.onchange=()=>replyImportState.matches[Number(el.dataset.replyResult)].Result_Code=el.value);body.querySelectorAll('[data-reply-codes]').forEach(el=>el.oninput=()=>replyImportState.matches[Number(el.dataset.replyCodes)].Error_Codes=el.value.trim());body.querySelectorAll('[data-reply-select]').forEach(el=>el.onchange=()=>replyImportState.matches[Number(el.dataset.replySelect)].selected=el.checked);
+  document.getElementById('replyImportSummary').innerHTML=`<div><b>${items.length}</b><span>จับคู่ได้</span></div><div><b>${a}</b><span>ผล A</span></div><div><b>${c}</b><span>ผล C</span></div><div><b>${replyImportState.unmatched.length}</b><span>ยังจับคู่ไม่ได้</span></div><div><b>${replyImportState.knowledgeKnown}</b><span>Knowledge พร้อมใช้</span></div><div><b>${replyImportState.knowledgeUnknown}</b><span>รหัสใหม่</span></div>`;
+  const body=document.getElementById('replyImportBody');body.innerHTML=items.length?items.map((x,i)=>`<tr><td>${i+1}</td><td><b>${escapeHtml(x.Case_ID)}</b><div class="subline">${escapeHtml(x.Patient_Name||'-')}</div></td><td>${escapeHtml(x.HN||'-')}<div class="subline">CID: ${escapeHtml(x.CID||'-')}</div></td><td><select data-reply-result="${i}"><option value="A" ${x.Result_Code==='A'?'selected':''}>A</option><option value="C" ${x.Result_Code==='C'?'selected':''}>C</option></select></td><td><input data-reply-codes="${i}" value="${escapeAttr(x.Error_Codes||'')}" placeholder="เช่น W07,C03"></td><td class="reply-knowledge-cell">${replyKnowledgeHtml(x.Error_Codes)}</td><td>${escapeHtml(x.Period_Key||'-')}<div class="subline">${escapeHtml(x.Source_Entry||'-')}</div></td><td><label class="reply-match-check"><input type="checkbox" data-reply-select="${i}" ${x.selected?'checked':''}> ยืนยัน</label><div class="subline">${escapeHtml(x.Match_Label||'')} · ${x.Match_Score}</div></td></tr>`).join(''):`<tr><td colspan="8" class="empty-row">ยังจับคู่ผู้ป่วยไม่ได้</td></tr>`;
+  body.querySelectorAll('[data-reply-result]').forEach(el=>el.onchange=()=>replyImportState.matches[Number(el.dataset.replyResult)].Result_Code=el.value);body.querySelectorAll('[data-reply-codes]').forEach(el=>el.onchange=async()=>{replyImportState.matches[Number(el.dataset.replyCodes)].Error_Codes=el.value.trim();await hydrateReplyImportKnowledge();renderReplyImport()});body.querySelectorAll('[data-reply-select]').forEach(el=>el.onchange=()=>replyImportState.matches[Number(el.dataset.replySelect)].selected=el.checked);
   const un=document.getElementById('replyImportUnmatched');un.classList.toggle('hidden',!replyImportState.unmatched.length);un.innerHTML=replyImportState.unmatched.length?`<b>รายการที่ยังจับคู่ไม่ได้:</b><br>${replyImportState.unmatched.map(escapeHtml).join('<br>')}`:'';
 }
 async function saveReplyImport(){
   const items=replyImportState.matches.filter(x=>x.selected);if(!items.length){toast('ยังไม่มีรายการยืนยัน','กรุณาติ๊กรายการที่ต้องการบันทึก','warning');return}
   const btn=document.getElementById('replyImportSaveBtn');btn.disabled=true;btn.textContent='กำลังบันทึก...';
-  try{const data=await apiRequest('importReplyResults',{items,replyFileName:replyImportState.file?.name||'',replyEntryNames:replyImportState.sourceFiles,periodKey:replyImportState.meta?.Period_Key||'',replyNo:replyImportState.meta?.Reply_No||'',replyDate:replyImportState.meta?.Reply_Date||'',updatedBy:'IMPORT REPLY'});closeReplyImport();toast('บันทึกผลตอบกลับสำเร็จ',`อัปเดต ${data.updated||0} รายการ · เชื่อม Attempt เดิม ${data.linked||0} · ผล A ${data.resultA||0} · ผล C ${data.resultC||0}`,'success',7500);await loadRegistry()}catch(err){toast('บันทึกผลไม่สำเร็จ',err.message,'error',7000)}finally{btn.disabled=false;btn.textContent='ยืนยันบันทึกผล'}
+  try{const data=await apiRequest('importReplyResults',{items,replyFileName:replyImportState.file?.name||'',replyEntryNames:replyImportState.sourceFiles,periodKey:replyImportState.meta?.Period_Key||'',replyNo:replyImportState.meta?.Reply_No||'',replyDate:replyImportState.meta?.Reply_Date||'',updatedBy:'IMPORT REPLY'});closeReplyImport();toast('บันทึกผลตอบกลับสำเร็จ',`อัปเดต ${data.updated||0} รายการ · เชื่อม Attempt เดิม ${data.linked||0} · ผล A ${data.resultA||0} · ผล C ${data.resultC||0} · Knowledge ${replyImportState.knowledgeKnown} รหัส · รหัสใหม่ ${replyImportState.knowledgeUnknown}`,'success',7500);await loadRegistry()}catch(err){toast('บันทึกผลไม่สำเร็จ',err.message,'error',7000)}finally{btn.disabled=false;btn.textContent='ยืนยันบันทึกผล'}
 }
-document.getElementById('openReplyImportBtn')?.addEventListener('click',openReplyImport);document.getElementById('replyImportClose')?.addEventListener('click',closeReplyImport);document.getElementById('replyImportCancelBtn')?.addEventListener('click',closeReplyImport);document.getElementById('replyImportChooseBtn')?.addEventListener('click',()=>document.getElementById('replyImportFile')?.click());document.getElementById('replyImportFile')?.addEventListener('change',e=>handleReplyImportFile(e.target.files?.[0]));document.getElementById('replyImportChangeBtn')?.addEventListener('click',resetReplyImport);document.getElementById('replyImportSaveBtn')?.addEventListener('click',saveReplyImport);
+document.getElementById('openReplyImportBtn')?.addEventListener('click',openReplyImport);document.getElementById('replyImportClose')?.addEventListener('click',closeReplyImport);document.getElementById('replyImportCancelBtn')?.addEventListener('click',closeReplyImport);document.getElementById('replyImportChooseBtn')?.addEventListener('click',()=>document.getElementById('replyImportFile')?.click());document.getElementById('replyImportFile')?.addEventListener('change',e=>handleReplyImportFile(e.target.files?.[0]));document.getElementById('replyImportChangeBtn')?.addEventListener('click',resetReplyImport);document.getElementById('replyImportSaveBtn')?.addEventListener('click',saveReplyImport);document.getElementById('replyImportKnowledgeBtn')?.addEventListener('click',()=>{closeReplyImport();showPage('knowledgePage');const q=[...new Set(replyImportState.matches.flatMap(x=>String(x.Error_Codes||'').split(',').map(v=>v.trim()).filter(Boolean)))].join(' ');const input=document.getElementById('knowledgeSearchInput');if(input)input.value=q;loadKnowledge(q,'SSOCAC')});
