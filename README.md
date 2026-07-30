@@ -1,11 +1,17 @@
-# it-ssop-claim V3.4.2
+# it-ssop-claim V3.4.3
 
-ต่อยอดจาก V3.4.1 โดยเชื่อมหน้าจอนำเข้าผลตอบกลับกับชีต Knowledge_Base
+## เพิ่มในเวอร์ชันนี้
+- เมื่อเปิดไฟล์ ZIP จากปุ่ม “แก้ไข ZIP” ในแถวผู้ป่วย และระบบอ่าน ZIP สำเร็จ สถานะจะเปลี่ยนจาก `รอเตรียมข้อมูล` เป็น `รอตรวจสอบ` อัตโนมัติ
+- ไม่เขียนทับ `Work_Order_No` และฟิลด์สำคัญเดิม
+- บันทึก Timeline ประเภท `ZIP_LOADED` พร้อมชื่อไฟล์ ZIP
+- หากเคสอยู่สถานะอื่นแล้ว ระบบจะไม่ย้อนสถานะกลับ
+- คงระบบ Knowledge Base และประวัติไฟล์จาก V3.4.2 ทั้งหมด
 
-- ค้นหา Error/Warning Code ใน Knowledge_Base อัตโนมัติ
-- แสดงคำอธิบายและแนวทางแก้ก่อนยืนยันบันทึกผล
-- แยกรหัสที่มีองค์ความรู้แล้วและรหัสใหม่
-- เปิด Knowledge Center พร้อมค้นหารหัสจากไฟล์ตอบกลับได้ทันที
-- คงการป้องกัน Work Order No. และประวัติ Claim_Attempt จาก V3.4.1
+## การติดตั้ง
+1. แทนที่ `index.html`, `assets/css/style.css`, `assets/js/app.js`, `assets/js/config.js` ใน GitHub
+2. ใส่ `apiUrl` เดิมกลับใน `assets/js/config.js`
+3. แทนที่ `Code.gs` ใน Apps Script แล้วใส่ Spreadsheet ID / Folder ID เดิม
+4. Deploy Apps Script เป็น New version
+5. กด Ctrl+F5 ที่หน้าเว็บ
 
-ติดตั้ง: แทน Code.gs และไฟล์หน้าเว็บ จากนั้น Deploy Apps Script เป็นเวอร์ชันใหม่
+ไม่ต้อง Run setupDatabase และไม่ต้องสร้างชีทเพิ่ม
