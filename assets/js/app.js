@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.4.4
+SSOP Toolkit Professional Edition V3.4.5
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -265,14 +265,44 @@ function exportReplyKnowledgeCSV(){
 }
 
 function getApiUrl(){return (window.SSOP_CONFIG?.apiUrl||'').trim();}
-async function apiRequest(action,payload={}){
+
+/* V3.4.5: ส่งคำขอผ่าน hidden iframe แทน fetch เพื่อหลีกเลี่ยง CORS ของ Apps Script */
+function apiRequest(action,payload={}){
   const url=getApiUrl();
-  if(!url || url.includes('PASTE_')) throw new Error('ยังไม่ได้ตั้งค่า Apps Script Web App URL ใน assets/js/config.js');
-  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...payload})});
-  if(!response.ok) throw new Error(`API ตอบกลับ ${response.status}`);
-  const data=await response.json();
-  if(!data.ok) throw new Error(data.message||'เกิดข้อผิดพลาดจากฐานข้อมูล');
-  return data;
+  if(!url || url.includes('PASTE_')) return Promise.reject(new Error('ยังไม่ได้ตั้งค่า Apps Script Web App URL ใน assets/js/config.js'));
+  return new Promise((resolve,reject)=>{
+    const requestId=`ssop_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const iframe=document.createElement('iframe');
+    const form=document.createElement('form');
+    const timer=setTimeout(()=>finish(new Error('เชื่อมต่อฐานข้อมูลหมดเวลา กรุณาตรวจสอบ Deployment และสิทธิ์การเข้าถึง Web App')),90000);
+    let finished=false;
+    function cleanup(){
+      clearTimeout(timer);
+      window.removeEventListener('message',onMessage);
+      setTimeout(()=>{iframe.remove();form.remove();},0);
+    }
+    function finish(err,data){
+      if(finished)return;finished=true;cleanup();
+      if(err)reject(err);else resolve(data);
+    }
+    function onMessage(event){
+      const msg=event.data;
+      if(!msg || msg.type!=='SSOP_API_RESPONSE' || msg.requestId!==requestId)return;
+      const data=msg.data||{};
+      if(!data.ok)finish(new Error(data.message||'เกิดข้อผิดพลาดจากฐานข้อมูล'));
+      else finish(null,data);
+    }
+    window.addEventListener('message',onMessage);
+    iframe.name=`ssop_api_frame_${requestId}`;
+    iframe.style.display='none';
+    iframe.setAttribute('aria-hidden','true');
+    document.body.appendChild(iframe);
+    form.method='POST';form.action=url;form.target=iframe.name;form.style.display='none';
+    const fields={transport:'iframe',requestId,payload:JSON.stringify({action,...payload})};
+    Object.entries(fields).forEach(([name,value])=>{const input=document.createElement('input');input.type='hidden';input.name=name;input.value=value;form.appendChild(input)});
+    document.body.appendChild(form);
+    try{form.submit()}catch(err){finish(err)}
+  });
 }
 async function hydrateReplyKnowledgeFromDatabase(){
   try{
