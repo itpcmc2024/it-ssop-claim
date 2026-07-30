@@ -105,3 +105,6 @@ All Rights Reserved.
 
 /* ZIP Reader V3.2.1 */
 .zip-section-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 10px}.zip-section-tab{border:1px solid #cfe4df;background:#f4fbf9;border-radius:999px;padding:7px 12px;font-weight:700;color:#315f58;cursor:pointer}.zip-section-tab span{display:inline-flex;min-width:22px;height:22px;align-items:center;justify-content:center;border-radius:999px;background:#e1f2ee;font-size:11px}.zip-section-tab.active{background:#4fc6ad;color:#083f35;border-color:#35ad96}.zip-section-tab.active span{background:#fff}.zip-table-wrap .important-head{background:#ffe8ea!important;color:#9a2635}.zip-table-wrap .important-cell{background:#fff7f7}.zip-table-wrap td{max-width:none;overflow:visible;text-overflow:clip}.zip-table-wrap{overflow:auto}.zip-table-wrap table{min-width:max-content}
+
+/* V3.3.0 ZIP Editor */
+.zip-editor-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:9px 0;border-bottom:1px solid #dcebea;flex-wrap:wrap}.zip-editor-toolbar .status{margin-right:auto}.zip-edit-cell{min-width:110px;cursor:text;outline:none}.zip-edit-cell:focus{box-shadow:inset 0 0 0 2px #53cbb4;background:#fffef2}.zip-edit-cell.changed{background:#fff2c9}.zip-table-wrap td[contenteditable=true]{white-space:nowrap}
