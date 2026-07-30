@@ -112,3 +112,7 @@ All Rights Reserved.
 
 /* Reply Import V3.4.0 */
 .reply-import-modal{width:min(1180px,94vw);max-height:90vh}.reply-import-modal .modal-body{overflow:auto}.drop-zone.compact{min-height:260px}.reply-import-toolbar{display:flex;align-items:center;gap:12px;margin:8px 0 12px}.reply-import-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}.reply-import-summary>div{border:1px solid #d9ebe7;background:#f7fffd;border-radius:14px;padding:12px}.reply-import-summary b{display:block;font-size:24px;color:#075f54}.reply-import-summary span{font-size:12px;color:#5a7771}.reply-import-table input,.reply-import-table select{width:100%;min-width:90px;border:1px solid #cfe1dd;border-radius:8px;padding:7px;background:#fff}.reply-match-check{white-space:nowrap}.reply-import-unmatched{margin-top:12px;padding:11px;border-radius:10px;background:#fff8e4;border:1px solid #ead69f;color:#775b16}.reply-import-btn{background:#eef9ff!important}@media(max-width:800px){.reply-import-summary{grid-template-columns:repeat(2,1fr)}}
+
+/* V3.4.1 */
+#caseWorkOrder[readonly]{background:#f3f7f6;color:#355d57;cursor:not-allowed}
+.attempt-table{min-width:900px}.attempt-table th,.attempt-table td{font-size:12px;vertical-align:top}
