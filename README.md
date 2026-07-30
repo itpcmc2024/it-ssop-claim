@@ -1,16 +1,19 @@
-# it-ssop-claim V3.4.3 Recovery Stable
+# it-ssop-claim V3.4.4 Stable
 
-ชุดกู้คืนจาก V3.4.3 ซึ่งเป็นเวอร์ชันสุดท้ายที่ผู้ใช้ยืนยันว่าโหลดข้อมูลและเปิดระบบได้ ก่อนเริ่มเปลี่ยนวิธีเชื่อมต่อ API ใน V3.4.4–V3.5.0
+ฐานระบบ: Recovery Stable ที่ยืนยันแล้วว่าโหลดข้อมูลได้
 
-ค่าที่ใส่ให้แล้ว:
-- Spreadsheet ID
-- Document Folder ID
-- Apps Script Web App URL
+ปรับเพิ่มเฉพาะ 4 เรื่อง:
+- แยกการอ่าน ZIP ออกจากการอัปเดตสถานะ ป้องกันแจ้งว่า ZIP เสียทั้งที่อ่านได้
+- เปลี่ยนสถานะเป็น `รอตรวจสอบ` หลังเปิด ZIP จากแถวผู้ป่วยและหลังสร้าง ZIP สำเร็จ
+- การ์ด Dashboard และป้ายสถานะใช้สีพาสเทลตาม Workflow
+- ตรวจ `ClaimCat = OPR` เฉพาะรายการที่ตรงกับ `Case_SSOCAC.Chemo_Drug`
+
+ยังคงระบบเชื่อมต่อ API เดิมจาก Recovery Stable โดยไม่ใช้ iframe, postMessage หรือ JSONP
 
 ติดตั้ง:
-1. อัปโหลดไฟล์หน้าเว็บทั้งหมดขึ้น GitHub แทนชุดปัจจุบัน
-2. นำ Code.gs ไปแทนใน Apps Script
+1. แทนไฟล์ทั้งหมดใน GitHub
+2. แทน `Code.gs` ใน Apps Script
 3. Deploy เป็น New version โดยใช้ Deployment เดิม
-4. เปิด GitHub Pages แล้วกด Ctrl+F5
+4. กลับหน้าเว็บและกด Ctrl+F5
 
-หมายเหตุ: ชุดนี้ตั้งใจคืนระบบให้โหลดข้อมูลได้ก่อน โดยไม่ใช้ iframe/postMessage หรือ JSONP และไม่มี routeApiAction_ ที่ทำให้ V3.5.0 ล้มเหลว
+ไม่ต้อง Run `setupDatabase`
