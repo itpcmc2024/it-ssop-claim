@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.3.0
+SSOP Toolkit Professional Edition V3.3.1
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -460,11 +460,31 @@ async function loadRegistry(){
  try{const data=await apiRequest('listCases',{module:'SSOCAC',limit:5000});registryState.items=data.items||[];applyRegistryFilter();status.textContent=`เชื่อมต่อฐานข้อมูลแล้ว · ${registryState.items.length} รายการ`;}
  catch(err){status.textContent=err.message;document.getElementById('registryBody').innerHTML=`<tr><td colspan="10" class="empty-row">${escapeHtml(err.message)}</td></tr>`;}
 }
+function registryDateValue(item){
+ const raw=item?.Service_Date||item?.Created_At||item?.Updated_At||'';
+ if(raw instanceof Date&&!Number.isNaN(raw.getTime()))return raw.getTime();
+ const text=String(raw||'').trim();
+ if(!text)return 0;
+ const thai=text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})(?:\s+.*)?$/);
+ if(thai){let year=Number(thai[3]);if(year>2400)year-=543;return new Date(year,Number(thai[2])-1,Number(thai[1])).getTime()||0;}
+ const iso=text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+ if(iso){let year=Number(iso[1]);if(year>2400)year-=543;return new Date(year,Number(iso[2])-1,Number(iso[3])).getTime()||0;}
+ const parsed=Date.parse(text);return Number.isNaN(parsed)?0:parsed;
+}
+function registryCaseSequence(item){
+ const m=String(item?.Case_ID||'').match(/(\d+)$/);return m?Number(m[1]):0;
+}
 function applyRegistryFilter(){
  const q=(document.getElementById('registrySearch')?.value||'').trim().toLowerCase();
  const sort=document.getElementById('registrySort')?.value||'newest';
  registryState.filtered=registryState.items.filter(x=>!q||[x.Case_ID,x.HN,x.VN,x.CID,x.Patient_Name,x.SSO_Case_No,x.Protocol_Code,x.Work_Order_No,x.Case_Status,x.Assigned_To].some(v=>String(v||'').toLowerCase().includes(q)));
- registryState.filtered.sort((a,b)=>{if(sort==='name')return String(a.Patient_Name||'').localeCompare(String(b.Patient_Name||''),'th');const av=new Date(a.Created_At||0).getTime(),bv=new Date(b.Created_At||0).getTime();return sort==='oldest'?av-bv:bv-av;});
+ registryState.filtered.sort((a,b)=>{
+  if(sort==='name')return String(a.Patient_Name||'').localeCompare(String(b.Patient_Name||''),'th',{sensitivity:'base'})||registryCaseSequence(a)-registryCaseSequence(b);
+  const av=registryDateValue(a),bv=registryDateValue(b);
+  if(av!==bv)return sort==='oldest'?av-bv:bv-av;
+  const as=registryCaseSequence(a),bs=registryCaseSequence(b);
+  return sort==='oldest'?as-bs:bs-as;
+ });
  registryState.page=1;renderRegistry();
 }
 function renderRegistry(){
