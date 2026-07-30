@@ -1,12 +1,10 @@
-# it-ssop-claim V3.4.0 (Revised)
+# it-ssop-claim V3.4.1
 
-ปรับจากไฟล์ตอบกลับจริง `13815_SOCDBIL_8723001.ZIP`
+เวอร์ชันแก้ไขการสูญหายของ Work Order No. และเพิ่มประวัติไฟล์ส่ง/ตอบกลับ
 
-- อ่านไฟล์ `13815_SOCDBIL_xxxxxxx.BIL` ภายใน ZIP
-- อ่านงวดส่ง เลขตอบรับ วันที่ตอบรับ และผล A/C
-- จับคู่ทะเบียนด้วย CID + วันที่รับบริการ
-- เก็บชื่อ ZIP ที่สร้างส่ง ชื่องวดส่ง ชื่อ ZIP ตอบกลับ ชื่อ BIL และเลขตอบรับใน Claim_Attempt
-- เชื่อมผลตอบกลับกับ Attempt เดิมด้วย Case_ID + Period_Key
-- เก็บ Warning Code เช่น W07 ได้ โดยผลยังคง A ตาม Stat ในไฟล์
-
-ติดตั้งโดยแทนไฟล์ GitHub และ Code.gs จากนั้น Deploy Apps Script เป็น New version
+## สิ่งสำคัญ
+- การแก้ไขทะเบียนใช้ Merge Update และรักษา Work_Order_No เดิม
+- Excel Update ที่ไม่มี JobNo จะไม่ล้าง Work Order เดิม
+- Claim_Attempt เพิ่ม Work_Order_No, Source_ZIP_Name, Generated_MD5 และ Reply_BIL_Name อัตโนมัติ
+- หน้ารายละเอียดแสดงประวัติ ZIP ส่งและ ZIP/BIL ตอบกลับ
+- ไม่ต้อง Run setupDatabase; ระบบเพิ่มคอลัมน์ Claim_Attempt ที่ขาดตอนใช้งาน
