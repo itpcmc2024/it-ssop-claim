@@ -1,10 +1,11 @@
-# it-ssop-claim V3.4.1
+# it-ssop-claim V3.4.2
 
-เวอร์ชันแก้ไขการสูญหายของ Work Order No. และเพิ่มประวัติไฟล์ส่ง/ตอบกลับ
+ต่อยอดจาก V3.4.1 โดยเชื่อมหน้าจอนำเข้าผลตอบกลับกับชีต Knowledge_Base
 
-## สิ่งสำคัญ
-- การแก้ไขทะเบียนใช้ Merge Update และรักษา Work_Order_No เดิม
-- Excel Update ที่ไม่มี JobNo จะไม่ล้าง Work Order เดิม
-- Claim_Attempt เพิ่ม Work_Order_No, Source_ZIP_Name, Generated_MD5 และ Reply_BIL_Name อัตโนมัติ
-- หน้ารายละเอียดแสดงประวัติ ZIP ส่งและ ZIP/BIL ตอบกลับ
-- ไม่ต้อง Run setupDatabase; ระบบเพิ่มคอลัมน์ Claim_Attempt ที่ขาดตอนใช้งาน
+- ค้นหา Error/Warning Code ใน Knowledge_Base อัตโนมัติ
+- แสดงคำอธิบายและแนวทางแก้ก่อนยืนยันบันทึกผล
+- แยกรหัสที่มีองค์ความรู้แล้วและรหัสใหม่
+- เปิด Knowledge Center พร้อมค้นหารหัสจากไฟล์ตอบกลับได้ทันที
+- คงการป้องกัน Work Order No. และประวัติ Claim_Attempt จาก V3.4.1
+
+ติดตั้ง: แทน Code.gs และไฟล์หน้าเว็บ จากนั้น Deploy Apps Script เป็นเวอร์ชันใหม่
