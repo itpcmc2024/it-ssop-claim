@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.4.8
+SSOP Toolkit Professional Edition V3.4.9
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -475,10 +475,25 @@ function registryDateValue(item){
 function registryCaseSequence(item){
  const m=String(item?.Case_ID||'').match(/(\d+)$/);return m?Number(m[1]):0;
 }
+function registryMatchesStatus(item,filter){
+ const status=String(item?.Case_Status||'').trim(),result=String(item?.Latest_Result||'').trim().toUpperCase();
+ if(!filter||filter==='ALL')return true;
+ if(filter==='PREPARING')return ['รอเตรียมข้อมูล','รอตรวจสอบ'].includes(status);
+ if(filter==='READY')return ['พร้อมส่ง','พร้อมสร้างไฟล์','สร้างไฟล์แล้ว'].includes(status);
+ if(filter==='SENT')return ['ส่งเบิกแล้ว','รอผลตอบกลับ'].includes(status);
+ if(filter==='A')return result==='A'||status==='ผ่าน (A)';
+ if(filter==='C')return result==='C'||status==='ติดแก้ไข (C)';
+ return true;
+}
+function syncRegistryStatusCards(){
+ const value=document.getElementById('registryStatusFilter')?.value||'ALL';
+ document.querySelectorAll('[data-registry-status]').forEach(card=>card.classList.toggle('active',card.dataset.registryStatus===value));
+}
 function applyRegistryFilter(){
  const q=(document.getElementById('registrySearch')?.value||'').trim().toLowerCase();
+ const statusFilter=document.getElementById('registryStatusFilter')?.value||'ALL';
  const sort=document.getElementById('registrySort')?.value||'newest';
- registryState.filtered=registryState.items.filter(x=>!q||[x.Case_ID,x.HN,x.VN,x.CID,x.Patient_Name,x.SSO_Case_No,x.Protocol_Code,x.Work_Order_No,x.Case_Status,x.Assigned_To].some(v=>String(v||'').toLowerCase().includes(q)));
+ registryState.filtered=registryState.items.filter(x=>registryMatchesStatus(x,statusFilter)&&(!q||[x.Case_ID,x.HN,x.VN,x.CID,x.Patient_Name,x.SSO_Case_No,x.Protocol_Code,x.Work_Order_No,x.Case_Status,x.Assigned_To].some(v=>String(v||'').toLowerCase().includes(q))));
  registryState.filtered.sort((a,b)=>{
   if(sort==='name')return String(a.Patient_Name||'').localeCompare(String(b.Patient_Name||''),'th',{sensitivity:'base'})||registryCaseSequence(a)-registryCaseSequence(b);
   const av=registryDateValue(a),bv=registryDateValue(b);
@@ -486,7 +501,7 @@ function applyRegistryFilter(){
   const as=registryCaseSequence(a),bs=registryCaseSequence(b);
   return sort==='oldest'?as-bs:bs-as;
  });
- registryState.page=1;renderRegistry();
+ registryState.page=1;syncRegistryStatusCards();renderRegistry();
 }
 function renderRegistry(){
  const size=Number(document.getElementById('registryPageSize')?.value||20);registryState.pageSize=size;
@@ -534,7 +549,7 @@ async function saveCase(){
 }
 async function openCaseDetail(id){try{const data=await apiRequest('getCase',{caseId:id});const x=data.item||{};document.getElementById('caseDetailTitle').textContent=`รายละเอียด ${x.Case_ID||''}`;document.getElementById('caseDetailSub').textContent=x.Patient_Name||'';const pairs=[['HN',x.HN],['VN',x.VN],['ชื่อผู้ป่วย',x.Patient_Name],['วันที่รับบริการ',thDate(x.Service_Date)],['สิทธิ',x.Coverage],['สถานะ',x.Case_Status],['Case Number',x.SSO_Case_No],['Protocol',x.Protocol_Code],['Work Order No.',x.Work_Order_No],['ยา Chemo',x.Chemo_Drug],['ผู้รับผิดชอบ',x.Assigned_To],['ผลล่าสุด',x.Latest_Result],['หมายเหตุ',x.Remark]];document.getElementById('caseDetailGrid').innerHTML=pairs.map(([k,v])=>`<div class="detail-item"><label>${escapeHtml(k)}</label><strong>${escapeHtml(v||'-')}</strong></div>`).join('');const attempts=data.attempts||[];document.getElementById('caseAttemptBody').innerHTML=attempts.length?attempts.map(a=>`<tr><td>${escapeHtml(a.Attempt_No||'-')}</td><td>${escapeHtml(a.Work_Order_No||x.Work_Order_No||'-')}</td><td>${escapeHtml(a.Period_Key||'-')}</td><td>${escapeHtml(a.Generated_File_Name||a.Submission_File_Name||'-')}</td><td>${escapeHtml(a.Reply_File_Name||'-')}<div class="subline">${escapeHtml(a.Reply_BIL_Name||'')}</div></td><td>${escapeHtml(a.Result_Code||a.Submission_Status||'-')}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-row">ยังไม่มีประวัติการส่งไฟล์</td></tr>`;document.getElementById('caseTimeline').innerHTML=(data.timeline||[]).length?(data.timeline||[]).map(t=>`<div class="timeline-item"><b>${escapeHtml(t.Detail||t.Action_Type||'-')}</b><small>${thDateTime(t.Action_Date||t.Created_At)} · ${escapeHtml(t.Performed_By||'-')}</small></div>`).join(''):'<div class="meta">ยังไม่มี Timeline</div>';const m=document.getElementById('caseDetailModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}catch(err){toast('เปิดรายละเอียดไม่สำเร็จ',err.message,'error')}}
 function exportRegistryCsv(){const headers=['Case_ID','HN','VN','CID','Patient_Name','Service_Date','Coverage','Case_Status','SSO_Case_No','Protocol_Code','Work_Order_No','Assigned_To','Latest_Result'];const rows=registryState.filtered.map(x=>headers.map(h=>x[h]||''));const csv='\uFEFF'+[headers,...rows].map(r=>r.map(csvCell).join(',')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`SSOCAC_Registry_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegistry);document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseDetailClose')?.addEventListener('click',()=>document.getElementById('caseDetailModal').classList.remove('show'));
+document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegistry);document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registryStatusFilter')?.addEventListener('change',applyRegistryFilter);document.querySelectorAll('[data-registry-status]').forEach(card=>card.addEventListener('click',()=>{const select=document.getElementById('registryStatusFilter');if(select)select.value=card.dataset.registryStatus||'ALL';applyRegistryFilter()}));document.getElementById('registryResetFilterBtn')?.addEventListener('click',()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter'),sort=document.getElementById('registrySort');if(search)search.value='';if(status)status.value='ALL';if(sort)sort.value='newest';applyRegistryFilter()});document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseDetailClose')?.addEventListener('click',()=>document.getElementById('caseDetailModal').classList.remove('show'));
 
 
 
