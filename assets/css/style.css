@@ -120,7 +120,7 @@ All Rights Reserved.
 /* V3.4.2 Reply Knowledge integration */
 .reply-knowledge-cell{min-width:260px;max-width:360px}.reply-knowledge-item{display:flex;flex-direction:column;gap:2px;padding:6px 8px;margin:3px 0;border-radius:9px;font-size:12px;line-height:1.35}.reply-knowledge-item b{font-size:12px}.reply-knowledge-item small{opacity:.85}.reply-knowledge-item.known{background:#e9f8f1;border:1px solid #c7eadb}.reply-knowledge-item.unknown{background:#fff4df;border:1px solid #f3ddb4}.knowledge-none{font-size:12px;color:#6d7d79}.reply-import-summary{flex-wrap:wrap}
 
-/* V3.4.7 Pastel status colors */
+/* V3.4.8 Pastel status colors */
 .stat-card{position:relative;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease}.stat-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(48,78,73,.10)}
 .stat-card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:6px;border-radius:16px 0 0 16px}
 .stat-card.all{background:#f3f7ff;border-color:#d8e4fb}.stat-card.all:before{background:#9eb9ee}.stat-card.all strong{color:#4f6fae}
@@ -131,5 +131,5 @@ All Rights Reserved.
 .stat-card.fix{background:#fff0f2;border-color:#f2ccd2}.stat-card.fix:before{background:#e99aa7}.stat-card.fix strong{color:#a54756}
 .status-pill.preparing{background:#fff1cf;color:#8f6419}.status-pill.review{background:#e8f3ff;color:#356b9b}.status-pill.ready{background:#dcf6ef;color:#247567}.status-pill.sent{background:#eee8ff;color:#6855a1}.status-pill.passed{background:#dff5e5;color:#2e7a46}.status-pill.fix{background:#ffe2e7;color:#a33e4d}.status-pill.neutral{background:#edf2f1;color:#5e706c}
 
-/* V3.4.7 workflow */
+/* V3.4.8 workflow */
 .compact-ready{padding:7px 10px;font-size:12px;white-space:nowrap}
