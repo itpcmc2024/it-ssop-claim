@@ -1,16 +1,10 @@
-# SSOP Toolkit V3.2.2
+# it-ssop-claim V3.3.0
 
-แก้ ZIP Reader ให้แยกข้อมูลตาม XML section และแสดงชื่อฟิลด์เป็นคอลัมน์เหมือน V2.3.4
+เพิ่ม ZIP Editor สำหรับ Cancer Care ภายในหน้าทะเบียนงาน
 
-- BILLTRAN / BillItems
-- Dispensing / DispensedItems
-- OPServices / OPDx
-- มีแท็บส่วนข้อมูลภายในแต่ละไฟล์
-- เน้นคอลัมน์สำคัญของ SSOCAC
-- อ่านทั้งหมดใน Browser
-
-
-## V3.2.2
-- เพิ่ม Work Order No. ในทะเบียน ค้นหา รายละเอียด และ CSV
-- แก้ชื่อฟิลด์ Dispensing และ DispensedItems ครบตาม SSOP 0.93
-- เปลี่ยนปุ่ม ZIP รายแถวเป็น แก้ไข ZIP
+- แก้ไขข้อมูลในตารางแบบคอลัมน์
+- ตรวจเงื่อนไข SSOCAC
+- คืนค่าไฟล์ที่กำลังแก้ไข
+- สร้าง Checksum/MD5 ใหม่ให้ไฟล์ที่แก้ไข
+- สร้าง ZIP กลับโดยใช้ชื่อ ZIP เดิม
+- ประมวลผลใน Browser ไม่อัปโหลดข้อมูลผู้ป่วย
