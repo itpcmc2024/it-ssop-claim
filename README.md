@@ -1,10 +1,11 @@
-# it-ssop-claim V3.4.4
+# it-ssop-claim V3.4.5
 
-ปรับปรุงจาก V3.4.3:
+แก้การเชื่อมต่อ Google Apps Script จาก GitHub Pages โดยเปลี่ยน API transport จาก `fetch()` เป็น hidden iframe + `postMessage` เพื่อหลีกเลี่ยง CORS พร้อมใส่ Spreadsheet ID, Drive Folder ID และ Web App URL ให้แล้ว และปรับเลขเวอร์ชันที่แสดง/ไฟล์ cache เป็น V3.4.5 ทั้งหมด
 
-- แก้การเปิด ZIP ครั้งแรกแล้วแจ้งว่าไม่สำเร็จ โดยแยกการอ่าน ZIP ออกจากการอัปเดตสถานะ API
-- เมื่อเปิด ZIP จากแถวผู้ป่วย หรือสร้าง ZIP สำเร็จ สถานะเป็น `รอตรวจสอบ`
-- การ์ดและป้ายสถานะแสดงสีพาสเทลตาม Workflow
-- ตรวจ `ClaimCat = OPR` เฉพาะรายการยาที่ตรงกับ `Case_SSOCAC.Chemo_Drug` ของผู้ป่วย
-- รายการอื่นที่ไม่ตรงกับยาในทะเบียนจะไม่ถูกแจ้งเตือน OPR
-- คงระบบป้องกัน Work Order No. และประวัติไฟล์ทั้งหมด
+## ติดตั้ง
+1. แทนไฟล์ GitHub ทั้งชุด
+2. แทน `Code.gs`
+3. Deploy > Manage deployments > Edit > New version > Deploy
+4. เปิดเว็บแล้วกด Ctrl+F5
+
+ไม่ต้องแก้ `config.js`, `SPREADSHEET_ID` หรือ `DOCUMENT_FOLDER_ID` เพิ่ม
