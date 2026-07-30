@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.4.2
+SSOP Toolkit Professional Edition V3.4.3
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -534,6 +534,17 @@ function parseZipSsopSections(text){
  return sections;
 }
 function sectionHeaders(section,rows){const width=Math.max(0,...rows.map(r=>r.length));const known=labels[section]||[];return Array.from({length:width},(_,i)=>known[i]||`คอลัมน์ ${i+1}`)}
+async function markZipLoadedForCase(fileName){
+ if(!zipReaderState.caseItem)return null;
+ const result=await apiRequest('markCaseZipLoaded',{Case_ID:zipReaderState.caseItem.Case_ID,Source_ZIP_Name:fileName||'',updatedBy:'ZIP EDITOR'});
+ if(result?.changed){
+  zipReaderState.caseItem.Case_Status='รอตรวจสอบ';
+  const local=registryState.items.find(x=>x.Case_ID===zipReaderState.caseItem.Case_ID);if(local)local.Case_Status='รอตรวจสอบ';
+  applyRegistryFilters();renderRegistryStats();
+  toast('อัปโหลด ZIP แล้ว','เปลี่ยนสถานะเป็น “รอตรวจสอบ” อัตโนมัติ','success',4500);
+ }
+ return result;
+}
 async function handleZipFile(file){if(!file)return;if(!window.JSZip){toast('เปิด ZIP ไม่ได้','ไม่พบไลบรารี JSZip กรุณาตรวจสอบอินเทอร์เน็ต','error');return}if(!/\.zip$/i.test(file.name)){toast('ชนิดไฟล์ไม่ถูกต้อง','กรุณาเลือกไฟล์ .zip','warning');return}try{
  const summary=document.getElementById('zipSummary');document.getElementById('zipChooseStep').classList.add('hidden');document.getElementById('zipWorkspace').classList.remove('hidden');summary.innerHTML='<div class="zip-loading">กำลังอ่านและแยกโครงสร้าง SSOP...</div>';
  const zip=await JSZip.loadAsync(file);const rawEntries=Object.values(zip.files).filter(e=>!e.dir);const entries=[];const logicalPresent=new Set();
@@ -541,6 +552,7 @@ async function handleZipFile(file){if(!file)return;if(!window.JSZip){toast('เ�
   entries.push({name:e.name,size:e._data?.uncompressedSize||0,type:classifySsopFile(e.name),logicalSections,entry:e,text:null,originalText:null,sections:null,modified:false});
  }
  zipReaderState.zip=zip;zipReaderState.file=file;zipReaderState.entries=entries;
+ if(zipReaderState.caseItem){await markZipLoadedForCase(file.name);}
  const expected=['BILLTRAN','BillItems','Dispensing','DispensedItems','OPServices','OPDx'];const missing=expected.filter(x=>!logicalPresent.has(x));
  summary.innerHTML=`<div class="summary-card"><span>ชื่อ ZIP</span><strong>${escapeHtml(file.name)}</strong></div><div class="summary-card"><span>จำนวนไฟล์</span><strong>${entries.length}</strong></div><div class="summary-card"><span>ส่วนข้อมูลที่อ่านได้</span><strong>${logicalPresent.size}</strong></div><div class="summary-card ${missing.length?'warn':''}"><span>ส่วนข้อมูลที่ยังไม่พบ</span><strong>${missing.length?escapeHtml(missing.join(', ')):'พบส่วนข้อมูลมาตรฐานครบ'}</strong></div>`;
  renderZipFileList();if(entries.length)await selectZipEntry(entries[0].name);
