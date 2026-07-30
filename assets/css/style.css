@@ -116,3 +116,6 @@ All Rights Reserved.
 /* V3.4.1 */
 #caseWorkOrder[readonly]{background:#f3f7f6;color:#355d57;cursor:not-allowed}
 .attempt-table{min-width:900px}.attempt-table th,.attempt-table td{font-size:12px;vertical-align:top}
+
+/* V3.4.2 Reply Knowledge integration */
+.reply-knowledge-cell{min-width:260px;max-width:360px}.reply-knowledge-item{display:flex;flex-direction:column;gap:2px;padding:6px 8px;margin:3px 0;border-radius:9px;font-size:12px;line-height:1.35}.reply-knowledge-item b{font-size:12px}.reply-knowledge-item small{opacity:.85}.reply-knowledge-item.known{background:#e9f8f1;border:1px solid #c7eadb}.reply-knowledge-item.unknown{background:#fff4df;border:1px solid #f3ddb4}.knowledge-none{font-size:12px;color:#6d7d79}.reply-import-summary{flex-wrap:wrap}
