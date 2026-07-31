@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.7.2
+SSOP Toolkit Professional Edition V3.7.3
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -833,7 +833,7 @@ function parseSocdBilRows(text,sourceName,meta){
     const fields=parts[1].trim().split(',').map(x=>x.trim());if(fields.length<10)continue;
     const stat=(fields[0]||'').split(/\s+/)[0].toUpperCase();if(!['A','C'].includes(stat))continue;
     const tail=(parts.slice(2).join('|')||'').replace(/[,\s]+$/,'').trim();
-    const codes=[...new Set((tail.match(/\b[A-Z]\d{2,4}\b/g)||[]))];
+    const codes=[...new Set((tail.match(/\b[A-Z]{1,4}\d{1,4}\b/gi)||[]).map(code=>code.toUpperCase()))];
     rows.push({Result_Code:stat,Station:(fields[0]||'').replace(/^\w\s*/,'' ).trim()||fields[1]||meta.Station||'',Line_No:fields[1]||'',Hcode:fields[2]||'',Hmain:fields[3]||'',AuthCode:fields[4]||'',Service_Date:fields[5]||'',InvNo:fields[6]||'',CID:normalizeDigits(fields[7]||''),Benefit_Package:fields[8]||'',Amount:fields[9]||'',Claim_Amt:fields[10]||'',Error_Codes:codes.join(','),Source_Entry:sourceName,Period_Key:meta.Period_Key||'',Reply_No:meta.Reply_No||'',Reply_Date:meta.Reply_Date||''});
   }
   return rows;
