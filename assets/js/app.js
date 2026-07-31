@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.5.1
+SSOP Toolkit Professional Edition V3.6.0
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -562,6 +562,20 @@ async function openCaseDetail(id){
   const m=document.getElementById('caseDetailModal');m.classList.add('show');m.setAttribute('aria-hidden','false');
  }catch(err){toast('เปิดรายละเอียดไม่สำเร็จ',err.message,'error')}
 }
+
+function exportRegistryCsv(){
+ const rows=registryState.filtered||[];
+ if(!rows.length){toast('ไม่มีข้อมูล','ไม่พบรายการตามตัวกรองที่เลือก','warning');return}
+ const headers=['เลขงาน','ครั้งที่','HN','VN','CID','ชื่อผู้ป่วย','วันที่รับบริการ','Case Number','Protocol','Work Order No.','สถานะ','ผลล่าสุด','Error Code','ความหมาย Error','สาเหตุ','แนวทางแก้','ผู้รับผิดชอบ'];
+ const data=rows.map(x=>[
+  x.Case_ID||'',x.Current_Attempt_No||'',x.HN||'',x.VN||'',x.CID||'',x.Patient_Name||'',thDate(x.Service_Date),x.SSO_Case_No||'',x.Protocol_Code||'',x.Work_Order_No||'',x.Case_Status||'',x.Latest_Result||'',x.Latest_Error_Code||'',x.Latest_Error_Description||'',x.Latest_Error_Cause||'',x.Latest_Error_Solution||'',x.Assigned_To||''
+ ]);
+ const csv='\uFEFF'+[headers,...data].map(r=>r.map(csvCell).join(',')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);a.download=`SSOCAC_Registry_Filtered_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ toast('ส่งออกแล้ว',`ส่งออก ${rows.length} รายการตามผลการค้นหาและตัวกรองปัจจุบัน`,'success');
+}
+
 document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegistry);document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registryStatusFilter')?.addEventListener('change',applyRegistryFilter);document.querySelectorAll('[data-registry-status]').forEach(card=>card.addEventListener('click',()=>{const select=document.getElementById('registryStatusFilter');if(select)select.value=card.dataset.registryStatus||'ALL';applyRegistryFilter()}));document.getElementById('registryResetFilterBtn')?.addEventListener('click',()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter'),sort=document.getElementById('registrySort');if(search)search.value='';if(status)status.value='ALL';if(sort)sort.value='newest';applyRegistryFilter()});document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseDetailClose')?.addEventListener('click',()=>document.getElementById('caseDetailModal').classList.remove('show'));
 
 
