@@ -162,3 +162,8 @@ body.modal-open{overflow:hidden}
 .case-knowledge-modal textarea{resize:vertical;min-height:72px}
 .case-knowledge-modal .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
 #caseDetailClose,#caseKnowledgeClose{position:relative;z-index:5;cursor:pointer;pointer-events:auto}
+
+/* V3.6.2 Production Hotfix */
+#registryStatusFilter,#registrySort,#registryPageSize{appearance:auto!important;-webkit-appearance:menulist!important;-moz-appearance:menulist!important;padding-right:30px!important;background-color:#fff!important;cursor:pointer}
+.registry-c-col{white-space:normal!important;min-width:110px}.registry-error-desc{min-width:230px;max-width:360px;line-height:1.45}.registry-toolbar select{background-image:none!important}
+#importExcelBtn,#openZipReaderBtn,#openReplyImportBtn,#caseDetailClose,#caseKnowledgeClose,#zipReaderClose,#excelImportClose,#replyImportClose{position:relative;z-index:3;pointer-events:auto!important;cursor:pointer}
