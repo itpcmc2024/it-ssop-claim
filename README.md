@@ -125,7 +125,7 @@
 - เพิ่ม cache-busting เป็น v=3.7.5 เพื่อให้ GitHub Pages โหลด CSS/JS ใหม่ทันที
 
 
-## V3.8.0 — Authentication & Multi-user Baseline
+## V3.8.1 — Authentication & Multi-user Baseline
 - Login ด้วย User ID/Email และรหัสผ่าน
 - Role: ADMIN / USER
 - ADMIN จัดการผู้ใช้และ System_Config ผ่านการ์ด “จัดการระบบ”
@@ -139,3 +139,10 @@
 2. Run `setupAllSheets()` หนึ่งครั้งเพื่อเพิ่มคอลัมน์ Password_Hash/Password_Salt โดยไม่ลบข้อมูลเดิม
 3. Run `setupInitialAdmin()` เพื่อสร้าง Admin คนแรก
 4. Deploy Apps Script เป็นเวอร์ชันใหม่ แล้วอัปโหลดไฟล์ GitHub Pages
+
+
+## V3.8.1 Login API Hotfix
+- Uses the new Apps Script deployment URL.
+- Accepts JSON, form parameters, and URL-encoded POST bodies.
+- Adds public `ping` diagnostic action.
+- Unknown-action responses now include backend version and received action.
