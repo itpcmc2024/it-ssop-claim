@@ -1,12 +1,12 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.6.3
+SSOP Toolkit Professional Edition V3.6.4
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
 */
 const state={file:null,fileName:'',originalText:'',doc:null,activeSection:'',originalDoc:null,selected:new Set()};
-window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),900);loadDocumentLinks();});
+window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),900);loadDocumentLinks();const page=new URLSearchParams(location.search).get('page');if(page==='knowledge'){showPage('knowledgePage');loadKnowledge('','ALL');}else if(page==='editor'){showPage('cancerPage');}});
 const aboutModal=document.getElementById('aboutModal');
 document.querySelectorAll('[data-open-about]').forEach(btn=>btn.addEventListener('click',()=>{aboutModal.classList.add('show');aboutModal.setAttribute('aria-hidden','false')}));
 document.getElementById('aboutClose').addEventListener('click',()=>{aboutModal.classList.remove('show');aboutModal.setAttribute('aria-hidden','true')});
@@ -25,6 +25,7 @@ function goHome(){
 function openModule(name){
  if(name==='cancer'){showPage('registryPage');loadRegistry();return;}
  if(name==='knowledge'){showPage('knowledgePage');loadKnowledge('','ALL');return;}
+ if(name==='editor'){showPage('cancerPage');return;}
  const names={main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test'};
  showDialog('เตรียมพัฒนา',`${names[name]||'โมดูลนี้'} ถูกเตรียมปุ่มและโครงสร้างไว้แล้ว
 จะเพิ่ม Parser และกฎตรวจสอบเฉพาะงานในเวอร์ชันถัดไป`,'info');
@@ -435,7 +436,7 @@ document.getElementById('announcementBtn')?.addEventListener('click',()=>openDoc
 document.getElementById('registryAnnouncementBtn')?.addEventListener('click',()=>openDocument('ANNOUNCEMENT'));
 document.getElementById('protocolBtn')?.addEventListener('click',()=>openDocument('PROTOCOL'));
 document.getElementById('registryProtocolBtn')?.addEventListener('click',()=>openDocument('PROTOCOL'));
-document.getElementById('registryKnowledgeBtn')?.addEventListener('click',()=>{showPage('knowledgePage');loadKnowledge('','SSOCAC');});
+document.getElementById('registryKnowledgeBtn')?.addEventListener('click',()=>{const w=window.open(`${location.origin}${location.pathname}?page=knowledge`,'ssopKnowledgeCenter');if(!w){showPage('knowledgePage');loadKnowledge('','SSOCAC');}});
 document.querySelectorAll('[data-document-type]').forEach(btn=>btn.addEventListener('click',()=>openDocumentUploadModal(btn.dataset.documentType)));
 document.getElementById('documentUploadConfirm')?.addEventListener('click',uploadDocument);
 document.getElementById('documentUploadCancel')?.addEventListener('click',closeDocumentUploadModal);
@@ -586,6 +587,9 @@ function openCaseKnowledgeModal(code,caseId,fileDescription='',existing=null){
  document.getElementById('caseKnowledgeRelatedField').value=item?.RelatedField||'Error Code';
  document.getElementById('caseKnowledgeUpdatedBy').value=item?.UpdatedBy||'Kimhan';
  document.getElementById('caseKnowledgeWritePin').value='';
+ modal.dataset.mode=isEdit?'edit':'create';
+ const pinField=document.getElementById('caseKnowledgePinField');
+ if(pinField)pinField.classList.toggle('hidden',!isEdit);
  modal.classList.add('show');modal.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
  setTimeout(()=>document.getElementById(item?.Description?'caseKnowledgeCause':'caseKnowledgeDescription')?.focus(),80);
 }
@@ -599,11 +603,12 @@ async function saveCaseKnowledge(){
  const code=get('caseKnowledgeCode').toUpperCase(),description=get('caseKnowledgeDescription'),cause=get('caseKnowledgeCause'),solution=get('caseKnowledgeSolution'),relatedFile=get('caseKnowledgeRelatedFile'),relatedField=get('caseKnowledgeRelatedField'),updatedBy=get('caseKnowledgeUpdatedBy'),writePin=get('caseKnowledgeWritePin'),caseId=get('caseKnowledgeCaseId');
  if(!description){toast('ข้อมูลไม่ครบ','กรุณากรอกความหมายของ Error Code','warning');return;}
  if(!updatedBy){toast('ข้อมูลไม่ครบ','กรุณากรอกชื่อผู้บันทึก','warning');return;}
- if(!writePin){toast('กรอก PIN','กรุณากรอก PIN สำหรับบันทึก Knowledge Base','warning');return;}
+ const isEdit=document.getElementById('caseKnowledgeModal')?.dataset.mode==='edit';
+ if(isEdit&&!writePin){toast('กรอก PIN','กรุณากรอก PIN สำหรับแก้ไข Knowledge Base','warning');return;}
  const btn=document.getElementById('caseKnowledgeSave');btn.disabled=true;btn.textContent='กำลังบันทึก...';
  try{
-  await apiRequest('upsertKnowledge',{items:[{Module:'SSOCAC',ErrorCode:code,Description:description,Cause:cause,Solution:solution,RelatedFile:relatedFile,RelatedField:relatedField,Tips:'',UpdatedBy:updatedBy,Active:true}],writePin});
-  closeCaseKnowledgeModal();toast('บันทึกสำเร็จ',`${code} ถูกเพิ่มใน Knowledge Base แล้ว`,'success');
+  await apiRequest('upsertKnowledge',{items:[{Module:'SSOCAC',ErrorCode:code,Description:description,Cause:cause,Solution:solution,RelatedFile:relatedFile,RelatedField:relatedField,Tips:'',UpdatedBy:updatedBy,Active:true}],writePin,createWithoutPin:!isEdit});
+  closeCaseKnowledgeModal();toast('บันทึกสำเร็จ',`${code} ถูกบันทึกใน Knowledge Base แล้ว`,'success');
   if(caseId)await openCaseDetail(caseId);if(document.getElementById('replyImportModal')?.classList.contains('show')){await hydrateReplyImportKnowledge();renderReplyImport();}
  }catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500)}finally{btn.disabled=false;btn.textContent='บันทึก Knowledge';}
 }
@@ -673,7 +678,7 @@ function renderZipFileList(){const wrap=document.getElementById('zipFileList');w
 async function selectZipEntry(name){const item=zipReaderState.entries.find(e=>e.name===name);if(!item)return;zipReaderState.selected=name;renderZipFileList();document.getElementById('zipPreviewTitle').textContent=baseName(name);document.getElementById('zipPreviewMeta').textContent=`${item.type} · กำลังอ่านข้อมูล...`;document.getElementById('zipPreviewBody').innerHTML='<tr><td class="empty-row">กำลังอ่านไฟล์...</td></tr>';try{const buf=await item.entry.async('arraybuffer');const text=item.text??decodeSsopBuffer(buf);if(item.text===null){item.text=text;item.originalText=text}const sections=item.sections??parseZipSsopSections(text);item.sections=sections;zipReaderState.sections=sections;zipReaderState.dirty=!!item.modified;updateZipEditStatus();const names=Object.keys(sections);const search=document.getElementById('zipTableSearch');search.disabled=false;search.value='';if(names.length){zipReaderState.activeSection=names[0];renderZipSectionTabs();selectZipSection(names[0])}else{const parsed=parseSsopText(text);zipReaderState.activeSection='';zipReaderState.headers=parsed.headers;zipReaderState.rows=parsed.rows;renderZipSectionTabs();document.getElementById('zipPreviewMeta').textContent=`${item.type} · ${parsed.rows.length.toLocaleString('th-TH')} แถว · ${parsed.headers.length} คอลัมน์`;renderZipPreview()}}catch(err){document.getElementById('zipPreviewBody').innerHTML=`<tr><td class="empty-row">อ่านไฟล์ไม่ได้: ${escapeHtml(err.message)}</td></tr>`}}
 function renderZipSectionTabs(){const wrap=document.getElementById('zipSectionTabs');if(!wrap)return;const names=Object.keys(zipReaderState.sections||{});wrap.innerHTML=names.map(name=>`<button class="zip-section-tab ${zipReaderState.activeSection===name?'active':''}" data-zip-section="${escapeHtml(name)}">${escapeHtml(name)} <span>${zipReaderState.sections[name].length}</span></button>`).join('');wrap.querySelectorAll('[data-zip-section]').forEach(b=>b.onclick=()=>selectZipSection(b.dataset.zipSection))}
 function selectZipSection(section){zipReaderState.activeSection=section;const rows=zipReaderState.sections[section]||[];zipReaderState.rows=rows;zipReaderState.headers=sectionHeaders(section,rows);renderZipSectionTabs();const info=sectionInfo[section];document.getElementById('zipPreviewMeta').textContent=`${info?.title||section} · ${rows.length.toLocaleString('th-TH')} แถว · ${zipReaderState.headers.length} คอลัมน์`;renderZipPreview()}
-function renderZipPreview(){const q=(document.getElementById('zipTableSearch')?.value||'').trim().toLowerCase();const all=zipReaderState.rows;const indexed=all.map((r,i)=>({r,i}));const filtered=q?indexed.filter(x=>x.r.some(v=>String(v||'').toLowerCase().includes(q))):indexed;const rows=filtered.slice(0,500);const importantCols=(sectionInfo[zipReaderState.activeSection]?.importantCols)||[];document.getElementById('zipPreviewHead').innerHTML=`<tr><th>#</th>${zipReaderState.headers.map((h,i)=>`<th class="${importantCols.includes(i)?'important-head':''}">${escapeHtml(h)}${importantCols.includes(i)?' ★':''}</th>`).join('')}</tr>`;const body=document.getElementById('zipPreviewBody');body.innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td>${zipReaderState.headers.map((_,c)=>`<td contenteditable="true" data-zip-row="${x.i}" data-zip-col="${c}" class="zip-edit-cell ${importantCols.includes(c)?'important-cell':''}" title="${escapeAttr(x.r[c]??'')}">${escapeHtml(x.r[c]??'')}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${zipReaderState.headers.length+1}" class="empty-row">ไม่พบข้อมูล</td></tr>`;body.querySelectorAll('[data-zip-row]').forEach(td=>td.addEventListener('input',()=>{const r=+td.dataset.zipRow,c=+td.dataset.zipCol;zipReaderState.rows[r][c]=td.textContent;const item=currentZipItem();if(item){item.modified=true;item.sections=zipReaderState.sections}zipReaderState.dirty=true;td.classList.add('changed');updateZipEditStatus()}));if(filtered.length>500){const meta=document.getElementById('zipPreviewMeta');meta.textContent+=` · แสดง 500 จาก ${filtered.length.toLocaleString('th-TH')} แถว`}}
+function renderZipPreview(){const q=(document.getElementById('zipTableSearch')?.value||'').trim().toLowerCase();const all=zipReaderState.rows;const indexed=all.map((r,i)=>({r,i}));const filtered=q?indexed.filter(x=>x.r.some(v=>String(v||'').toLowerCase().includes(q))):indexed;const rows=filtered.slice(0,500);const importantCols=(sectionInfo[zipReaderState.activeSection]?.importantCols)||[];document.getElementById('zipPreviewHead').innerHTML=`<tr><th>#</th>${zipReaderState.headers.map((h,i)=>{const meta=(fieldMeta[zipReaderState.activeSection]||[])[i];const desc=meta?.[1]||'ยังไม่มีคำอธิบายสำหรับหัวข้อนี้';const example=meta?getConditionExample(zipReaderState.activeSection,meta):'';return `<th class="field-tip ${importantCols.includes(i)?'important-head':''}" data-tip-title="${escapeAttr(h)}" data-tip-desc="${escapeAttr(desc)}" data-tip-example="${escapeAttr(example)}"><span class="head-wrap">${escapeHtml(h)}${importantCols.includes(i)?' ★':''}<span class="tip-dot">i</span></span></th>`}).join('')}</tr>`;bindTooltips();const body=document.getElementById('zipPreviewBody');body.innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td>${zipReaderState.headers.map((_,c)=>`<td contenteditable="true" data-zip-row="${x.i}" data-zip-col="${c}" class="zip-edit-cell ${importantCols.includes(c)?'important-cell':''}" title="${escapeAttr(x.r[c]??'')}">${escapeHtml(x.r[c]??'')}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${zipReaderState.headers.length+1}" class="empty-row">ไม่พบข้อมูล</td></tr>`;body.querySelectorAll('[data-zip-row]').forEach(td=>td.addEventListener('input',()=>{const r=+td.dataset.zipRow,c=+td.dataset.zipCol;zipReaderState.rows[r][c]=td.textContent;const item=currentZipItem();if(item){item.modified=true;item.sections=zipReaderState.sections}zipReaderState.dirty=true;td.classList.add('changed');updateZipEditStatus()}));if(filtered.length>500){const meta=document.getElementById('zipPreviewMeta');meta.textContent+=` · แสดง 500 จาก ${filtered.length.toLocaleString('th-TH')} แถว`}}
 function currentZipItem(){return zipReaderState.entries.find(e=>e.name===zipReaderState.selected)||null}
 function updateZipEditStatus(text){const el=document.getElementById('zipEditStatus');if(!el)return;el.textContent=text||(zipReaderState.dirty?'มีข้อมูลแก้ไข':'พร้อมตรวจสอบ');el.className='status '+(zipReaderState.dirty?'warn':'ok')}
 function rebuildZipEntry(item){let text=item.originalText||item.text||'';for(const [sec,rows] of Object.entries(item.sections||{})){const body=rows.map(r=>r.join('|')).join('\r\n');const re=new RegExp(`(<${sec}>)[\s\S]*?(</${sec}>)`);text=text.replace(re,`$1\r\n${body}\r\n$2`)}text=text.replace(/<\?EndNote\s+CheckSum="[^"]*"\?>\s*$/i,'').replace(/<\?EndNote\s+Checksum="[^"]*"\?>\s*$/i,'');const ending=text.includes('\r\n')?'\r\n':'\n';text=text.replace(/\s+$/,'')+ending;const sum=md5(cp874Bytes(text));return text+`<?EndNote Checksum="${sum}"?>`+ending}
