@@ -329,18 +329,21 @@ body.modal-open{overflow:hidden}
 
 
 /* ======================================================
-   V3.7.4 Registry UX Enhancement
+   V3.7.5 Registry UX Hotfix
+   - Browser vertical scroll only
+   - Dedicated horizontal scroll for wide registry table
 ====================================================== */
-.registry-pagination-top{margin:4px 0 10px;padding:8px 10px;background:#f7fbfa;border:1px solid #e0ece9;border-radius:11px;position:sticky;top:0;z-index:4}
-.registry-table-wrap{max-height:none!important;overflow-x:auto!important;overflow-y:visible!important}
-.registry-table-wrap .registry-table{width:max-content;min-width:100%}
-.registry-table-wrap thead th{position:sticky;top:0;z-index:3}
+.registry-pagination-top{margin:4px 0 10px;padding:8px 10px;background:#f7fbfa;border:1px solid #e0ece9;border-radius:11px}
+.registry-table-wrap{max-height:none!important;height:auto!important;overflow:visible!important;border:1px solid var(--line);border-radius:14px}
+.registry-horizontal-scroll{display:block;width:100%;max-height:none!important;height:auto!important;overflow-x:auto!important;overflow-y:hidden!important;border-radius:14px;scrollbar-gutter:stable}
+.registry-horizontal-scroll .registry-table{width:max-content;min-width:100%;margin:0}
+.registry-horizontal-scroll thead th{position:sticky;top:0;z-index:3}
 .registry-c-col{vertical-align:top}
-.error-code-tags{display:flex;gap:5px;flex-wrap:wrap;min-width:128px}
-.error-code-tag{border:1px solid #f0b9be;background:#fff0f1;color:#a72330;border-radius:999px;padding:4px 7px;font-weight:800;font-size:11px;line-height:1.1;cursor:pointer}
-.error-code-tag:hover,.error-code-tag:focus{background:#ffdfe2;border-color:#dc7781;outline:none}
-.registry-error-desc{min-width:330px;max-width:470px;white-space:normal!important;line-height:1.45}
-.registry-error-line{display:block;padding:3px 0;border-bottom:1px dashed #e7efed;overflow-wrap:anywhere}
+.error-code-tags{display:flex;gap:5px;flex-wrap:wrap;min-width:145px;align-content:flex-start}
+.error-code-tag{border:1px solid #f0b9be;background:#fff0f1;color:#a72330;border-radius:999px;padding:4px 7px;font-weight:800;font-size:11px;line-height:1.1;cursor:pointer;white-space:nowrap}
+.error-code-tag:hover,.error-code-tag:focus{background:#ffdfe2;border-color:#dc7781;outline:2px solid rgba(220,119,129,.18)}
+.registry-error-desc{min-width:360px;max-width:520px;white-space:normal!important;line-height:1.5}
+.registry-error-line{display:block;padding:4px 0;border-bottom:1px dashed #e2ece9;overflow-wrap:anywhere;word-break:break-word}
 .registry-error-line:last-child{border-bottom:0}
-.error-separator{color:#b9c7c4;margin-left:3px}
-@media(max-width:900px){.registry-pagination-top{position:static}.registry-error-desc{min-width:280px;max-width:360px}}
+.error-separator{color:#9eb0ac;margin-left:4px;font-weight:700}
+@media(max-width:900px){.registry-error-desc{min-width:300px;max-width:390px}.registry-pagination-top{position:static}}
