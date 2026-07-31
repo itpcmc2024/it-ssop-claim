@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.6.4
+SSOP Toolkit Professional Edition V3.6.5
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -31,7 +31,7 @@ function openModule(name){
 จะเพิ่ม Parser และกฎตรวจสอบเฉพาะงานในเวอร์ชันถัดไป`,'info');
 }
 document.querySelectorAll('[data-module]').forEach(b=>b.addEventListener('click',()=>openModule(b.dataset.module)));
-document.getElementById('backHomeBtn').onclick=()=>showPage('registryPage');
+document.getElementById('backHomeBtn').onclick=goHome;
 document.getElementById('registryBackHomeBtn')?.addEventListener('click',goHome);
 document.getElementById('openCancerEditorBtn')?.addEventListener('click',()=>showPage('cancerPage'));
 document.getElementById('knowledgeBackHomeBtn').onclick=goHome;
@@ -143,11 +143,19 @@ document.getElementById('previewBtn').onclick=validate;document.getElementById('
 
 function bindTooltips(){
  const tip=document.getElementById('fieldTooltip');
+ if(!tip)return;
+ if(tip.parentElement!==document.body)document.body.appendChild(tip);
  document.querySelectorAll('.field-tip').forEach(el=>{
-  el.onmouseenter=e=>{const title=el.dataset.tipTitle,desc=el.dataset.tipDesc,example=el.dataset.tipExample;tip.innerHTML=`<b>${escapeHtml(title)}</b><div>${escapeHtml(desc)}</div>${example?`<div class="tip-example">ค่าที่แนะนำ: ${escapeHtml(example)}</div>`:''}`;tip.classList.add('show');positionTip(e)};
-  el.onmousemove=positionTip;el.onmouseleave=()=>tip.classList.remove('show');
+  const title=el.dataset.tipTitle||el.textContent.trim();
+  const desc=el.dataset.tipDesc||'ยังไม่มีคำอธิบายสำหรับหัวข้อนี้';
+  const example=el.dataset.tipExample||'';
+  el.title=[title,desc,example?`ค่าที่แนะนำ: ${example}`:''].filter(Boolean).join(' — ');
+  const show=e=>{tip.innerHTML=`<b>${escapeHtml(title)}</b><div>${escapeHtml(desc)}</div>${example?`<div class="tip-example">ค่าที่แนะนำ: ${escapeHtml(example)}</div>`:''}`;tip.classList.add('show');positionTip(e)};
+  el.onmouseenter=show;el.onmousemove=positionTip;el.onmouseleave=()=>tip.classList.remove('show');
+  el.onfocus=()=>{const r=el.getBoundingClientRect();show({clientX:r.left+r.width/2,clientY:r.bottom})};el.onblur=()=>tip.classList.remove('show');
+  if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0');
  });
- function positionTip(e){const pad=14,w=340;let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-pad)x=e.clientX-w-14;if(y+150>innerHeight-pad)y=e.clientY-150;tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px'}
+ function positionTip(e){const pad=14,w=380;let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-pad)x=e.clientX-w-14;if(y+180>innerHeight-pad)y=e.clientY-180;tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px'}
 }
 function validateSSOCAC(){
  const p=[],results=[];
@@ -576,6 +584,8 @@ function closeCaseDetail(){
 }
 function openCaseKnowledgeModal(code,caseId,fileDescription='',existing=null){
  const modal=document.getElementById('caseKnowledgeModal');if(!modal)return;
+ const parent=[...document.querySelectorAll('.modal.show')].reverse().find(x=>x.id!=='caseKnowledgeModal');
+ if(parent){parent.classList.add('suspended');modal.dataset.parentModal=parent.id}else delete modal.dataset.parentModal;
  const item=existing||null,isEdit=Boolean(item);
  document.getElementById('caseKnowledgeTitle').textContent=isEdit?'แก้ไขข้อมูลใน Knowledge Base':'เพิ่มข้อมูลเข้า Knowledge Base';
  document.getElementById('caseKnowledgeCode').value=String(code||item?.ErrorCode||'').trim().toUpperCase();
@@ -596,6 +606,7 @@ function openCaseKnowledgeModal(code,caseId,fileDescription='',existing=null){
 function closeCaseKnowledgeModal(){
  const modal=document.getElementById('caseKnowledgeModal');if(!modal)return;
  modal.classList.remove('show');modal.setAttribute('aria-hidden','true');
+ const parentId=modal.dataset.parentModal;if(parentId)document.getElementById(parentId)?.classList.remove('suspended');delete modal.dataset.parentModal;
  if(!document.querySelector('.modal.show'))document.body.classList.remove('modal-open');
 }
 async function saveCaseKnowledge(){
