@@ -154,3 +154,11 @@ All Rights Reserved.
 .error-text{color:#b91c1c;font-weight:700}
 .empty-knowledge{padding:14px;border:1px dashed #cbd5e1;border-radius:12px;text-align:center}
 @media(max-width:760px){.knowledge-detail-card{grid-template-columns:1fr}.knowledge-code{justify-self:start}}
+
+/* V3.6.1 Production Hotfix */
+body.modal-open{overflow:hidden}
+.case-kb-add-btn{margin-top:8px;min-height:38px;padding:8px 13px;font-weight:700}
+.case-knowledge-modal{width:min(760px,95vw)}
+.case-knowledge-modal textarea{resize:vertical;min-height:72px}
+.case-knowledge-modal .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+#caseDetailClose,#caseKnowledgeClose{position:relative;z-index:5;cursor:pointer;pointer-events:auto}
