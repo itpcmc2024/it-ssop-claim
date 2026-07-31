@@ -146,3 +146,13 @@
 - Accepts JSON, form parameters, and URL-encoded POST bodies.
 - Adds public `ping` diagnostic action.
 - Unknown-action responses now include backend version and received action.
+
+
+## V3.8.2 — ZIP Row Tools
+
+- เพิ่ม Checkbox หน้าแถวทุกแถวในหน้าแก้ไข ZIP
+- ปุ่ม − จะเปิดใช้งานเมื่อมีแถวถูกเลือก และลบหลายแถวพร้อมกันได้
+- ปุ่ม + เพิ่มแถวว่างท้ายส่วนข้อมูลที่กำลังเปิด เพื่อกรอกข้อมูลใหม่
+- รองรับการเลือกทั้งหมดเฉพาะรายการที่กำลังแสดง/กรอง
+- การเพิ่มและลบถือเป็นการแก้ไขไฟล์ ระบบจะสร้าง Checksum ใหม่เมื่อสร้าง ZIP
+- ปุ่ม “คืนค่าไฟล์นี้” สามารถย้อนกลับการเพิ่ม/ลบทั้งหมดของไฟล์ที่เปิดได้
