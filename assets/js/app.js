@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.6.0
+SSOP Toolkit Professional Edition V3.6.1
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -557,10 +557,48 @@ async function openCaseDetail(id){
   const attempts=data.attempts||[];
   document.getElementById('caseAttemptBody').innerHTML=attempts.length?attempts.map(a=>`<tr><td><b>${escapeHtml(a.Attempt_No||'-')}</b></td><td>${thDateTime(a.Created_At)}<div class="subline">ส่ง: ${thDateTime(a.Submit_Date)}</div></td><td>${escapeHtml(a.Work_Order_No||x.Work_Order_No||'-')}<div class="subline">${escapeHtml(a.Period_Key||'-')}</div></td><td>${escapeHtml(a.Generated_File_Name||a.Submission_File_Name||'-')}</td><td>${escapeHtml(a.Reply_File_Name||'-')}<div class="subline">${escapeHtml(a.Reply_BIL_Name||'')}</div></td><td><span class="result-pill ${a.Result_Code==='A'?'a':a.Result_Code==='C'?'c':''}">${escapeHtml(a.Result_Code||a.Submission_Status||'-')}</span>${a.Error_Codes?`<div class="subline error-text">${escapeHtml(a.Error_Codes)}</div>`:''}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-row">ยังไม่มีประวัติการส่งไฟล์</td></tr>`;
   const codes=data.errorCodes||[],knowledge=data.knowledge||[],knowledgeMap={};knowledge.forEach(k=>knowledgeMap[String(k.ErrorCode||'').trim().toUpperCase()]=k);
-  document.getElementById('caseErrorKnowledge').innerHTML=codes.length?codes.map(code=>{const k=knowledgeMap[String(code).toUpperCase()];return `<article class="knowledge-detail-card"><div class="knowledge-code">${escapeHtml(code)}</div>${k?`<div><b>${escapeHtml(k.Description||'พบคำแนะนำใน Knowledge Base')}</b><p><strong>สาเหตุ:</strong> ${escapeHtml(k.Cause||'-')}</p><p><strong>แนวทางแก้:</strong> ${escapeHtml(k.Solution||'-')}</p>${k.Tips?`<p><strong>ข้อควรระวัง:</strong> ${escapeHtml(k.Tips)}</p>`:''}${k.RelatedFile||k.RelatedField?`<div class="subline">ไฟล์/ฟิลด์: ${escapeHtml([k.RelatedFile,k.RelatedField].filter(Boolean).join(' · '))}</div>`:''}</div>`:`<div><b>ยังไม่มีคำแนะนำใน Knowledge Base</b><p class="meta">รหัสนี้ถูกบันทึกไว้ในผลตอบกลับ แต่ยังไม่มีแนวทางแก้ในคลังความรู้</p></div>`}</article>`}).join(''):'<div class="meta empty-knowledge">ไม่พบ Error Code ในประวัติเคสนี้</div>';
+  document.getElementById('caseErrorKnowledge').innerHTML=codes.length?codes.map(code=>{const k=knowledgeMap[String(code).toUpperCase()];return `<article class="knowledge-detail-card"><div class="knowledge-code">${escapeHtml(code)}</div>${k?`<div><b>${escapeHtml(k.Description||'พบคำแนะนำใน Knowledge Base')}</b><p><strong>สาเหตุ:</strong> ${escapeHtml(k.Cause||'-')}</p><p><strong>แนวทางแก้:</strong> ${escapeHtml(k.Solution||'-')}</p>${k.Tips?`<p><strong>ข้อควรระวัง:</strong> ${escapeHtml(k.Tips)}</p>`:''}${k.RelatedFile||k.RelatedField?`<div class="subline">ไฟล์/ฟิลด์: ${escapeHtml([k.RelatedFile,k.RelatedField].filter(Boolean).join(' · '))}</div>`:''}</div>`:`<div><b>ยังไม่มีคำแนะนำใน Knowledge Base</b><p class="meta">รหัสนี้ถูกบันทึกไว้ในผลตอบกลับ แต่ยังไม่มีแนวทางแก้ในคลังความรู้</p><button type="button" class="soft case-kb-add-btn" data-case-kb-code="${escapeAttr(code)}">➕ เพิ่มเข้า Knowledge Base</button></div>`}</article>`}).join(''):'<div class="meta empty-knowledge">ไม่พบ Error Code ในประวัติเคสนี้</div>';
   document.getElementById('caseTimeline').innerHTML=(data.timeline||[]).length?(data.timeline||[]).map(t=>`<div class="timeline-item"><b>${escapeHtml(t.Detail||t.Action_Type||'-')}</b><small>${thDateTime(t.Action_Date||t.Created_At)} · ${escapeHtml(t.Performed_By||'-')}</small>${t.Old_Value||t.New_Value?`<div class="subline">${escapeHtml(t.Old_Value||'-')} → ${escapeHtml(t.New_Value||'-')}</div>`:''}</div>`).join(''):'<div class="meta">ยังไม่มี Timeline</div>';
-  const m=document.getElementById('caseDetailModal');m.classList.add('show');m.setAttribute('aria-hidden','false');
+  const m=document.getElementById('caseDetailModal');m.classList.add('show');m.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
+  m.querySelectorAll('[data-case-kb-code]').forEach(btn=>btn.addEventListener('click',()=>openCaseKnowledgeModal(btn.dataset.caseKbCode,id)));
  }catch(err){toast('เปิดรายละเอียดไม่สำเร็จ',err.message,'error')}
+}
+
+function closeCaseDetail(){
+ const m=document.getElementById('caseDetailModal');if(!m)return;
+ m.classList.remove('show');m.setAttribute('aria-hidden','true');document.body.classList.remove('modal-open');
+}
+function openCaseKnowledgeModal(code,caseId){
+ const modal=document.getElementById('caseKnowledgeModal');if(!modal)return;
+ document.getElementById('caseKnowledgeCode').value=String(code||'').trim().toUpperCase();
+ document.getElementById('caseKnowledgeCaseId').value=caseId||'';
+ document.getElementById('caseKnowledgeDescription').value='';
+ document.getElementById('caseKnowledgeCause').value='';
+ document.getElementById('caseKnowledgeSolution').value='';
+ document.getElementById('caseKnowledgeRelatedFile').value='SOCDBIL / Reply BIL';
+ document.getElementById('caseKnowledgeRelatedField').value='Error Code';
+ document.getElementById('caseKnowledgeUpdatedBy').value='Kimhan';
+ document.getElementById('caseKnowledgeWritePin').value='';
+ modal.classList.add('show');modal.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
+ setTimeout(()=>document.getElementById('caseKnowledgeDescription')?.focus(),80);
+}
+function closeCaseKnowledgeModal(){
+ const modal=document.getElementById('caseKnowledgeModal');if(!modal)return;
+ modal.classList.remove('show');modal.setAttribute('aria-hidden','true');
+ if(!document.querySelector('.modal.show'))document.body.classList.remove('modal-open');
+}
+async function saveCaseKnowledge(){
+ const get=id=>document.getElementById(id)?.value.trim()||'';
+ const code=get('caseKnowledgeCode').toUpperCase(),description=get('caseKnowledgeDescription'),cause=get('caseKnowledgeCause'),solution=get('caseKnowledgeSolution'),relatedFile=get('caseKnowledgeRelatedFile'),relatedField=get('caseKnowledgeRelatedField'),updatedBy=get('caseKnowledgeUpdatedBy'),writePin=get('caseKnowledgeWritePin'),caseId=get('caseKnowledgeCaseId');
+ if(!description){toast('ข้อมูลไม่ครบ','กรุณากรอกความหมายของ Error Code','warning');return;}
+ if(!updatedBy){toast('ข้อมูลไม่ครบ','กรุณากรอกชื่อผู้บันทึก','warning');return;}
+ if(!writePin){toast('กรอก PIN','กรุณากรอก PIN สำหรับบันทึก Knowledge Base','warning');return;}
+ const btn=document.getElementById('caseKnowledgeSave');btn.disabled=true;btn.textContent='กำลังบันทึก...';
+ try{
+  await apiRequest('upsertKnowledge',{items:[{Module:'SSOCAC',ErrorCode:code,Description:description,Cause:cause,Solution:solution,RelatedFile:relatedFile,RelatedField:relatedField,Tips:'',UpdatedBy:updatedBy,Active:true}],writePin});
+  closeCaseKnowledgeModal();toast('บันทึกสำเร็จ',`${code} ถูกเพิ่มใน Knowledge Base แล้ว`,'success');
+  if(caseId)await openCaseDetail(caseId);
+ }catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500)}finally{btn.disabled=false;btn.textContent='บันทึก Knowledge';}
 }
 
 function exportRegistryCsv(){
@@ -576,7 +614,7 @@ function exportRegistryCsv(){
  toast('ส่งออกแล้ว',`ส่งออก ${rows.length} รายการตามผลการค้นหาและตัวกรองปัจจุบัน`,'success');
 }
 
-document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegistry);document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registryStatusFilter')?.addEventListener('change',applyRegistryFilter);document.querySelectorAll('[data-registry-status]').forEach(card=>card.addEventListener('click',()=>{const select=document.getElementById('registryStatusFilter');if(select)select.value=card.dataset.registryStatus||'ALL';applyRegistryFilter()}));document.getElementById('registryResetFilterBtn')?.addEventListener('click',()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter'),sort=document.getElementById('registrySort');if(search)search.value='';if(status)status.value='ALL';if(sort)sort.value='newest';applyRegistryFilter()});document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseDetailClose')?.addEventListener('click',()=>document.getElementById('caseDetailModal').classList.remove('show'));
+document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegistry);document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registryStatusFilter')?.addEventListener('change',applyRegistryFilter);document.querySelectorAll('[data-registry-status]').forEach(card=>card.addEventListener('click',()=>{const select=document.getElementById('registryStatusFilter');if(select)select.value=card.dataset.registryStatus||'ALL';applyRegistryFilter()}));document.getElementById('registryResetFilterBtn')?.addEventListener('click',()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter'),sort=document.getElementById('registrySort');if(search)search.value='';if(status)status.value='ALL';if(sort)sort.value='newest';applyRegistryFilter()});document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseDetailClose')?.addEventListener('click',closeCaseDetail);document.getElementById('caseKnowledgeClose')?.addEventListener('click',closeCaseKnowledgeModal);document.getElementById('caseKnowledgeCancel')?.addEventListener('click',closeCaseKnowledgeModal);document.getElementById('caseKnowledgeSave')?.addEventListener('click',saveCaseKnowledge);document.getElementById('caseDetailModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeCaseDetail()});document.getElementById('caseKnowledgeModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeCaseKnowledgeModal()});document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const kb=document.getElementById('caseKnowledgeModal');if(kb?.classList.contains('show')){closeCaseKnowledgeModal();return;}const detail=document.getElementById('caseDetailModal');if(detail?.classList.contains('show'))closeCaseDetail();});
 
 
 
