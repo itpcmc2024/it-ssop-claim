@@ -7,30 +7,30 @@
   <meta name="author" content="PCMC By Kimhan" />
   <meta name="copyright" content="© 2026 PCMC By Kimhan" />
   <meta name="application-name" content="SSOP Toolkit" />
-  <meta name="generator" content="SSOP Toolkit Version 3.7.5" />
+  <meta name="generator" content="SSOP Toolkit Version 3.8.0" />
   <!--
   ======================================================
-  SSOP Toolkit Version 3.7.5
+  SSOP Toolkit Version 3.8.0
   Copyright © 2026 PCMC By Kimhan
   All Rights Reserved.
   ======================================================
   -->
-  <link rel="stylesheet" href="assets/css/style.css?v=3.7.5" />
+  <link rel="stylesheet" href="assets/css/style.css?v=3.8.0" />
 </head>
 <body>
-  <div class="test-system-banner">ระบบงาน SSOP Toolkit V3 · Production</div>
+  <div class="test-system-banner">ระบบงาน SSOP Toolkit V3 · Production</div><div id="authBar" class="auth-bar hidden"><span id="authDisplayName"></span><span id="authRole" class="role-badge"></span><button id="logoutBtn" class="soft">ออกจากระบบ</button></div>
 <div id="splashScreen" class="splash-screen" aria-hidden="true">
   <div class="splash-card">
     <div class="splash-logo">🩺</div>
     <h1>SSOP Toolkit</h1>
-    <p>Professional Edition · Version 3.7.5</p>
+    <p>Professional Edition · Version 3.8.0</p>
     <div class="splash-loader"></div>
     <small>© 2026 PCMC By Kimhan</small>
   </div>
 </div>
 <div class="app-shell">
   <section id="homePage" class="home-page">
-    <header class="home-hero"><div class="top-row"><div><h1>SSOP Toolkit <span class="version">V3.7.5</span></h1><p>ศูนย์รวมเครื่องมือจัดการไฟล์ส่งเบิกประกันสังคม เลือกประเภทงานที่ต้องการใช้งาน</p></div><div class="row"><div class="module-badge">ข้อมูลประมวลผลในเบราว์เซอร์</div><button class="about-btn" data-open-about>ℹ เกี่ยวกับโปรแกรม</button></div></div></header>
+    <header class="home-hero"><div class="top-row"><div><h1>SSOP Toolkit <span class="version">V3.8.0</span></h1><p>ศูนย์รวมเครื่องมือจัดการไฟล์ส่งเบิกประกันสังคม เลือกประเภทงานที่ต้องการใช้งาน</p></div><div class="row"><div class="module-badge">ข้อมูลประมวลผลในเบราว์เซอร์</div><button class="about-btn" data-open-about>ℹ เกี่ยวกับโปรแกรม</button></div></div></header>
     <main class="wrap">
       <section class="card"><div class="section-title">เลือกระบบงานประกันสังคม</div><div class="module-grid">
         <button class="module-card planned" data-module="main"><div class="module-icon">🏥</div><h3>ประกันสังคม Main</h3><p>พื้นที่สำหรับตรวจและแก้ไขไฟล์ส่งเบิกผู้ป่วยนอกประกันสังคมทั่วไป</p><span class="module-badge">เตรียมพัฒนา</span></button>
@@ -40,14 +40,15 @@
         <button class="module-card planned" data-module="sleep"><div class="module-icon">😴</div><h3>ประกันสังคม Sleep Test</h3><p>เตรียมพื้นที่สำหรับการตรวจสอบและแก้ไขข้อมูล Sleep Test</p><span class="module-badge">เตรียมพัฒนา</span></button>
         <button class="module-card ready" data-module="editor"><div class="module-icon">🛠️</div><h3>เครื่องมือแก้ไฟล์ SSOP</h3><p>เปิดไฟล์ข้อความ แยกส่วนข้อมูล แก้ไข ตรวจสอบ และส่งออกกลับชื่อเดิม ใช้เป็นเครื่องมือกลางสำหรับทุกโมดูล</p><span class="module-badge">เครื่องมือกลางพร้อมใช้</span></button>
         <button class="module-card ready" data-module="knowledge"><div class="module-icon">📚</div><h3>SSOP Knowledge Center</h3><p>ค้นหา Error Code คำอธิบาย สาเหตุ วิธีแก้ ไฟล์และฟิลด์ที่เกี่ยวข้อง</p><span class="module-badge">พร้อมใช้งานร่วมกับ SSOCAC</span></button>
+        <button class="module-card ready admin-only hidden" data-module="admin"><div class="module-icon">⚙️</div><h3>จัดการระบบ</h3><p>จัดการผู้ใช้งาน สิทธิ์การเข้าถึง และค่ากำหนดส่วนกลางของระบบ</p><span class="module-badge">เฉพาะ Admin</span></button>
       </div></section>
       <section class="card future-card"><div class="section-title">🔒 แนวทางความเป็นส่วนตัวของข้อมูล</div><p class="meta">ไฟล์ตอบกลับและไฟล์ส่งเบิกทั้งหมดอ่านและประมวลผลภายในเบราว์เซอร์ ระบบไม่จัดเก็บข้อมูลผู้ป่วยออนไลน์</p><ul class="future-list"><li>ฐานความรู้ออนไลน์เก็บเฉพาะประเภทการส่งเบิก, Error Code, คำอธิบาย, สาเหตุ และแนวทางแก้</li><li>ไม่บันทึก HN, PID, Invoice, วันที่รักษา, จำนวนเงิน หรือเนื้อหาไฟล์ตอบกลับ</li><li>รองรับการค้นหาความรู้จากทุกโมดูลผ่าน SSOP Knowledge Center</li></ul></section>
-      <footer class="copyright-footer"><strong>SSOP Toolkit Version 3.7.5</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
+      <footer class="copyright-footer"><strong>SSOP Toolkit Version 3.8.0</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
     </main>
   </section>
 
   <section id="registryPage" class="module-page">
-    <header class="top"><div class="top-row"><div><h1>🎗️ ทะเบียนงาน Cancer Care <span class="version">V3.7.5</span></h1><p>ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC</p></div><div class="row header-actions registry-header-actions"><button class="back-home" id="registryBackHomeBtn">← หน้าหลัก</button><div class="split-doc-action"><button class="doc-view-btn" id="registryAnnouncementBtn">📢 ประกาศ</button><button class="doc-upload-btn" data-document-type="ANNOUNCEMENT" title="อัปโหลดประกาศฉบับใหม่">⬆</button></div><div class="split-doc-action"><button class="doc-view-btn" id="registryProtocolBtn">🧬 รหัส Protocol</button><button class="doc-upload-btn" data-document-type="PROTOCOL" title="อัปโหลดรหัส Protocol ฉบับใหม่">⬆</button></div><button class="guide-btn" id="registryDictionaryBtn">📖 คู่มือฟิลด์</button><button class="soft" id="registryKnowledgeBtn">📚 ฐานความรู้</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
+    <header class="top"><div class="top-row"><div><h1>🎗️ ทะเบียนงาน Cancer Care <span class="version">V3.8.0</span></h1><p>ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC</p></div><div class="row header-actions registry-header-actions"><button class="back-home" id="registryBackHomeBtn">← หน้าหลัก</button><div class="split-doc-action"><button class="doc-view-btn" id="registryAnnouncementBtn">📢 ประกาศ</button><button class="doc-upload-btn" data-document-type="ANNOUNCEMENT" title="อัปโหลดประกาศฉบับใหม่">⬆</button></div><div class="split-doc-action"><button class="doc-view-btn" id="registryProtocolBtn">🧬 รหัส Protocol</button><button class="doc-upload-btn" data-document-type="PROTOCOL" title="อัปโหลดรหัส Protocol ฉบับใหม่">⬆</button></div><button class="guide-btn" id="registryDictionaryBtn">📖 คู่มือฟิลด์</button><button class="soft" id="registryKnowledgeBtn">📚 ฐานความรู้</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
     <main class="wrap">
       <section class="registry-dashboard" aria-label="ตัวกรองสถานะด่วน">
         <button type="button" class="stat-card all active" data-registry-status="ALL"><span>ทั้งหมด</span><strong id="statAll">0</strong></button>
@@ -61,14 +62,24 @@
         <div class="row registry-head"><div class="grow"><div class="section-title">รายการทะเบียนงาน</div><div class="meta" id="registryStatus">กำลังเชื่อมต่อฐานข้อมูล...</div></div><button class="soft" id="registryReloadBtn">↻ โหลดข้อมูล</button><button class="soft import-btn" id="importExcelBtn" onclick="openExcelImport()">📥 นำเข้า Excel</button><button class="soft zip-btn" id="openZipReaderBtn" onclick="openZipReader()">🗜️ เปิด ZIP ผู้ป่วย</button><button class="soft reply-import-btn" id="openReplyImportBtn" onclick="openReplyImport()">📨 นำเข้าผลตอบกลับ</button><button class="primary" id="addCaseBtn">+ เพิ่มเอง</button></div>
         <div class="registry-toolbar"><input id="registrySearch" name="registry_filter_query" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" placeholder="ค้นหาเลขงาน, HN, VN, ชื่อผู้ป่วย, Case Number, Session, Station, Error Code..."><select id="registryStatusFilter" aria-label="กรองตามสถานะ"><option value="ALL">ทุกสถานะ</option><option value="PREPARING">รอเตรียม/รอตรวจสอบ</option><option value="READY">พร้อมส่ง</option><option value="SENT">ส่งแล้ว/รอผล</option><option value="A">ผ่าน (A)</option><option value="C">ต้องแก้ (C)</option></select><select id="registrySort"><option value="newest">ใหม่ → เก่า</option><option value="oldest">เก่า → ใหม่</option><option value="name">ชื่อผู้ป่วย ก → ฮ</option></select><select id="registryPageSize"><option>10</option><option selected>20</option><option>50</option><option>100</option><option value="99999">ทั้งหมด</option></select><button class="soft" id="registryResetFilterBtn">ล้างตัวกรอง</button><button class="soft" id="registryCsvBtn">ส่งออก CSV</button></div>
         <div class="registry-pagination registry-pagination-top"><span id="registryCountText"></span><div id="registryPages" class="page-buttons"></div></div>
-        <div class="registry-table-wrap"><div class="registry-horizontal-scroll"><table class="data-table registry-table"><thead><tr><th>เลขงาน</th><th>HN / VN</th><th>ผู้ป่วย</th><th>วันที่รับบริการ</th><th>Case Number / Protocol</th><th class="session-station-col">Session : Station</th><th class="work-no-col">Work No.</th><th>สถานะ</th><th>ผลล่าสุด</th><th class="registry-c-col hidden">Error Code</th><th class="registry-c-col hidden">คำอธิบาย</th><th>ผู้รับผิดชอบ</th><th>ดำเนินการ</th></tr></thead><tbody id="registryBody"></tbody></table></div></div>
+        <div class="registry-table-wrap"><div class="registry-horizontal-scroll"><table class="data-table registry-table"><thead><tr><th>เลขงาน</th><th>HN / VN</th><th>ผู้ป่วย</th><th>วันที่รับบริการ</th><th class="case-protocol-col">Case Number /<br>Protocol</th><th class="session-station-col">Session : Station</th><th class="work-no-col">Work No.</th><th>สถานะ</th><th>ผลล่าสุด</th><th class="registry-c-col hidden">Error Code</th><th>ผู้รับผิดชอบ</th><th>ดำเนินการ</th></tr></thead><tbody id="registryBody"></tbody></table></div></div>
       </section>
-      <footer class="copyright-footer"><strong>SSOP Toolkit · Cancer Care Registry Version 3.7.5</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
+      <footer class="copyright-footer"><strong>SSOP Toolkit · Cancer Care Registry Version 3.8.0</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
+    </main>
+  </section>
+
+
+  <section id="adminPage" class="module-page">
+    <header class="top"><div class="top-row"><div><h1>⚙️ จัดการระบบ <span class="version">V3.8.0</span></h1><p>จัดการผู้ใช้งาน สิทธิ์ และค่ากำหนดส่วนกลาง</p></div><div class="row header-actions"><button class="back-home" id="adminBackHomeBtn">← หน้าหลัก</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
+    <main class="wrap admin-wrap">
+      <section class="card"><div class="row"><div class="grow"><div class="section-title">👥 ผู้ใช้งานระบบ</div><div class="meta">Admin จัดการ User ID, Display Name, Role, สถานะ และรีเซ็ตรหัสผ่าน</div></div><button class="primary" id="addUserBtn">+ เพิ่มผู้ใช้</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>User ID</th><th>Display Name</th><th>Email</th><th>Role</th><th>หน่วยงาน</th><th>สถานะ</th><th>Login ล่าสุด</th><th>ดำเนินการ</th></tr></thead><tbody id="systemUsersBody"></tbody></table></div></section>
+      <section class="card"><div class="row"><div class="grow"><div class="section-title">🛠️ ค่ากำหนดระบบ</div><div class="meta">ตั้งค่าชื่อระบบ โมดูล ค่าเริ่มต้น และตัวเลือกส่วนกลางโดยไม่แก้โค้ด</div></div><button class="soft" id="reloadConfigBtn">↻ โหลดใหม่</button></div><div id="systemConfigGrid" class="config-grid"></div></section>
+      <section class="card"><div class="section-title">🧾 แนวทาง Audit และมาตรฐานโมดูล</div><div class="admin-feature-grid"><div><b>Display Name Stamp</b><p>ทุกการเพิ่ม แก้ไข นำเข้า ZIP/Excel/Reply และเปลี่ยนสถานะจะประทับชื่อผู้ล็อกอินจาก Display_Name</p></div><div><b>Role-based Access</b><p>ADMIN ใช้ทุกเมนู ส่วน USER ใช้งานโมดูลและ Knowledge ได้ แต่ไม่เห็นหน้าจัดการระบบ</p></div><div><b>Shared Authentication</b><p>โครงสร้าง Login และ Session ใช้ซ้ำเป็นแม่แบบสำหรับโมดูลต่อไปได้</p></div></div></section>
     </main>
   </section>
 
   <section id="cancerPage" class="module-page">
-  <header class="top"><div class="top-row"><div><h1>SSO Editor <span class="version">V3.7.5</span></h1><p>อัปโหลด แยกข้อมูล แก้ไข ตรวจสอบ และส่งออกกลับชื่อเดิม</p></div><div class="row header-actions"><button class="back-home" id="backHomeBtn">← หน้าหลัก</button><button class="guide-btn module-guide-btn" id="dictionaryBtn" data-guide-module="SSOCAC">📖 คู่มือฟิลด์ SSOCAC</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
+  <header class="top"><div class="top-row"><div><h1>SSO Editor <span class="version">V3.8.0</span></h1><p>อัปโหลด แยกข้อมูล แก้ไข ตรวจสอบ และส่งออกกลับชื่อเดิม</p></div><div class="row header-actions"><button class="back-home" id="backHomeBtn">← หน้าหลัก</button><button class="guide-btn module-guide-btn" id="dictionaryBtn" data-guide-module="SSOCAC">📖 คู่มือฟิลด์ SSOCAC</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
   <main class="wrap">
     <section class="card reply-card" id="ssocacReplyCard">
       <div class="row">
@@ -159,11 +170,11 @@
         <button class="primary" id="downloadBtn">ดาวน์โหลดชื่อเดิม</button>
       </div>
     </div>
-    <footer class="copyright-footer"><strong>SSOP Toolkit · SSO Editor Version 3.7.5</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
+    <footer class="copyright-footer"><strong>SSOP Toolkit · SSO Editor Version 3.8.0</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
   </main>
   </section>
   <section id="knowledgePage" class="module-page">
-    <header class="top"><div class="top-row"><div><h1>📚 SSOP Knowledge Center <span class="version">V3.7.5</span></h1><p>ค้นหาและจัดการองค์ความรู้ Error โดยไม่จัดเก็บข้อมูลผู้ป่วย</p></div><div class="row"><button class="back-home" id="knowledgeBackHomeBtn">← หน้าหลัก</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
+    <header class="top"><div class="top-row"><div><h1>📚 SSOP Knowledge Center <span class="version">V3.8.0</span></h1><p>ค้นหาและจัดการองค์ความรู้ Error โดยไม่จัดเก็บข้อมูลผู้ป่วย</p></div><div class="row"><button class="back-home" id="knowledgeBackHomeBtn">← หน้าหลัก</button><button class="about-btn" data-open-about>ℹ เกี่ยวกับ</button></div></div></header>
     <main class="wrap">
       <section class="card">
         <div class="knowledge-toolbar">
@@ -178,7 +189,7 @@
         <div class="row"><div class="section-title grow">ผลการค้นหา</div><button class="soft" id="knowledgeReloadBtn">โหลดข้อมูลทั้งหมด</button></div>
         <div id="knowledgeResults" class="knowledge-results"><div class="knowledge-empty">ยังไม่มีผลการค้นหา</div></div>
       </section>
-      <footer class="copyright-footer"><strong>SSOP Toolkit · SSOP Knowledge Center Version 3.7.5</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
+      <footer class="copyright-footer"><strong>SSOP Toolkit · SSOP Knowledge Center Version 3.8.0</strong><br>© 2026 PCMC By Kimhan · All Rights Reserved.</footer>
     </main>
   </section>
 </div>
@@ -197,7 +208,7 @@
       <div class="about-brand">
         <div class="about-logo">🩺</div>
         <h2>SSOP Toolkit</h2>
-        <p>Professional Edition · Version 3.7.5<br>ระบบช่วยตรวจสอบ แก้ไข และจัดการไฟล์ส่งเบิกประกันสังคม</p>
+        <p>Professional Edition · Version 3.8.0<br>ระบบช่วยตรวจสอบ แก้ไข และจัดการไฟล์ส่งเบิกประกันสังคม</p>
       </div>
       <div class="about-credit">Developed by<strong>PCMC By Kimhan</strong>© 2026 All Rights Reserved.</div>
     </div>
@@ -251,7 +262,7 @@
 </div></div></div>
 
 <div class="modal" id="caseModal" aria-hidden="true"><div class="modal-card registry-modal"><div class="modal-head"><div><strong id="caseModalTitle">เพิ่มงาน Cancer Care</strong><div class="meta">กรอกข้อมูลผู้ป่วยหลัง Discharge เพื่อเตรียมส่งเบิก</div></div><button class="close-x" id="caseModalClose">✕ ปิด</button></div><div class="modal-body"><input type="hidden" id="caseId"><div class="case-form-grid">
-<div class="field"><label>HN *</label><input id="caseHN"></div><div class="field"><label>VN</label><input id="caseVN"></div><div class="field"><label>เลขบัตรประชาชน</label><input id="caseCID" maxlength="13"></div><div class="field"><label>ชื่อ-นามสกุล *</label><input id="casePatientName"></div><div class="field"><label>วันที่รับบริการ *</label><input id="caseServiceDate" type="date"></div><div class="field"><label>สิทธิการรักษา</label><input id="caseCoverage" value="ประกันสังคม"></div><div class="field"><label>Case Number</label><input id="caseSsoNo"></div><div class="field"><label>Protocol Code</label><input id="caseProtocol"></div><div class="field"><label>Session</label><input id="caseSession"></div><div class="field"><label>Station</label><input id="caseStation"></div><div class="field"><label>Work No. <small>(รักษาค่าเดิมอัตโนมัติ)</small></label><input id="caseWorkOrder" readonly></div><div class="field"><label>ชื่อยา Chemo</label><input id="caseChemo"></div><div class="field"><label>ผู้รับผิดชอบ</label><input id="caseAssigned"></div><div class="field"><label>สถานะงาน</label><select id="caseStatus"><option>รอเตรียมข้อมูล</option><option>รอตรวจสอบ</option><option>พร้อมส่ง</option><option>พร้อมสร้างไฟล์</option><option>สร้างไฟล์แล้ว</option><option>ส่งเบิกแล้ว</option><option>รอผลตอบกลับ</option><option>ผ่าน (A)</option><option>ติดแก้ไข (C)</option></select></div><div class="field"><label>ผู้บันทึก</label><input id="caseUpdatedBy" value="Kimhan"></div><div class="field full"><label>หมายเหตุ</label><textarea id="caseRemark" rows="3"></textarea></div></div><div class="dialog-actions"><button class="soft" id="caseModalCancel">ยกเลิก</button><button class="primary" id="caseSaveBtn">บันทึก</button></div></div></div></div>
+<div class="field"><label>HN *</label><input id="caseHN"></div><div class="field"><label>VN</label><input id="caseVN"></div><div class="field"><label>เลขบัตรประชาชน</label><input id="caseCID" maxlength="13"></div><div class="field"><label>ชื่อ-นามสกุล *</label><input id="casePatientName"></div><div class="field"><label>วันที่รับบริการ *</label><input id="caseServiceDate" type="date"></div><div class="field"><label>สิทธิการรักษา</label><input id="caseCoverage" value="ประกันสังคม"></div><div class="field"><label>Case Number</label><input id="caseSsoNo"></div><div class="field"><label>Protocol Code</label><input id="caseProtocol"></div><div class="field"><label>Session</label><input id="caseSession"></div><div class="field"><label>Station</label><input id="caseStation"></div><div class="field"><label>Work No. <small>(รักษาค่าเดิมอัตโนมัติ)</small></label><input id="caseWorkOrder" readonly></div><div class="field"><label>ชื่อยา Chemo</label><input id="caseChemo"></div><div class="field"><label>ผู้รับผิดชอบ</label><input id="caseAssigned"></div><div class="field"><label>สถานะงาน</label><select id="caseStatus"><option>รอเตรียมข้อมูล</option><option>รอตรวจสอบ</option><option>พร้อมส่ง</option><option>พร้อมสร้างไฟล์</option><option>สร้างไฟล์แล้ว</option><option>ส่งเบิกแล้ว</option><option>รอผลตอบกลับ</option><option>ผ่าน (A)</option><option>ติดแก้ไข (C)</option></select></div><input type="hidden" id="caseUpdatedBy"><div class="field full"><label>หมายเหตุ</label><textarea id="caseRemark" rows="3"></textarea></div></div><div class="dialog-actions"><button class="soft" id="caseModalCancel">ยกเลิก</button><button class="primary" id="caseSaveBtn">บันทึก</button></div></div></div></div>
 <div class="modal" id="caseKnowledgeModal" aria-hidden="true">
   <div class="modal-card case-knowledge-modal">
     <div class="modal-head"><div><strong id="caseKnowledgeTitle">เพิ่มข้อมูลเข้า Knowledge Base</strong><div class="meta">บันทึกหรือแก้ไขความหมาย สาเหตุ และแนวทางแก้สำหรับ Error Code</div></div><button type="button" class="close-x" id="caseKnowledgeClose" onclick="closeCaseKnowledgeModal()">✕ ปิด</button></div>
@@ -259,13 +270,13 @@
       <input type="hidden" id="caseKnowledgeCaseId">
       <div class="case-knowledge-grid">
         <div class="field"><label for="caseKnowledgeCode">Error Code</label><input id="caseKnowledgeCode" readonly></div>
-        <div class="field"><label for="caseKnowledgeUpdatedBy">ผู้บันทึก/ผู้แก้ไข *</label><input id="caseKnowledgeUpdatedBy" autocomplete="off"></div>
+        <input type="hidden" id="caseKnowledgeUpdatedBy">
         <div class="field span-2"><label for="caseKnowledgeDescription">ความหมายของ Error Code *</label><textarea id="caseKnowledgeDescription" rows="3" placeholder="คำอธิบายจากไฟล์ตอบกลับ หรือความหมายของรหัส"></textarea></div>
         <div class="field span-2"><label for="caseKnowledgeCause">สาเหตุ/ข้อสังเกต</label><textarea id="caseKnowledgeCause" rows="4" placeholder="ระบุสาเหตุที่พบบ่อย หรือเงื่อนไขที่ทำให้เกิด Error"></textarea></div>
         <div class="field span-2"><label for="caseKnowledgeSolution">แนวทางแก้ไข</label><textarea id="caseKnowledgeSolution" rows="5" placeholder="ระบุขั้นตอน วิธีตรวจสอบ และวิธีแก้ไข"></textarea></div>
         <div class="field"><label for="caseKnowledgeRelatedFile">ไฟล์ที่เกี่ยวข้อง</label><input id="caseKnowledgeRelatedFile" placeholder="เช่น SOCDBIL / BILLTRAN"></div>
         <div class="field"><label for="caseKnowledgeRelatedField">ฟิลด์ที่เกี่ยวข้อง</label><input id="caseKnowledgeRelatedField" placeholder="เช่น Drug ID / ClaimAmount"></div>
-        <div class="field span-2 hidden" id="caseKnowledgePinField"><label for="caseKnowledgeWritePin">PIN สำหรับแก้ไขข้อมูล *</label><input id="caseKnowledgeWritePin" type="password" inputmode="numeric" autocomplete="new-password" placeholder="กรอก PIN เมื่อแก้ไขข้อมูลเดิม"></div>
+        <input type="hidden" id="caseKnowledgeWritePin">
       </div>
       <div class="privacy-note">ระบบบันทึกเฉพาะ Error Code และองค์ความรู้ ไม่บันทึก HN, CID, ชื่อผู้ป่วย หรือข้อมูลค่ารักษา</div>
       <div class="modal-actions"><button type="button" class="soft" id="caseKnowledgeCancel">ยกเลิก</button><button type="button" class="primary" id="caseKnowledgeSave">บันทึก Knowledge</button></div>
@@ -279,11 +290,17 @@
   <div id="zipChooseStep"><div class="drop-zone" id="zipDropZone"><div class="drop-icon">🗂️</div><strong>ลาก ZIP ผู้ป่วยมาวางที่นี่</strong><span>รองรับ 1 ZIP ต่อผู้ป่วย 1 ราย</span><input id="zipFileInput" type="file" accept=".zip,application/zip"><button class="primary" id="zipChooseBtn">เลือกไฟล์ ZIP</button></div><div class="privacy-note">🔒 ระบบอ่านไฟล์ทั้งหมดใน Browser เท่านั้น เวอร์ชันนี้ยังไม่บันทึกหรือส่งเนื้อหาไฟล์ผู้ป่วยไป Google Sheets</div></div>
   <div id="zipWorkspace" class="hidden"><div class="zip-summary" id="zipSummary"></div><div class="zip-layout"><aside class="zip-file-panel"><div class="row"><strong class="grow">ไฟล์ภายใน ZIP</strong><button class="soft" id="zipChangeBtn">เปลี่ยน ZIP</button></div><div id="zipFileList" class="zip-file-list"></div></aside><section class="zip-preview-panel"><div class="row zip-preview-head"><div class="grow"><strong id="zipPreviewTitle">เลือกไฟล์เพื่อดูข้อมูล</strong><div class="meta" id="zipPreviewMeta"></div></div><input id="zipTableSearch" placeholder="ค้นหาในไฟล์..." disabled></div><div class="zip-editor-toolbar"><span id="zipEditStatus" class="status">พร้อมตรวจสอบ</span><button class="smart-fill-btn" id="zipAutoFillBtn">✨ ปรับปรุงข้อมูลอัตโนมัติ</button><button class="soft" id="zipValidateBtn">✓ ตรวจ SSOCAC</button><button class="soft" id="zipUndoBtn">↶ คืนค่าไฟล์นี้</button><button class="primary" id="zipDownloadBtn">⬇ สร้าง ZIP ชื่อเดิม</button></div><div id="zipSectionTabs" class="zip-section-tabs"></div><div class="table-wrap zip-table-wrap"><table class="data-table"><thead id="zipPreviewHead"></thead><tbody id="zipPreviewBody"><tr><td class="empty-row">กรุณาเลือกไฟล์จากด้านซ้าย</td></tr></tbody></table></div></section></div></div>
 </div></div></div>
+
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-card"><div class="login-logo">🔐</div><h1>SSOP Toolkit</h1><p>เข้าสู่ระบบเพื่อใช้งาน</p><div class="field"><label>ชื่อผู้ใช้หรืออีเมล</label><input id="loginUsername" autocomplete="username"></div><div class="field"><label>รหัสผ่าน</label><input id="loginPassword" type="password" autocomplete="current-password"></div><button class="primary login-btn" id="loginBtn">เข้าสู่ระบบ</button><div id="loginMessage" class="login-message"></div></div>
+</div>
+<div class="modal" id="userModal" aria-hidden="true"><div class="modal-card user-modal"><div class="modal-head"><strong id="userModalTitle">เพิ่มผู้ใช้</strong><button class="close-x" id="userModalClose">✕ ปิด</button></div><div class="modal-body"><div class="case-form-grid"><div class="field"><label>User ID *</label><input id="userId"></div><div class="field"><label>Display Name *</label><input id="userDisplayName"></div><div class="field"><label>Email</label><input id="userEmail" type="email"></div><div class="field"><label>Role</label><select id="userRole"><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select></div><div class="field"><label>หน่วยงาน</label><input id="userDepartment"></div><div class="field"><label>โมดูลที่อนุญาต</label><input id="userModules" value="ALL"></div><div class="field"><label>รหัสผ่าน <small>(เว้นว่างหากไม่เปลี่ยน)</small></label><input id="userPassword" type="password"></div><div class="field"><label><input id="userActive" type="checkbox" checked> เปิดใช้งาน</label></div></div><div class="modal-actions"><button class="soft" id="userModalCancel">ยกเลิก</button><button class="primary" id="userSaveBtn">บันทึกผู้ใช้</button></div></div></div></div>
+
 <div class="toast-stack" id="toastStack"></div>
 <div class="dialog-overlay" id="dialogOverlay"><div class="dialog-box"><div class="dialog-icon" id="dialogIcon">ℹ️</div><h3 id="dialogTitle"></h3><p id="dialogMessage"></p><div class="dialog-actions" id="dialogActions"></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="assets/js/config.js?v=3.7.5"></script>
-<script src="assets/js/app.js?v=3.7.5"></script>
+<script src="assets/js/config.js?v=3.8.0"></script>
+<script src="assets/js/app.js?v=3.8.0"></script>
 </body>
 </html>
