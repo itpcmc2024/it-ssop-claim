@@ -27,7 +27,7 @@ All Rights Reserved.
     .top-row{display:flex;justify-content:space-between;gap:16px;align-items:center}.version{font-size:13px;background:rgba(255,255,255,.72);padding:4px 9px;border-radius:999px;vertical-align:middle}.guide-btn{background:#fff;border:1px solid rgba(41,65,59,.12);box-shadow:0 6px 18px rgba(48,91,79,.10)}
     .rules-card{background:linear-gradient(135deg,#fffafa,#fffdf7);border:1px solid #f0d7d7}.rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}.rule-item{background:#fff;border:1px solid #eadfdf;border-radius:13px;padding:12px;display:flex;gap:10px;align-items:flex-start}.rule-icon{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#ffe6e6;color:#b42318;font-weight:900;flex:0 0 auto}.rule-item strong{display:block;color:#a71919;margin-bottom:3px}.rule-item small{color:var(--muted);line-height:1.45}
     th.field-tip{cursor:help}.head-wrap{display:inline-flex;gap:5px;align-items:center}.tip-dot{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#dbeee8;color:#37675a;font-size:11px;font-weight:900}.important-head .tip-dot{background:#ffd8d8;color:#a71919}.required-star{color:#c62828;font-size:15px}
-    .tooltip{position:fixed;z-index:9999;max-width:340px;background:#21332e;color:#fff;padding:12px 14px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.22);font-size:12px;line-height:1.55;pointer-events:none;opacity:0;transform:translateY(4px);transition:.12s}.tooltip.show{opacity:1;transform:translateY(0)}.tooltip b{color:#ffd6d6}.tooltip .tip-example{margin-top:6px;color:#cdeee4}
+    .tooltip{position:fixed;z-index:60000;max-width:380px;background:#21332e;color:#fff;padding:12px 14px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.22);font-size:12px;line-height:1.55;pointer-events:none;opacity:0;transform:translateY(4px);transition:.12s}.tooltip.show{opacity:1;transform:translateY(0)}.tooltip b{color:#ffd6d6}.tooltip .tip-example{margin-top:6px;color:#cdeee4}
     .modal{position:fixed;inset:0;background:rgba(23,37,33,.44);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.modal-card{width:min(1100px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.28)}.modal-head{position:sticky;top:0;background:linear-gradient(120deg,var(--mint),var(--blue));padding:16px 18px;display:flex;justify-content:space-between;align-items:center;z-index:2}.modal-body{padding:18px}.dict-section{margin-bottom:22px}.dict-section h3{margin:0 0 10px}.dict-table{width:100%;border-collapse:collapse;font-size:13px}.dict-table th,.dict-table td{position:static;white-space:normal;text-align:left;padding:9px;border:1px solid var(--line)}.dict-table th{background:#edf8f4}.dict-important{color:#b42318;font-weight:800}.close-x{background:#fff;padding:7px 11px}
     .validation-list{display:grid;gap:8px;margin-top:12px}.validation-item{border-radius:11px;padding:9px 11px;font-size:13px}.validation-item.good{background:#e5f7ed}.validation-item.bad{background:#ffe6e6}.validation-item.info{background:#eef4ff}
     .app-shell{min-height:100vh}.home-hero{padding:34px 28px;background:linear-gradient(125deg,#dff5ec,#dceeff,#fff1e7);border-bottom:1px solid var(--line)}.home-hero h1{margin:0;font-size:30px}.home-hero p{margin:8px 0 0;color:var(--muted)}
@@ -163,19 +163,19 @@ body.modal-open{overflow:hidden}
 .case-knowledge-modal .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
 #caseDetailClose,#caseKnowledgeClose{position:relative;z-index:5;cursor:pointer;pointer-events:auto}
 
-/* V3.6.4 Production Hotfix */
+/* V3.6.5 Production Hotfix */
 #registryStatusFilter,#registrySort,#registryPageSize{appearance:auto!important;-webkit-appearance:menulist!important;-moz-appearance:menulist!important;padding-right:30px!important;background-color:#fff!important;cursor:pointer}
 .registry-c-col{white-space:normal!important;min-width:110px}.registry-error-desc{min-width:230px;max-width:360px;line-height:1.45}.registry-toolbar select{background-image:none!important}
 #importExcelBtn,#openZipReaderBtn,#openReplyImportBtn,#caseDetailClose,#caseKnowledgeClose,#zipReaderClose,#excelImportClose,#replyImportClose{position:relative;z-index:3;pointer-events:auto!important;cursor:pointer}
 
 
-/* V3.6.4 Production — Knowledge workflow and registry reference menus */
+/* V3.6.5 Production — Knowledge workflow and registry reference menus */
 .registry-header-actions{flex-wrap:wrap;gap:8px;max-width:900px}.registry-header-actions>button,.registry-header-actions .split-doc-action{flex:0 0 auto}
 .case-knowledge-modal{width:min(820px,96vw);max-height:94vh}.case-knowledge-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.case-knowledge-grid .field{display:flex;flex-direction:column;gap:6px}.case-knowledge-grid .field label{font-weight:700;color:#29443f}.case-knowledge-grid .span-2{grid-column:1/-1}.case-knowledge-grid input,.case-knowledge-grid textarea{width:100%;box-sizing:border-box;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}.case-knowledge-grid textarea{line-height:1.5;resize:vertical}.case-knowledge-grid input:focus,.case-knowledge-grid textarea:focus{outline:none;border-color:#72c7ad;box-shadow:0 0 0 3px rgba(114,199,173,.18)}
 .reply-knowledge-item{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:9px;border-radius:10px}.reply-knowledge-item.unknown{background:#fff7ed;border:1px solid #fed7aa}.reply-knowledge-item.known{background:#f0fdf4;border:1px solid #bbf7d0}.reply-knowledge-item.incomplete{background:#fffbeb;border-color:#fde68a}.reply-kb-save,.reply-kb-edit{margin-top:4px;padding:6px 9px;font-size:12px}.reply-knowledge-cell{min-width:260px}
 @media(max-width:900px){.registry-header-actions{justify-content:flex-start}.case-knowledge-grid{grid-template-columns:1fr}.case-knowledge-grid .span-2{grid-column:auto}}
 
-/* V3.6.4 Production usability */
+/* V3.6.5 Production usability */
 #caseKnowledgeModal{z-index:12050}
 #caseKnowledgeModal .modal-card{position:relative}
 .reply-knowledge-cell{overflow:hidden}
@@ -185,3 +185,12 @@ body.modal-open{overflow:hidden}
 .zip-table-wrap .field-tip{cursor:help}
 .zip-table-wrap .head-wrap{display:inline-flex;align-items:center;gap:5px}
 .hidden{display:none!important}
+
+/* V3.6.5: field tips must appear above ZIP/modal overlays */
+#fieldTooltip{z-index:60000!important;display:block!important}
+.field-tip{position:relative}
+.module-guide-btn{white-space:nowrap}
+
+/* V3.6.5: prevent stacked modal scrollbars */
+.modal.suspended{display:none!important}
+.field-tip:focus{outline:2px solid #6dc8ae;outline-offset:-2px}
