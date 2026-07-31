@@ -1,4 +1,4 @@
-# it-ssop-claim V3.7.4 Production
+# it-ssop-claim V3.7.5 Production
 
 ต่อยอดจาก V3.4.8 Stable ที่ผ่านการทดสอบ โดยคงระบบ API และ Workflow เดิมทั้งหมด
 
@@ -89,7 +89,7 @@
 - ไม่เปลี่ยน API, โครงสร้างฐานข้อมูล หรือ Workflow ของ V3.7.0
 
 
-## V3.7.4 Productivity Polish
+## V3.7.5 Productivity Polish
 
 - เปลี่ยนหัวคอลัมน์ `Work Order No.` เป็น `Work No.` และลดความกว้างคอลัมน์
 - เพิ่มคอลัมน์ `Session : Station` ในทะเบียนงาน เช่น `6812 : 20`
@@ -100,7 +100,7 @@
 - ไม่เปลี่ยน API, โครงสร้างฐานข้อมูล หรือ Workflow เดิม
 
 
-## V3.7.4 – Reply CheckCode Coverage
+## V3.7.5 – Reply CheckCode Coverage
 
 - อ่าน CheckCode ได้ทั้งรหัสที่ไม่ผ่านการตรวจสอบและรหัสเตือนจาก Reply BIL
 - รองรับรหัสหลายตัวอักษร เช่น CD2, CE3 และรหัสเตือน เช่น W07
@@ -108,10 +108,18 @@
 - สถานะ A/C ยังคงอ้างอิงค่า Stat เดิม: รหัสเตือนอาจอยู่ในรายการ A ส่วนรหัสไม่ผ่านอยู่ในรายการ C
 
 
-## V3.7.4 – Registry UX Enhancement
+## V3.7.5 – Registry UX Enhancement
 
 - ค้นหา Error Code และคำอธิบาย Error ได้จากหน้าทะเบียน
 - ย้ายจำนวนรายการและเลขหน้าขึ้นเหนือหัวตาราง
 - ยกเลิกแถบเลื่อนแนวตั้งซ้อนในตารางทะเบียน ใช้แถบเลื่อนของ Browser เพียงชุดเดียว
 - จัดคำอธิบาย Error แยกบรรทัดตามเครื่องหมาย | เพื่ออ่านง่าย
 - แสดง Error Code เป็น Tag พร้อม Tooltip และคลิกเพื่อกรองรหัสได้
+
+
+## V3.7.5 Registry UX Hotfix
+- แก้โครงสร้างตารางทะเบียนให้ใช้ Browser vertical scrollbar เพียงชุดเดียว
+- แยก horizontal scrollbar ไปไว้ใน wrapper เฉพาะ โดยไม่สร้าง vertical scrollbar ซ้อน
+- แสดง Error Code เป็นป้าย [CODE] พร้อม tooltip และคลิกเพื่อกรอง
+- แยกคำอธิบาย Error เป็นคนละบรรทัดตาม |, line break หรือรหัสถัดไป
+- เพิ่ม cache-busting เป็น v=3.7.5 เพื่อให้ GitHub Pages โหลด CSS/JS ใหม่ทันที
