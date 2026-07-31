@@ -1,4 +1,4 @@
-/* SSOP Claim V3.6.1 Stable Configuration */
+/* SSOP Claim V3.6.2 Stable Configuration */
 window.SSOP_CONFIG = {
   apiUrl: 'https://script.google.com/macros/s/AKfycbyqUFg3dFgW8US6_jekM4BLsFGARVbsLVFJIgIpv4edDuYskzei4tpCuLv6wz09Gl79Rw/exec',
   version: '3.5.0',
