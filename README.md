@@ -1,4 +1,4 @@
-# it-ssop-claim V3.6.5 Production
+# it-ssop-claim V3.7.0 Production
 
 ต่อยอดจาก V3.4.8 Stable ที่ผ่านการทดสอบ โดยคงระบบ API และ Workflow เดิมทั้งหมด
 
@@ -66,3 +66,14 @@
 - คงคู่มือฟิลด์ SSOCAC และเตรียมเพิ่มคู่มือรายโมดูล
 - ป้องกัน Modal ซ้อนและแถบเลื่อนซ้ำเมื่อแก้ Knowledge Base
 - ตั้ง WRITE_PIN ผ่านฟังก์ชัน setWritePin ใน Apps Script
+
+
+## V3.7.0 Smart Assist
+
+- Knowledge Assistant ดึงคำอธิบาย Error Code จาก Reply BIL มาใส่ในฟอร์มอัตโนมัติ และมีข้อความตั้งต้นเมื่อไฟล์ไม่มีคำอธิบาย
+- เพิ่มปุ่ม “ปรับปรุงข้อมูลอัตโนมัติ” ใน ZIP Reader
+- เขียนทับ BILLTRAN.AuthCode = SSOCAC, MemberNo = Case Number, VerCode = Protocol Code และ TFlag = ข้อมูลทะเบียน
+- ตรวจชื่อยา Chemo_Drug แล้วกำหนด BillItems.ClaimCat = OPR ในรายการที่ตรงกัน
+- ไฮไลต์เซลล์ที่ระบบปรับปรุง พร้อมสรุปจำนวนจุดที่แก้ไข
+- เลื่อน Toast ลงจากมุมบน เพื่อไม่ให้ทับปุ่มปิด (X) ของ Modal
+- ปุ่มหน้าหลักล้างพารามิเตอร์ page และกลับ Dashboard โมดูล
