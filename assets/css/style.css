@@ -329,7 +329,7 @@ body.modal-open{overflow:hidden}
 
 
 /* ======================================================
-   V3.7.5 Registry UX Hotfix
+   V3.8.0 Registry UX Hotfix
    - Browser vertical scroll only
    - Dedicated horizontal scroll for wide registry table
 ====================================================== */
@@ -347,3 +347,13 @@ body.modal-open{overflow:hidden}
 .registry-error-line:last-child{border-bottom:0}
 .error-separator{color:#9eb0ac;margin-left:4px;font-weight:700}
 @media(max-width:900px){.registry-error-desc{min-width:300px;max-width:390px}.registry-pagination-top{position:static}}
+
+
+/* V3.8.0 Authentication & Admin */
+.auth-bar{position:fixed;right:18px;bottom:18px;z-index:8500;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #cfe1dc;border-radius:16px;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(34,65,70,.16)}
+.role-badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:#e7f7f2;font-size:12px;font-weight:800;color:#176a59}
+.login-overlay{position:fixed;inset:0;z-index:20000;display:none;place-items:center;background:linear-gradient(135deg,rgba(231,249,245,.96),rgba(225,238,255,.97))}.login-overlay.show{display:grid}
+.login-card{width:min(420px,calc(100vw - 32px));padding:30px;border:1px solid #c9e2dc;border-radius:26px;background:#fff;box-shadow:0 24px 70px rgba(37,67,75,.22)}.login-logo{text-align:center;font-size:46px}.login-card h1{text-align:center;margin:8px 0}.login-card>p{text-align:center;color:#60777d;margin-bottom:22px}.login-btn{width:100%;margin-top:14px}.login-message{min-height:24px;margin-top:10px;text-align:center;color:#bd3144;font-weight:700}
+.case-protocol-col{min-width:140px!important;width:140px!important}.registry-table th,.registry-table td{vertical-align:top}.row-actions{flex-wrap:nowrap!important;white-space:nowrap}.error-code-tag{cursor:pointer}
+.admin-wrap{max-width:1500px}.config-grid{display:grid;gap:10px;margin-top:14px}.config-item{display:grid;grid-template-columns:minmax(220px,1fr) minmax(280px,2fr) auto;gap:12px;align-items:center;padding:10px;border:1px solid #dbe9e5;border-radius:14px;background:#f8fcfb}.config-item small{display:block;color:#6a7d82;margin-top:4px}.admin-feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.admin-feature-grid>div{padding:16px;border-radius:16px;background:#f2faf7}.user-modal{max-width:850px}
+@media(max-width:800px){.auth-bar{right:8px;bottom:8px}.admin-feature-grid{grid-template-columns:1fr}.config-item{grid-template-columns:1fr}.row-actions{flex-wrap:wrap!important}}
