@@ -357,3 +357,11 @@ body.modal-open{overflow:hidden}
 .case-protocol-col{min-width:140px!important;width:140px!important}.registry-table th,.registry-table td{vertical-align:top}.row-actions{flex-wrap:nowrap!important;white-space:nowrap}.error-code-tag{cursor:pointer}
 .admin-wrap{max-width:1500px}.config-grid{display:grid;gap:10px;margin-top:14px}.config-item{display:grid;grid-template-columns:minmax(220px,1fr) minmax(280px,2fr) auto;gap:12px;align-items:center;padding:10px;border:1px solid #dbe9e5;border-radius:14px;background:#f8fcfb}.config-item small{display:block;color:#6a7d82;margin-top:4px}.admin-feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.admin-feature-grid>div{padding:16px;border-radius:16px;background:#f2faf7}.user-modal{max-width:850px}
 @media(max-width:800px){.auth-bar{right:8px;bottom:8px}.admin-feature-grid{grid-template-columns:1fr}.config-item{grid-template-columns:1fr}.row-actions{flex-wrap:wrap!important}}
+
+
+/* V3.8.2 ZIP row add/delete tools */
+.zip-row-tools{display:inline-flex;align-items:center;gap:7px;padding:4px 8px;border:1px solid #d8e9e5;border-radius:12px;background:#f7fcfb}
+.zip-row-btn{width:36px;height:34px;border-radius:9px;border:1px solid #bcded6;font-size:24px;line-height:1;font-weight:800;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:#fff;color:#246f61}
+.zip-row-btn.add:hover{background:#e8faf5;border-color:#4fc6ad}.zip-row-btn.delete{color:#b23a4a;border-color:#ecc7cc}.zip-row-btn.delete:hover:not(:disabled){background:#fff0f2;border-color:#db7b88}.zip-row-btn:disabled{opacity:.38;cursor:not-allowed;background:#f1f4f3}
+.zip-selected-count{font-size:12px;font-weight:700;color:#5d7470;min-width:72px;text-align:center}.zip-select-col{width:42px;min-width:42px;text-align:center!important;position:sticky;left:0;z-index:3;background:#f7fbfa!important}.zip-select-col input{width:17px;height:17px;accent-color:#39b9a1;cursor:pointer}.zip-row-selected td{background:#eefaf7}.zip-row-selected .zip-select-col{background:#dff5ef!important}.zip-row-selected .important-cell{background:#fff1f2}
+@media(max-width:760px){.zip-row-tools{order:2}.zip-selected-count{display:none}}
