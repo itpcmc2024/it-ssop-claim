@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.6.2
+SSOP Toolkit Professional Edition V3.6.3
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -168,7 +168,7 @@ function renderDictionary(){
  const order=['BILLTRAN','BillItems','Dispensing','DispensedItems','OPServices','OPDx'];
  document.getElementById('dictionaryBody').innerHTML=order.map(sec=>{const rows=fieldMeta[sec]||[];return `<div class="dict-section"><h3>${escapeHtml(sec)}</h3><table class="dict-table"><thead><tr><th style="width:50px">ลำดับ</th><th style="width:180px">ชื่อฟิลด์</th><th>ความหมาย</th><th style="width:250px">เงื่อนไข/ตัวอย่าง</th></tr></thead><tbody>${rows.map((m,i)=>`<tr><td>${i+1}</td><td class="${m[3]==='important'?'dict-important':''}">${escapeHtml(m[0])}${m[3]==='important'?' ★':''}</td><td>${escapeHtml(m[1]||'')}</td><td>${escapeHtml(String(m[2]||'-'))}</td></tr>`).join('')}</tbody></table></div>`}).join('');
 }
-const dictionaryModal=document.getElementById('dictionaryModal');document.getElementById('dictionaryBtn').onclick=()=>{dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');renderDictionary();};document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
+const dictionaryModal=document.getElementById('dictionaryModal');const openDictionary=()=>{dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');renderDictionary();};document.getElementById('dictionaryBtn').onclick=openDictionary;document.getElementById('registryDictionaryBtn')?.addEventListener('click',openDictionary);document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
 function md5(bytes){
  function cmn(q,a,b,x,s,t){return (((a+q+x+t)|0)<<s|((a+q+x+t)|0)>>>32-s)+b|0}function ff(a,b,c,d,x,s,t){return cmn((b&c)|(~b&d),a,b,x,s,t)}function gg(a,b,c,d,x,s,t){return cmn((b&d)|(c&~d),a,b,x,s,t)}function hh(a,b,c,d,x,s,t){return cmn(b^c^d,a,b,x,s,t)}function ii(a,b,c,d,x,s,t){return cmn(c^(b|~d),a,b,x,s,t)}
  const len=bytes.length,bit=len*8,n=((len+8>>6)+1)*16,w=new Int32Array(n);for(let i=0;i<len;i++)w[i>>2]|=bytes[i]<<((i%4)*8);w[len>>2]|=0x80<<((len%4)*8);w[n-2]=bit;
@@ -432,7 +432,10 @@ document.getElementById('saveKnowledgeModal')?.addEventListener('click',e=>{if(e
 document.getElementById('saveWritePin')?.addEventListener('keydown',e=>{if(e.key==='Enter')saveReplyKnowledge();});
 
 document.getElementById('announcementBtn')?.addEventListener('click',()=>openDocument('ANNOUNCEMENT'));
+document.getElementById('registryAnnouncementBtn')?.addEventListener('click',()=>openDocument('ANNOUNCEMENT'));
 document.getElementById('protocolBtn')?.addEventListener('click',()=>openDocument('PROTOCOL'));
+document.getElementById('registryProtocolBtn')?.addEventListener('click',()=>openDocument('PROTOCOL'));
+document.getElementById('registryKnowledgeBtn')?.addEventListener('click',()=>{showPage('knowledgePage');loadKnowledge('','SSOCAC');});
 document.querySelectorAll('[data-document-type]').forEach(btn=>btn.addEventListener('click',()=>openDocumentUploadModal(btn.dataset.documentType)));
 document.getElementById('documentUploadConfirm')?.addEventListener('click',uploadDocument);
 document.getElementById('documentUploadCancel')?.addEventListener('click',closeDocumentUploadModal);
@@ -559,10 +562,10 @@ async function openCaseDetail(id){
   const attempts=data.attempts||[];
   document.getElementById('caseAttemptBody').innerHTML=attempts.length?attempts.map(a=>`<tr><td><b>${escapeHtml(a.Attempt_No||'-')}</b></td><td>${thDateTime(a.Created_At)}<div class="subline">ส่ง: ${thDateTime(a.Submit_Date)}</div></td><td>${escapeHtml(a.Work_Order_No||x.Work_Order_No||'-')}<div class="subline">${escapeHtml(a.Period_Key||'-')}</div></td><td>${escapeHtml(a.Generated_File_Name||a.Submission_File_Name||'-')}</td><td>${escapeHtml(a.Reply_File_Name||'-')}<div class="subline">${escapeHtml(a.Reply_BIL_Name||'')}</div></td><td><span class="result-pill ${a.Result_Code==='A'?'a':a.Result_Code==='C'?'c':''}">${escapeHtml(a.Result_Code||a.Submission_Status||'-')}</span>${a.Error_Codes?`<div class="subline error-text">${escapeHtml(a.Error_Codes)}</div>`:''}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-row">ยังไม่มีประวัติการส่งไฟล์</td></tr>`;
   const codes=data.errorCodes||[],knowledge=data.knowledge||[],knowledgeMap={};knowledge.forEach(k=>knowledgeMap[String(k.ErrorCode||'').trim().toUpperCase()]=k);
-  document.getElementById('caseErrorKnowledge').innerHTML=codes.length?codes.map(code=>{const k=knowledgeMap[String(code).toUpperCase()];return `<article class="knowledge-detail-card"><div class="knowledge-code">${escapeHtml(code)}</div>${k?`<div><b>${escapeHtml(k.Description||'พบคำแนะนำใน Knowledge Base')}</b><p><strong>สาเหตุ:</strong> ${escapeHtml(k.Cause||'-')}</p><p><strong>แนวทางแก้:</strong> ${escapeHtml(k.Solution||'-')}</p>${k.Tips?`<p><strong>ข้อควรระวัง:</strong> ${escapeHtml(k.Tips)}</p>`:''}${k.RelatedFile||k.RelatedField?`<div class="subline">ไฟล์/ฟิลด์: ${escapeHtml([k.RelatedFile,k.RelatedField].filter(Boolean).join(' · '))}</div>`:''}</div>`:`<div><b>ยังไม่มีคำแนะนำใน Knowledge Base</b><p class="meta">รหัสนี้ถูกบันทึกไว้ในผลตอบกลับ แต่ยังไม่มีแนวทางแก้ในคลังความรู้</p><button type="button" class="soft case-kb-add-btn" data-case-kb-code="${escapeAttr(code)}">➕ เพิ่มเข้า Knowledge Base</button></div>`}</article>`}).join(''):'<div class="meta empty-knowledge">ไม่พบ Error Code ในประวัติเคสนี้</div>';
+  document.getElementById('caseErrorKnowledge').innerHTML=codes.length?codes.map(code=>{const k=knowledgeMap[String(code).toUpperCase()];return `<article class="knowledge-detail-card"><div class="knowledge-code">${escapeHtml(code)}</div>${k?`<div><b>${escapeHtml(k.Description||'พบคำแนะนำใน Knowledge Base')}</b><p><strong>สาเหตุ:</strong> ${escapeHtml(k.Cause||'-')}</p><p><strong>แนวทางแก้:</strong> ${escapeHtml(k.Solution||'-')}</p>${k.Tips?`<p><strong>ข้อควรระวัง:</strong> ${escapeHtml(k.Tips)}</p>`:''}${k.RelatedFile||k.RelatedField?`<div class="subline">ไฟล์/ฟิลด์: ${escapeHtml([k.RelatedFile,k.RelatedField].filter(Boolean).join(' · '))}</div>`:''}<button type="button" class="soft case-kb-add-btn" data-case-kb-code="${escapeAttr(code)}">✏️ แก้ไข Knowledge</button></div>`:`<div><b>ยังไม่มีคำแนะนำใน Knowledge Base</b><p class="meta">รหัสนี้ถูกบันทึกไว้ในผลตอบกลับ แต่ยังไม่มีแนวทางแก้ในคลังความรู้</p><button type="button" class="soft case-kb-add-btn" data-case-kb-code="${escapeAttr(code)}">➕ เพิ่มเข้า Knowledge Base</button></div>`}</article>`}).join(''):'<div class="meta empty-knowledge">ไม่พบ Error Code ในประวัติเคสนี้</div>';
   document.getElementById('caseTimeline').innerHTML=(data.timeline||[]).length?(data.timeline||[]).map(t=>`<div class="timeline-item"><b>${escapeHtml(t.Detail||t.Action_Type||'-')}</b><small>${thDateTime(t.Action_Date||t.Created_At)} · ${escapeHtml(t.Performed_By||'-')}</small>${t.Old_Value||t.New_Value?`<div class="subline">${escapeHtml(t.Old_Value||'-')} → ${escapeHtml(t.New_Value||'-')}</div>`:''}</div>`).join(''):'<div class="meta">ยังไม่มี Timeline</div>';
   const m=document.getElementById('caseDetailModal');m.classList.add('show');m.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
-  m.querySelectorAll('[data-case-kb-code]').forEach(btn=>btn.addEventListener('click',()=>openCaseKnowledgeModal(btn.dataset.caseKbCode,id)));
+  m.querySelectorAll('[data-case-kb-code]').forEach(btn=>btn.addEventListener('click',()=>{const code=btn.dataset.caseKbCode,k=knowledgeMap[String(code).toUpperCase()]||null;openCaseKnowledgeModal(code,id,'',k)}));
  }catch(err){toast('เปิดรายละเอียดไม่สำเร็จ',err.message,'error')}
 }
 
@@ -570,19 +573,21 @@ function closeCaseDetail(){
  const m=document.getElementById('caseDetailModal');if(!m)return;
  m.classList.remove('show');m.setAttribute('aria-hidden','true');document.body.classList.remove('modal-open');
 }
-function openCaseKnowledgeModal(code,caseId){
+function openCaseKnowledgeModal(code,caseId,fileDescription='',existing=null){
  const modal=document.getElementById('caseKnowledgeModal');if(!modal)return;
- document.getElementById('caseKnowledgeCode').value=String(code||'').trim().toUpperCase();
+ const item=existing||null,isEdit=Boolean(item);
+ document.getElementById('caseKnowledgeTitle').textContent=isEdit?'แก้ไขข้อมูลใน Knowledge Base':'เพิ่มข้อมูลเข้า Knowledge Base';
+ document.getElementById('caseKnowledgeCode').value=String(code||item?.ErrorCode||'').trim().toUpperCase();
  document.getElementById('caseKnowledgeCaseId').value=caseId||'';
- document.getElementById('caseKnowledgeDescription').value='';
- document.getElementById('caseKnowledgeCause').value='';
- document.getElementById('caseKnowledgeSolution').value='';
- document.getElementById('caseKnowledgeRelatedFile').value='SOCDBIL / Reply BIL';
- document.getElementById('caseKnowledgeRelatedField').value='Error Code';
- document.getElementById('caseKnowledgeUpdatedBy').value='Kimhan';
+ document.getElementById('caseKnowledgeDescription').value=item?.Description||fileDescription||'';
+ document.getElementById('caseKnowledgeCause').value=item?.Cause||'';
+ document.getElementById('caseKnowledgeSolution').value=item?.Solution||'';
+ document.getElementById('caseKnowledgeRelatedFile').value=item?.RelatedFile||'SOCDBIL / Reply BIL';
+ document.getElementById('caseKnowledgeRelatedField').value=item?.RelatedField||'Error Code';
+ document.getElementById('caseKnowledgeUpdatedBy').value=item?.UpdatedBy||'Kimhan';
  document.getElementById('caseKnowledgeWritePin').value='';
  modal.classList.add('show');modal.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
- setTimeout(()=>document.getElementById('caseKnowledgeDescription')?.focus(),80);
+ setTimeout(()=>document.getElementById(item?.Description?'caseKnowledgeCause':'caseKnowledgeDescription')?.focus(),80);
 }
 function closeCaseKnowledgeModal(){
  const modal=document.getElementById('caseKnowledgeModal');if(!modal)return;
@@ -599,7 +604,7 @@ async function saveCaseKnowledge(){
  try{
   await apiRequest('upsertKnowledge',{items:[{Module:'SSOCAC',ErrorCode:code,Description:description,Cause:cause,Solution:solution,RelatedFile:relatedFile,RelatedField:relatedField,Tips:'',UpdatedBy:updatedBy,Active:true}],writePin});
   closeCaseKnowledgeModal();toast('บันทึกสำเร็จ',`${code} ถูกเพิ่มใน Knowledge Base แล้ว`,'success');
-  if(caseId)await openCaseDetail(caseId);
+  if(caseId)await openCaseDetail(caseId);if(document.getElementById('replyImportModal')?.classList.contains('show')){await hydrateReplyImportKnowledge();renderReplyImport();}
  }catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500)}finally{btn.disabled=false;btn.textContent='บันทึก Knowledge';}
 }
 
@@ -718,10 +723,10 @@ document.getElementById('importCancelBtn')?.addEventListener('click',closeExcelI
    Central Reply Import V3.4.0 (Revised from real .BIL)
    จับคู่ด้วย CID + วันที่บริการ และเชื่อม Period Key
 ====================================================== */
-const replyImportState={file:null,zip:null,matches:[],unmatched:[],sourceFiles:[],meta:{},knowledgeByCode:{},knowledgeKnown:0,knowledgeUnknown:0};
+const replyImportState={file:null,zip:null,matches:[],unmatched:[],sourceFiles:[],meta:{},descriptions:{},knowledgeByCode:{},knowledgeKnown:0,knowledgeUnknown:0};
 function openReplyImport(){resetReplyImport();const m=document.getElementById('replyImportModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}
 function closeReplyImport(){const m=document.getElementById('replyImportModal');m.classList.remove('show');m.setAttribute('aria-hidden','true')}
-function resetReplyImport(){replyImportState.file=null;replyImportState.zip=null;replyImportState.matches=[];replyImportState.unmatched=[];replyImportState.sourceFiles=[];replyImportState.meta={};replyImportState.knowledgeByCode={};replyImportState.knowledgeKnown=0;replyImportState.knowledgeUnknown=0;const i=document.getElementById('replyImportFile');if(i)i.value='';document.getElementById('replyImportChoose')?.classList.remove('hidden');document.getElementById('replyImportWorkspace')?.classList.add('hidden')}
+function resetReplyImport(){replyImportState.file=null;replyImportState.zip=null;replyImportState.matches=[];replyImportState.unmatched=[];replyImportState.sourceFiles=[];replyImportState.meta={};replyImportState.descriptions={};replyImportState.knowledgeByCode={};replyImportState.knowledgeKnown=0;replyImportState.knowledgeUnknown=0;const i=document.getElementById('replyImportFile');if(i)i.value='';document.getElementById('replyImportChoose')?.classList.remove('hidden');document.getElementById('replyImportWorkspace')?.classList.add('hidden')}
 function normalizeReplyText(text){return String(text||'').replace(/\u0000/g,'').replace(/\r\n?/g,'\n')}
 function normalizeDigits(v){return String(v||'').replace(/\D/g,'')}
 function normalizeThaiDateKey(v){
@@ -733,6 +738,23 @@ function normalizeThaiDateKey(v){
 function parseReplyMeta(text,fileName){
   const get=re=>{const m=String(text||'').match(re);return m?m[1].trim():''};
   return {Reply_Zip_Name:fileName||'',Period_Key:get(/งวดส่งของ\s*ร\.พ\.\s*=\s*([^\r\n]+)/i),Reply_No:get(/เลขที่ตอบรับ\s*=\s*([^\s\r\n]+)/i),Reply_Date:get(/วันที่ออกเลขตอบรับ\s*=\s*([^\r\n]+)/i),Station:get(/สถานี\s*:\s*([^\r\n]+)/i),Hospital_Code:get(/รหัส\s*ร\.พ\.\s*=\s*([^\r\n]+)/i)};
+}
+function parseReplyCheckCodeDescriptions(text){
+  const out={};let inSection=false;
+  for(const raw of normalizeReplyText(text).split('\n')){
+    const line=raw.trim();
+    if(/คำอธิบายรหัส\s*:\s*CheckCode/i.test(line)){inSection=true;continue;}
+    if(!inSection)continue;
+    if(/^หมายเหตุ/.test(line)||/^\*\*=/.test(line))break;
+    const m=line.match(/^([A-Z]{1,4}\d{1,4})\s*[:：]\s*(.+)$/i);
+    if(m)out[m[1].toUpperCase()]=m[2].trim();
+  }
+  return out;
+}
+function knowledgeIsComplete(k){
+  if(!k)return false;
+  const d=String(k.Description||'').trim(),c=String(k.Cause||'').trim(),sol=String(k.Solution||'').trim();
+  return Boolean(d && !/^พบรหัสจากไฟล์ตอบกลับ/.test(d) && (c && !/^รอวิเคราะห์/.test(c) || sol && !/^รอบันทึก/.test(sol)));
 }
 function parseSocdBilRows(text,sourceName,meta){
   const rows=[];
@@ -761,7 +783,7 @@ async function handleReplyImportFile(file){
   try{
     if(!registryState.items.length)await loadRegistry();
     const zip=await JSZip.loadAsync(file),entries=Object.values(zip.files).filter(x=>!x.dir),docs=[],allRows=[];let mainMeta={};
-    for(const e of entries){if(!/\.bil$/i.test(e.name))continue;const buf=await e.async('arraybuffer'),text=normalizeReplyText(decodeSsopBuffer(buf)),name=baseName(e.name),meta=parseReplyMeta(text,file.name);docs.push({name,text,meta});if(/_SOCDBIL_/i.test(name)){mainMeta=meta;allRows.push(...parseSocdBilRows(text,name,meta))}}
+    for(const e of entries){if(!/\.bil$/i.test(e.name))continue;const buf=await e.async('arraybuffer'),text=normalizeReplyText(decodeSsopBuffer(buf)),name=baseName(e.name),meta=parseReplyMeta(text,file.name);docs.push({name,text,meta});Object.assign(replyImportState.descriptions,parseReplyCheckCodeDescriptions(text));if(/_SOCDBIL_/i.test(name)){mainMeta=meta;allRows.push(...parseSocdBilRows(text,name,meta))}}
     if(!docs.length)throw new Error('ไม่พบไฟล์ .BIL ภายใน ZIP');
     if(!allRows.length)throw new Error('ไม่พบรายการผล A/C ในไฟล์ SOCDBIL');
     const matches=[],unmatched=[];
@@ -784,7 +806,12 @@ async function hydrateReplyImportKnowledge(){
 function replyKnowledgeHtml(errorCodes){
   const codes=String(errorCodes||'').split(',').map(v=>v.trim().toUpperCase()).filter(Boolean);
   if(!codes.length)return '<span class="knowledge-none">ไม่มีรหัสแจ้งเตือน</span>';
-  return codes.map(code=>{const k=replyImportState.knowledgeByCode[code];if(!k)return `<div class="reply-knowledge-item unknown"><b>${escapeHtml(code)}</b><span>ยังไม่มีใน Knowledge Base</span></div>`;const desc=k.Description||'มีข้อมูลใน Knowledge Base',sol=k.Solution||k.Tips||'';return `<div class="reply-knowledge-item known"><b>${escapeHtml(code)}</b><span>${escapeHtml(desc)}</span>${sol?`<small>แนวทาง: ${escapeHtml(sol)}</small>`:''}</div>`}).join('');
+  return codes.map(code=>{
+    const k=replyImportState.knowledgeByCode[code],fileDesc=replyImportState.descriptions[code]||'';
+    if(!k)return `<div class="reply-knowledge-item unknown"><b>${escapeHtml(code)}</b><span>${escapeHtml(fileDesc||'ยังไม่มีคำอธิบายใน Knowledge Base')}</span><button type="button" class="soft reply-kb-save" data-reply-kb-code="${escapeAttr(code)}">💾 บันทึกเข้าฐานความรู้</button></div>`;
+    const desc=k.Description||fileDesc||'มีข้อมูลใน Knowledge Base',sol=k.Solution||k.Tips||'',complete=knowledgeIsComplete(k);
+    return `<div class="reply-knowledge-item known ${complete?'':'incomplete'}"><b>${escapeHtml(code)}</b><span>${escapeHtml(desc)}</span>${sol?`<small>แนวทาง: ${escapeHtml(sol)}</small>`:''}<small>${complete?'✓ มีในฐานความรู้แล้ว':'มีแล้ว แต่ยังรอเติมวิธีแก้'}</small><button type="button" class="soft reply-kb-edit" data-reply-kb-code="${escapeAttr(code)}">✏️ แก้ไข</button></div>`;
+  }).join('');
 }
 
 function renderReplyImport(){
@@ -795,7 +822,7 @@ function renderReplyImport(){
   const a=items.filter(x=>x.Result_Code==='A').length,c=items.filter(x=>x.Result_Code==='C').length;
   document.getElementById('replyImportSummary').innerHTML=`<div><b>${items.length}</b><span>จับคู่ได้</span></div><div><b>${a}</b><span>ผล A</span></div><div><b>${c}</b><span>ผล C</span></div><div><b>${replyImportState.unmatched.length}</b><span>ยังจับคู่ไม่ได้</span></div><div><b>${replyImportState.knowledgeKnown}</b><span>Knowledge พร้อมใช้</span></div><div><b>${replyImportState.knowledgeUnknown}</b><span>รหัสใหม่</span></div>`;
   const body=document.getElementById('replyImportBody');body.innerHTML=items.length?items.map((x,i)=>`<tr><td>${i+1}</td><td><b>${escapeHtml(x.Case_ID)}</b><div class="subline">${escapeHtml(x.Patient_Name||'-')}</div></td><td>${escapeHtml(x.HN||'-')}<div class="subline">CID: ${escapeHtml(x.CID||'-')}</div></td><td><select data-reply-result="${i}"><option value="A" ${x.Result_Code==='A'?'selected':''}>A</option><option value="C" ${x.Result_Code==='C'?'selected':''}>C</option></select></td><td><input data-reply-codes="${i}" value="${escapeAttr(x.Error_Codes||'')}" placeholder="เช่น W07,C03"></td><td class="reply-knowledge-cell">${replyKnowledgeHtml(x.Error_Codes)}</td><td>${escapeHtml(x.Period_Key||'-')}<div class="subline">${escapeHtml(x.Source_Entry||'-')}</div></td><td><label class="reply-match-check"><input type="checkbox" data-reply-select="${i}" ${x.selected?'checked':''}> ยืนยัน</label><div class="subline">${escapeHtml(x.Match_Label||'')} · ${x.Match_Score}</div></td></tr>`).join(''):`<tr><td colspan="8" class="empty-row">ยังจับคู่ผู้ป่วยไม่ได้</td></tr>`;
-  body.querySelectorAll('[data-reply-result]').forEach(el=>el.onchange=()=>replyImportState.matches[Number(el.dataset.replyResult)].Result_Code=el.value);body.querySelectorAll('[data-reply-codes]').forEach(el=>el.onchange=async()=>{replyImportState.matches[Number(el.dataset.replyCodes)].Error_Codes=el.value.trim();await hydrateReplyImportKnowledge();renderReplyImport()});body.querySelectorAll('[data-reply-select]').forEach(el=>el.onchange=()=>replyImportState.matches[Number(el.dataset.replySelect)].selected=el.checked);
+  body.querySelectorAll('[data-reply-result]').forEach(el=>el.onchange=()=>replyImportState.matches[Number(el.dataset.replyResult)].Result_Code=el.value);body.querySelectorAll('[data-reply-codes]').forEach(el=>el.onchange=async()=>{replyImportState.matches[Number(el.dataset.replyCodes)].Error_Codes=el.value.trim();await hydrateReplyImportKnowledge();renderReplyImport()});body.querySelectorAll('[data-reply-select]').forEach(el=>el.onchange=()=>replyImportState.matches[Number(el.dataset.replySelect)].selected=el.checked);body.querySelectorAll('[data-reply-kb-code]').forEach(btn=>btn.onclick=()=>{const code=btn.dataset.replyKbCode,k=replyImportState.knowledgeByCode[code]||null;openCaseKnowledgeModal(code,'',replyImportState.descriptions[code]||'',k)});
   const un=document.getElementById('replyImportUnmatched');un.classList.toggle('hidden',!replyImportState.unmatched.length);un.innerHTML=replyImportState.unmatched.length?`<b>รายการที่ยังจับคู่ไม่ได้:</b><br>${replyImportState.unmatched.map(escapeHtml).join('<br>')}`:'';
 }
 async function saveReplyImport(){
