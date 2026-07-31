@@ -143,3 +143,14 @@ All Rights Reserved.
 #registryResetFilterBtn{white-space:nowrap}
 
 /* V3.5.0: compact one-row registry controls on desktop */
+
+/* V3.5.1 Case Detail */
+.registry-detail-modal{width:min(1180px,97vw);max-height:94vh}
+.case-detail-summary{background:#f8fbff;border:1px solid #e1ebf5;border-radius:16px;padding:12px}
+.knowledge-detail-list{display:grid;gap:10px}
+.knowledge-detail-card{display:grid;grid-template-columns:92px 1fr;gap:14px;padding:14px;border:1px solid #e5e7eb;border-radius:14px;background:#fff}
+.knowledge-code{align-self:start;text-align:center;font-weight:800;padding:8px 10px;border-radius:999px;background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
+.knowledge-detail-card p{margin:5px 0;line-height:1.5}
+.error-text{color:#b91c1c;font-weight:700}
+.empty-knowledge{padding:14px;border:1px dashed #cbd5e1;border-radius:12px;text-align:center}
+@media(max-width:760px){.knowledge-detail-card{grid-template-columns:1fr}.knowledge-code{justify-self:start}}
