@@ -163,14 +163,25 @@ body.modal-open{overflow:hidden}
 .case-knowledge-modal .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
 #caseDetailClose,#caseKnowledgeClose{position:relative;z-index:5;cursor:pointer;pointer-events:auto}
 
-/* V3.6.3 Production Hotfix */
+/* V3.6.4 Production Hotfix */
 #registryStatusFilter,#registrySort,#registryPageSize{appearance:auto!important;-webkit-appearance:menulist!important;-moz-appearance:menulist!important;padding-right:30px!important;background-color:#fff!important;cursor:pointer}
 .registry-c-col{white-space:normal!important;min-width:110px}.registry-error-desc{min-width:230px;max-width:360px;line-height:1.45}.registry-toolbar select{background-image:none!important}
 #importExcelBtn,#openZipReaderBtn,#openReplyImportBtn,#caseDetailClose,#caseKnowledgeClose,#zipReaderClose,#excelImportClose,#replyImportClose{position:relative;z-index:3;pointer-events:auto!important;cursor:pointer}
 
 
-/* V3.6.3 Production — Knowledge workflow and registry reference menus */
+/* V3.6.4 Production — Knowledge workflow and registry reference menus */
 .registry-header-actions{flex-wrap:wrap;gap:8px;max-width:900px}.registry-header-actions>button,.registry-header-actions .split-doc-action{flex:0 0 auto}
 .case-knowledge-modal{width:min(820px,96vw);max-height:94vh}.case-knowledge-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.case-knowledge-grid .field{display:flex;flex-direction:column;gap:6px}.case-knowledge-grid .field label{font-weight:700;color:#29443f}.case-knowledge-grid .span-2{grid-column:1/-1}.case-knowledge-grid input,.case-knowledge-grid textarea{width:100%;box-sizing:border-box;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}.case-knowledge-grid textarea{line-height:1.5;resize:vertical}.case-knowledge-grid input:focus,.case-knowledge-grid textarea:focus{outline:none;border-color:#72c7ad;box-shadow:0 0 0 3px rgba(114,199,173,.18)}
 .reply-knowledge-item{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:9px;border-radius:10px}.reply-knowledge-item.unknown{background:#fff7ed;border:1px solid #fed7aa}.reply-knowledge-item.known{background:#f0fdf4;border:1px solid #bbf7d0}.reply-knowledge-item.incomplete{background:#fffbeb;border-color:#fde68a}.reply-kb-save,.reply-kb-edit{margin-top:4px;padding:6px 9px;font-size:12px}.reply-knowledge-cell{min-width:260px}
 @media(max-width:900px){.registry-header-actions{justify-content:flex-start}.case-knowledge-grid{grid-template-columns:1fr}.case-knowledge-grid .span-2{grid-column:auto}}
+
+/* V3.6.4 Production usability */
+#caseKnowledgeModal{z-index:12050}
+#caseKnowledgeModal .modal-card{position:relative}
+.reply-knowledge-cell{overflow:hidden}
+.reply-knowledge-item{max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.reply-knowledge-item span,.reply-knowledge-item small{display:block;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.reply-knowledge-item button{align-self:flex-start;max-width:100%;white-space:normal}
+.zip-table-wrap .field-tip{cursor:help}
+.zip-table-wrap .head-wrap{display:inline-flex;align-items:center;gap:5px}
+.hidden{display:none!important}
