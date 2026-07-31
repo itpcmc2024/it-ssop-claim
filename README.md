@@ -123,3 +123,19 @@
 - แสดง Error Code เป็นป้าย [CODE] พร้อม tooltip และคลิกเพื่อกรอง
 - แยกคำอธิบาย Error เป็นคนละบรรทัดตาม |, line break หรือรหัสถัดไป
 - เพิ่ม cache-busting เป็น v=3.7.5 เพื่อให้ GitHub Pages โหลด CSS/JS ใหม่ทันที
+
+
+## V3.8.0 — Authentication & Multi-user Baseline
+- Login ด้วย User ID/Email และรหัสผ่าน
+- Role: ADMIN / USER
+- ADMIN จัดการผู้ใช้และ System_Config ผ่านการ์ด “จัดการระบบ”
+- USER ใช้งานทุกโมดูลและ Knowledge ได้ แต่ไม่เห็นเมนูจัดการระบบ
+- ทุกการบันทึกใช้ Display_Name ของผู้ล็อกอินเป็นผู้ทำรายการจากฝั่ง Backend
+- หน้า C Registry ตัดคอลัมน์คำอธิบายซ้ำออก ใช้ Error Code Tag + Tooltip
+- เรียงปุ่ม: ดู | แก้ไข | แก้ไข ZIP | ปุ่มตามเงื่อนไข
+
+### เปิดใช้งานครั้งแรก
+1. เปิด `Code.gs` และแก้ค่าใน `setupInitialAdmin()` โดยเฉพาะ `INITIAL_ADMIN_PASSWORD`
+2. Run `setupAllSheets()` หนึ่งครั้งเพื่อเพิ่มคอลัมน์ Password_Hash/Password_Salt โดยไม่ลบข้อมูลเดิม
+3. Run `setupInitialAdmin()` เพื่อสร้าง Admin คนแรก
+4. Deploy Apps Script เป็นเวอร์ชันใหม่ แล้วอัปโหลดไฟล์ GitHub Pages
