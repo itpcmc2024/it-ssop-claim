@@ -18,9 +18,25 @@ function showPage(pageId){
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function goHome(){
- document.querySelectorAll('.module-page').forEach(p=>p.classList.remove('active'));
- document.getElementById('homePage').classList.remove('hidden-page');
- window.scrollTo({top:0,behavior:'smooth'});
+  // ปิดทุกหน้าโมดูล
+  document.querySelectorAll('.module-page').forEach(page => {
+    page.classList.remove('active');
+  });
+
+  // แสดงหน้า Dashboard ที่มีการ์ดโมดูลทั้งหมด
+  const homePage = document.getElementById('homePage');
+  if (homePage) {
+    homePage.classList.remove('hidden-page');
+  }
+
+  // ลบ ?page=editor หรือ ?page=knowledge ออกจาก URL
+  const cleanUrl = `${window.location.origin}${window.location.pathname}`;
+  window.history.replaceState({}, '', cleanUrl);
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
 }
 function openModule(name){
  if(name==='cancer'){showPage('registryPage');loadRegistry();return;}
