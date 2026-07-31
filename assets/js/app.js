@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.7.4
+SSOP Toolkit Professional Edition V3.7.5
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -521,9 +521,15 @@ function registryErrorCodes(value){
  return [...new Set(String(value||'').split(/[|,;\s]+/).map(x=>x.trim().toUpperCase()).filter(Boolean))];
 }
 function registryErrorDescriptions(value){
- const text=String(value||'').trim();
+ const text=String(value||'').replace(/\r/g,'').trim();
  if(!text)return ['ยังไม่มีคำอธิบายใน Knowledge Base'];
- const parts=text.split(/\s*\|\s*|\r?\n+/).map(x=>x.trim()).filter(Boolean);
+ // ทำให้คำอธิบายแต่ละรหัสแยกจากกัน แม้ข้อมูลเดิมจะคั่นด้วย |, ขึ้นบรรทัดใหม่
+ // หรือถูกต่อกันโดยไม่มีตัวคั่นที่ชัดเจน
+ const normalized=text
+  .replace(/\n+/g,' | ')
+  .replace(/\s*\|\s*/g,' | ')
+  .replace(/\s+(?=[A-Z]{1,4}\d{1,4}\s*[:：])/gi,' | ');
+ const parts=normalized.split(/\s*\|\s*/).map(x=>x.trim()).filter(Boolean);
  return parts.length?parts:[text];
 }
 function registryErrorTagsHtml(x){
@@ -532,10 +538,11 @@ function registryErrorTagsHtml(x){
  const descByCode=new Map();
  descParts.forEach(part=>{const m=part.match(/^([A-Z]{1,4}\d{1,4})\s*[:：]\s*(.*)$/i);if(m)descByCode.set(m[1].toUpperCase(),m[2].trim())});
  if(!codes.length)return '<span class="meta">-</span>';
- return codes.map(code=>`<button type="button" class="error-code-tag" data-error-filter="${escapeAttr(code)}" title="${escapeAttr(descByCode.get(code)||'คลิกเพื่อกรองรหัส '+code)}">${escapeHtml(code)}</button>`).join('');
+ return codes.map(code=>`<button type="button" class="error-code-tag" data-error-filter="${escapeAttr(code)}" title="${escapeAttr(descByCode.get(code)||'คลิกเพื่อกรองรหัส '+code)}">[${escapeHtml(code)}]</button>`).join('');
 }
 function registryErrorDescriptionHtml(value){
- return registryErrorDescriptions(value).map(part=>`<div class="registry-error-line">${escapeHtml(part)}${part.endsWith('|')?'':' <span class="error-separator">|</span>'}</div>`).join('');
+ const parts=registryErrorDescriptions(value);
+ return parts.map((part,index)=>`<div class="registry-error-line">${escapeHtml(part)}${index<parts.length-1?' <span class="error-separator">|</span>':''}</div>`).join('');
 }
 function renderRegistry(){
  const size=Number(document.getElementById('registryPageSize')?.value||20);registryState.pageSize=size;
