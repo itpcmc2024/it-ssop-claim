@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V3.7.3
+SSOP Toolkit Professional Edition V3.7.4
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -507,7 +507,7 @@ function applyRegistryFilter(){
  const q=(document.getElementById('registrySearch')?.value||'').trim().toLowerCase();
  const statusFilter=document.getElementById('registryStatusFilter')?.value||'ALL';
  const sort=document.getElementById('registrySort')?.value||'newest';
- registryState.filtered=registryState.items.filter(x=>registryMatchesStatus(x,statusFilter)&&(!q||[x.Case_ID,x.HN,x.VN,x.CID,x.Patient_Name,x.SSO_Case_No,x.Protocol_Code,x.Session,x.Station,`${x.Session||''} : ${x.Station||''}`,x.Work_Order_No,x.Case_Status,x.Assigned_To].some(v=>String(v||'').toLowerCase().includes(q))));
+ registryState.filtered=registryState.items.filter(x=>registryMatchesStatus(x,statusFilter)&&(!q||[x.Case_ID,x.HN,x.VN,x.CID,x.Patient_Name,x.SSO_Case_No,x.Protocol_Code,x.Session,x.Station,`${x.Session||''} : ${x.Station||''}`,x.Work_Order_No,x.Case_Status,x.Assigned_To,x.Latest_Result,x.Latest_Error_Code,x.Latest_Error_Description,x.Latest_Error_Cause,x.Latest_Error_Solution].some(v=>String(v||'').toLowerCase().includes(q))));
  registryState.filtered.sort((a,b)=>{
   if(sort==='name')return String(a.Patient_Name||'').localeCompare(String(b.Patient_Name||''),'th',{sensitivity:'base'})||registryCaseSequence(a)-registryCaseSequence(b);
   const av=registryDateValue(a),bv=registryDateValue(b);
@@ -517,15 +517,35 @@ function applyRegistryFilter(){
  });
  registryState.page=1;syncRegistryStatusCards();renderRegistry();
 }
+function registryErrorCodes(value){
+ return [...new Set(String(value||'').split(/[|,;\s]+/).map(x=>x.trim().toUpperCase()).filter(Boolean))];
+}
+function registryErrorDescriptions(value){
+ const text=String(value||'').trim();
+ if(!text)return ['ยังไม่มีคำอธิบายใน Knowledge Base'];
+ const parts=text.split(/\s*\|\s*|\r?\n+/).map(x=>x.trim()).filter(Boolean);
+ return parts.length?parts:[text];
+}
+function registryErrorTagsHtml(x){
+ const codes=registryErrorCodes(x.Latest_Error_Code);
+ const descParts=registryErrorDescriptions(x.Latest_Error_Description);
+ const descByCode=new Map();
+ descParts.forEach(part=>{const m=part.match(/^([A-Z]{1,4}\d{1,4})\s*[:：]\s*(.*)$/i);if(m)descByCode.set(m[1].toUpperCase(),m[2].trim())});
+ if(!codes.length)return '<span class="meta">-</span>';
+ return codes.map(code=>`<button type="button" class="error-code-tag" data-error-filter="${escapeAttr(code)}" title="${escapeAttr(descByCode.get(code)||'คลิกเพื่อกรองรหัส '+code)}">${escapeHtml(code)}</button>`).join('');
+}
+function registryErrorDescriptionHtml(value){
+ return registryErrorDescriptions(value).map(part=>`<div class="registry-error-line">${escapeHtml(part)}${part.endsWith('|')?'':' <span class="error-separator">|</span>'}</div>`).join('');
+}
 function renderRegistry(){
  const size=Number(document.getElementById('registryPageSize')?.value||20);registryState.pageSize=size;
  const total=registryState.filtered.length,pages=Math.max(1,Math.ceil(total/size));registryState.page=Math.min(registryState.page,pages);
  const start=(registryState.page-1)*size,rows=registryState.filtered.slice(start,start+size),body=document.getElementById('registryBody');
  const showCDetails=(document.getElementById('registryStatusFilter')?.value||'ALL')==='C';
  document.querySelectorAll('.registry-c-col').forEach(el=>el.classList.toggle('hidden',!showCDetails));
- body.innerHTML=rows.length?rows.map(x=>{const status=String(x.Case_Status||'').trim();const readyAction=status==='รอตรวจสอบ'?`<button class="primary compact-ready" data-case-ready="${escapeHtml(x.Case_ID)}">✓ พร้อมส่ง</button>`:'';const submittedAction=status==='พร้อมส่ง'?`<button class="primary compact-ready" data-case-submitted="${escapeHtml(x.Case_ID)}">📤 บันทึกส่งแล้ว</button>`:'';const reworkAction=(status==='ติดแก้ไข (C)'||x.Latest_Result==='C')?`<button class="primary compact-ready" data-case-rework="${escapeHtml(x.Case_ID)}">🔧 เริ่มแก้ไข</button>`:'';const cCells=showCDetails?`<td class="registry-c-col"><b class="error-text">${escapeHtml(x.Latest_Error_Code||'-')}</b></td><td class="registry-c-col registry-error-desc">${escapeHtml(x.Latest_Error_Description||'ยังไม่มีคำอธิบายใน Knowledge Base')}</td>`:'';return `<tr><td><div class="case-no">${escapeHtml(x.Case_ID||'-')}</div><div class="subline">ครั้งที่ ${escapeHtml(x.Current_Attempt_No||0)}</div></td><td><b>${escapeHtml(x.HN||'-')}</b><div class="subline">VN: ${escapeHtml(x.VN||'-')}</div></td><td><b>${escapeHtml(x.Patient_Name||'-')}</b><div class="subline">CID: ${escapeHtml(x.CID?String(x.CID).replace(/.(?=.{4})/g,'•'):'-')}</div></td><td>${thDate(x.Service_Date)}</td><td>${escapeHtml(x.SSO_Case_No||'-')}<div class="subline">${escapeHtml(x.Protocol_Code||'-')}</div></td><td class="session-station-col"><b>${escapeHtml(x.Session||'-')}</b> : <b>${escapeHtml(x.Station||'-')}</b></td><td class="work-no-col">${escapeHtml(x.Work_Order_No||'-')}</td><td><span class="status-pill ${statusClassName(x.Case_Status)}">${escapeHtml(x.Case_Status||'รอเตรียมข้อมูล')}</span></td><td><span class="result-pill ${x.Latest_Result==='A'?'a':x.Latest_Result==='C'?'c':''}">${escapeHtml(x.Latest_Result||'-')}</span></td>${cCells}<td>${escapeHtml(x.Assigned_To||'-')}</td><td><div class="row-actions">${readyAction}${submittedAction}${reworkAction}<button class="soft" data-case-view="${escapeHtml(x.Case_ID)}">ดู</button><button class="soft" data-case-zip="${escapeHtml(x.Case_ID)}">แก้ไข ZIP</button><button class="soft" data-case-edit="${escapeHtml(x.Case_ID)}">แก้ไข</button></div></td></tr>`}).join(''):`<tr><td colspan="${showCDetails?13:11}" class="empty-row">ยังไม่มีข้อมูลทะเบียนงาน</td></tr>`;
- body.querySelectorAll('[data-case-view]').forEach(b=>b.onclick=()=>openCaseDetail(b.dataset.caseView));body.querySelectorAll('[data-case-zip]').forEach(b=>b.onclick=()=>openZipReader(b.dataset.caseZip));body.querySelectorAll('[data-case-edit]').forEach(b=>b.onclick=()=>openCaseModal(b.dataset.caseEdit));body.querySelectorAll('[data-case-ready]').forEach(b=>b.onclick=()=>markCaseReady(b.dataset.caseReady));body.querySelectorAll('[data-case-submitted]').forEach(b=>b.onclick=()=>markCaseSubmitted(b.dataset.caseSubmitted));body.querySelectorAll('[data-case-rework]').forEach(b=>b.onclick=()=>startCaseRework(b.dataset.caseRework));
- document.getElementById('registryCountText').textContent=total?`แสดง ${start+1}-${Math.min(start+size,total)} จาก ${total} รายการ`:'0 รายการ';
+ body.innerHTML=rows.length?rows.map(x=>{const status=String(x.Case_Status||'').trim();const readyAction=status==='รอตรวจสอบ'?`<button class="primary compact-ready" data-case-ready="${escapeHtml(x.Case_ID)}">✓ พร้อมส่ง</button>`:'';const submittedAction=status==='พร้อมส่ง'?`<button class="primary compact-ready" data-case-submitted="${escapeHtml(x.Case_ID)}">📤 บันทึกส่งแล้ว</button>`:'';const reworkAction=(status==='ติดแก้ไข (C)'||x.Latest_Result==='C')?`<button class="primary compact-ready" data-case-rework="${escapeHtml(x.Case_ID)}">🔧 เริ่มแก้ไข</button>`:'';const cCells=showCDetails?`<td class="registry-c-col"><div class="error-code-tags">${registryErrorTagsHtml(x)}</div></td><td class="registry-c-col registry-error-desc">${registryErrorDescriptionHtml(x.Latest_Error_Description)}</td>`:'';return `<tr><td><div class="case-no">${escapeHtml(x.Case_ID||'-')}</div><div class="subline">ครั้งที่ ${escapeHtml(x.Current_Attempt_No||0)}</div></td><td><b>${escapeHtml(x.HN||'-')}</b><div class="subline">VN: ${escapeHtml(x.VN||'-')}</div></td><td><b>${escapeHtml(x.Patient_Name||'-')}</b><div class="subline">CID: ${escapeHtml(x.CID?String(x.CID).replace(/.(?=.{4})/g,'•'):'-')}</div></td><td>${thDate(x.Service_Date)}</td><td>${escapeHtml(x.SSO_Case_No||'-')}<div class="subline">${escapeHtml(x.Protocol_Code||'-')}</div></td><td class="session-station-col"><b>${escapeHtml(x.Session||'-')}</b> : <b>${escapeHtml(x.Station||'-')}</b></td><td class="work-no-col">${escapeHtml(x.Work_Order_No||'-')}</td><td><span class="status-pill ${statusClassName(x.Case_Status)}">${escapeHtml(x.Case_Status||'รอเตรียมข้อมูล')}</span></td><td><span class="result-pill ${x.Latest_Result==='A'?'a':x.Latest_Result==='C'?'c':''}">${escapeHtml(x.Latest_Result||'-')}</span></td>${cCells}<td>${escapeHtml(x.Assigned_To||'-')}</td><td><div class="row-actions">${readyAction}${submittedAction}${reworkAction}<button class="soft" data-case-view="${escapeHtml(x.Case_ID)}">ดู</button><button class="soft" data-case-zip="${escapeHtml(x.Case_ID)}">แก้ไข ZIP</button><button class="soft" data-case-edit="${escapeHtml(x.Case_ID)}">แก้ไข</button></div></td></tr>`}).join(''):`<tr><td colspan="${showCDetails?13:11}" class="empty-row">ยังไม่มีข้อมูลทะเบียนงาน</td></tr>`;
+ body.querySelectorAll('[data-case-view]').forEach(b=>b.onclick=()=>openCaseDetail(b.dataset.caseView));body.querySelectorAll('[data-case-zip]').forEach(b=>b.onclick=()=>openZipReader(b.dataset.caseZip));body.querySelectorAll('[data-case-edit]').forEach(b=>b.onclick=()=>openCaseModal(b.dataset.caseEdit));body.querySelectorAll('[data-case-ready]').forEach(b=>b.onclick=()=>markCaseReady(b.dataset.caseReady));body.querySelectorAll('[data-case-submitted]').forEach(b=>b.onclick=()=>markCaseSubmitted(b.dataset.caseSubmitted));body.querySelectorAll('[data-case-rework]').forEach(b=>b.onclick=()=>startCaseRework(b.dataset.caseRework));body.querySelectorAll('[data-error-filter]').forEach(b=>b.onclick=()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter');if(search)search.value=b.dataset.errorFilter||'';if(status)status.value='C';applyRegistryFilter()});
+ document.getElementById('registryCountText').textContent=total?`แสดง ${start+1}-${Math.min(start+size,total)} จาก ${total} รายการ · หน้า ${registryState.page} / ${pages}`:'0 รายการ · หน้า 1 / 1';
  const pageWrap=document.getElementById('registryPages');pageWrap.innerHTML='';for(let i=1;i<=pages;i++){if(pages>10&&Math.abs(i-registryState.page)>2&&i!==1&&i!==pages)continue;const b=document.createElement('button');b.textContent=i;b.className=i===registryState.page?'active':'';b.onclick=()=>{registryState.page=i;renderRegistry()};pageWrap.appendChild(b)}
  renderRegistryStats();
 }
