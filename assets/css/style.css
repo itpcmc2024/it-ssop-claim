@@ -204,7 +204,7 @@ body.modal-open{overflow:hidden}
 
 
 /* ======================================================
-   V3.7.1 UI Polish — Compact Knowledge Center + safe toast
+   V3.7.2 Productivity Polish — Compact Knowledge Center + safe toast
 ====================================================== */
 /* Move notifications below the page header so they do not cover close/menu buttons. */
 .toast-stack{
@@ -315,3 +315,14 @@ body.modal-open{overflow:hidden}
   #knowledgePage .card{padding:11px}
   #knowledgePage .knowledge-card{padding:11px}
 }
+
+
+/* ======================================================
+   V3.7.2 Productivity Polish — compact registry columns
+====================================================== */
+.registry-table .session-station-col{min-width:112px;width:112px;white-space:nowrap;text-align:center}
+.registry-table .work-no-col{min-width:82px;width:82px;white-space:nowrap;text-align:center}
+.registry-table th.session-station-col,.registry-table th.work-no-col{font-size:12px}
+.registry-table th:nth-child(4),.registry-table td:nth-child(4){min-width:100px;width:100px;white-space:nowrap}
+.registry-table th:nth-child(5),.registry-table td:nth-child(5){min-width:158px;width:158px}
+@media(max-width:900px){.registry-table .session-station-col{min-width:105px;width:105px}.registry-table .work-no-col{min-width:78px;width:78px}}
