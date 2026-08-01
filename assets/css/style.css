@@ -359,9 +359,18 @@ body.modal-open{overflow:hidden}
 @media(max-width:800px){.auth-bar{right:8px;bottom:8px}.admin-feature-grid{grid-template-columns:1fr}.config-item{grid-template-columns:1fr}.row-actions{flex-wrap:wrap!important}}
 
 
-/* V3.8.2 ZIP row add/delete tools */
+/* V4.0.0 ZIP row add/delete tools */
 .zip-row-tools{display:inline-flex;align-items:center;gap:7px;padding:4px 8px;border:1px solid #d8e9e5;border-radius:12px;background:#f7fcfb}
 .zip-row-btn{width:36px;height:34px;border-radius:9px;border:1px solid #bcded6;font-size:24px;line-height:1;font-weight:800;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:#fff;color:#246f61}
 .zip-row-btn.add:hover{background:#e8faf5;border-color:#4fc6ad}.zip-row-btn.delete{color:#b23a4a;border-color:#ecc7cc}.zip-row-btn.delete:hover:not(:disabled){background:#fff0f2;border-color:#db7b88}.zip-row-btn:disabled{opacity:.38;cursor:not-allowed;background:#f1f4f3}
 .zip-selected-count{font-size:12px;font-weight:700;color:#5d7470;min-width:72px;text-align:center}.zip-select-col{width:42px;min-width:42px;text-align:center!important;position:sticky;left:0;z-index:3;background:#f7fbfa!important}.zip-select-col input{width:17px;height:17px;accent-color:#39b9a1;cursor:pointer}.zip-row-selected td{background:#eefaf7}.zip-row-selected .zip-select-col{background:#dff5ef!important}.zip-row-selected .important-cell{background:#fff1f2}
 @media(max-width:760px){.zip-row-tools{order:2}.zip-selected-count{display:none}}
+
+
+/* V4.0.0 Unified ZIP Editor */
+.save-file-btn{border:1px solid #72b89f;background:#e7f8f1;color:#176a51;font-weight:700;border-radius:10px;padding:9px 13px;cursor:pointer;white-space:nowrap}
+.save-file-btn:hover{background:#d8f2e8;transform:translateY(-1px)}
+.save-file-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.zip-editor-toolbar .hidden{display:none!important}
+.zip-edit-cell[contenteditable="true"]{cursor:text;min-width:90px}
+.zip-edit-cell:focus{outline:2px solid #7ab7ff;outline-offset:-2px;background:#eef7ff!important}
