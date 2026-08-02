@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.1.3
+SSOP Toolkit Professional Edition V4.1.4
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -539,7 +539,12 @@ function openErrorQueue(code){
  const stat=buildErrorStats().find(x=>x.code===String(code).toUpperCase());if(!stat)return;
  registryState.activeErrorCode=stat.code;const k=registryState.errorKnowledge.get(stat.code);
  document.getElementById('errorQueueTitle').textContent=`${stat.code} · ${stat.count} ราย`;
- const desc=isWarningCode(stat.code)?'รหัสเตือน: ใช้ติดตามเพื่อปรับปรุงข้อมูลต้นทางใน HIS':(k?.Description||'ยังไม่มีคำอธิบายในฐานความรู้');
+ const itemDescription=stat.items.map(item=>{
+  const parts=registryErrorDescriptions(item?.Latest_Error_Description||'');
+  const matched=parts.find(part=>new RegExp('^'+stat.code+'\\s*[:：]','i').test(part));
+  return matched?matched.replace(new RegExp('^'+stat.code+'\\s*[:：]\\s*','i'),'').trim():'';
+ }).find(Boolean)||'';
+ const desc=String(k?.Description||itemDescription||'ยังไม่มีคำอธิบายในฐานความรู้').trim();
  const solution=String(k?.Solution||'').trim();
  document.getElementById('errorQueueSub').innerHTML=`<span class="queue-description">${escapeHtml(desc)}</span>${solution?`<span class="queue-solution"><b>วิธีแก้ไข:</b> ${escapeHtml(solution)}</span>`:'<span class="queue-solution pending">ยังไม่มีวิธีแก้ไขที่บันทึกไว้</span>'}`;
  const list=document.getElementById('errorQueueList');list.innerHTML=stat.items.slice().sort((a,b)=>String(a.Session||'').localeCompare(String(b.Session||''))||String(a.Station||'').localeCompare(String(b.Station||''))).map(item=>`<article class="error-queue-row"><div><b>${escapeHtml(item.Session||'-')} : ${escapeHtml(item.Station||'-')}</b><span>Work ${escapeHtml(item.Work_Order_No||'-')}</span></div><div class="grow"><strong>${escapeHtml(item.Patient_Name||item.Case_ID||'-')}</strong><small>HN ${escapeHtml(item.HN||'-')} · ${escapeHtml(item.Case_ID||'-')} · VN ${escapeHtml(item.VN||'-')}</small></div><button class="soft" data-error-goto="${escapeAttr(item.Case_ID)}">ไปทะเบียน</button>${isViewer()?'':`<button class="primary" data-error-zip="${escapeAttr(item.Case_ID)}">แก้ไข ZIP</button>`}</article>`).join('');
@@ -965,7 +970,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.1.3 */
+/* Excel Import V4.1.4 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 function openExcelImport(){resetExcelImport();const m=document.getElementById('excelImportModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}
