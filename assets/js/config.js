@@ -1,7 +1,7 @@
-/* SSOP Toolkit V4.1.2 Production Configuration */
+/* SSOP Toolkit V4.1.3 Production Configuration */
 window.SSOP_CONFIG = {
   apiUrl: 'https://script.google.com/macros/s/AKfycbxI_G_yQMCii-NsSp4-hX3I-dTF0_0hNE0ktghhEHSyIDUKpJZO9oGS8tokY5Hu0IeP4g/exec',
-  version: '4.1.2',
+  version: '4.1.3',
   environment: 'PRODUCTION',
   repository: 'it-ssop-claim',
   defaultModule: 'SSOCAC'
