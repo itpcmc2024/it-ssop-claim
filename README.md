@@ -148,7 +148,7 @@
 - Unknown-action responses now include backend version and received action.
 
 
-## V4.1.0 — ZIP Row Tools
+## V4.1.1 — ZIP Row Tools
 
 - เพิ่ม Checkbox หน้าแถวทุกแถวในหน้าแก้ไข ZIP
 - ปุ่ม − จะเปิดใช้งานเมื่อมีแถวถูกเลือก และลบหลายแถวพร้อมกันได้
@@ -158,7 +158,7 @@
 - ปุ่ม “คืนค่าไฟล์นี้” สามารถย้อนกลับการเพิ่ม/ลบทั้งหมดของไฟล์ที่เปิดได้
 
 
-## V4.1.0 — Unified ZIP Editor
+## V4.1.1 — Unified ZIP Editor
 - แยกโหมดเปิด ZIP อิสระออกจากโหมดแก้ไข ZIP รายผู้ป่วย
 - ซ่อน Smart Auto Fill ในโหมดเปิด ZIP อิสระ
 - แก้การเขียนข้อมูลจาก Grid กลับเข้าไฟล์ SSOP จริง
@@ -168,10 +168,19 @@
 - แสดงสถานะยังไม่บันทึก/บันทึกแล้ว และเตือนก่อนปิดหน้าต่าง
 
 
-## V4.1.0 Production Baseline
+## V4.1.1 Production Baseline
 - Smart Error Dashboard and Error Work Queue
 - Work Queue displays Session : Station and Work No.
 - Error colors: solved knowledge (green), warning W (yellow), unresolved error (red)
 - Knowledge Center compact expandable rows
 - Knowledge opens in a new browser tab
 - ZIP status badge moved before file search
+
+
+## V4.1.1 Production Hotfix
+- แก้ปุ่มปิด/แสดงในทะเบียนงานใน Error Work Queue
+- เพิ่ม VN และส่งออก CSV ราย Error Code
+- Work Queue แสดงเฉพาะตัวกรองต้องแก้ (C)
+- ไปทะเบียนข้ามหน้าและคงไฮไลต์
+- อ่าน Error Code จากทั้งรหัสและคำอธิบาย
+- SSO Editor รองรับไฟล์ ZIP และหลายโมดูล
