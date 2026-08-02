@@ -377,7 +377,7 @@ body.modal-open{overflow:hidden}
 
 
 /* ======================================================
-   V4.1.0 Production Baseline — Error Intelligence & Compact Knowledge
+   V4.1.1 Production Baseline — Error Intelligence & Compact Knowledge
 ====================================================== */
 .error-intelligence-card{padding:14px 16px}.error-intelligence-head{align-items:center;margin-bottom:10px}.knowledge-score{padding:7px 12px;border-radius:999px;background:#e8f7f1;color:#176a51;font-weight:800;font-size:13px;white-space:nowrap}
 .error-work-queue{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px}.error-work-card{display:grid;gap:5px;text-align:left;padding:11px 12px;border-radius:14px;border:1px solid #dbe8e5;background:#fff;cursor:pointer;min-height:92px;transition:.18s ease}.error-work-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(42,75,70,.12)}.error-work-card-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.error-work-card-top strong{font-size:18px}.error-work-card-top b{font-size:13px}.error-work-card span{font-size:12px;font-weight:800}.error-work-card small{color:#657a76;line-height:1.35}.error-work-card.critical{border-color:#efb9bf;background:#fff5f6;color:#a32333}.error-work-card.solved{border-color:#a9ddc9;background:#effaf5;color:#176a51}.error-work-card.warning{border-color:#ecd58a;background:#fff9df;color:#80620c}
@@ -386,3 +386,12 @@ body.modal-open{overflow:hidden}
 .zip-preview-head{gap:10px}.zip-search-status{flex:0 0 auto;white-space:nowrap;margin-left:auto}.zip-preview-head #zipTableSearch{flex:0 1 360px;min-width:220px}.zip-editor-toolbar{align-items:center}
 #knowledgePage .knowledge-results{display:grid;gap:7px}.knowledge-compact-row{border:1px solid #dce9e6;border-radius:12px;background:#fff;overflow:hidden}.knowledge-compact-row[open]{box-shadow:0 8px 20px rgba(45,78,73,.08)}.knowledge-compact-row>summary{list-style:none;display:grid;grid-template-columns:70px 70px minmax(240px,1fr) 120px 24px;gap:9px;align-items:center;padding:9px 11px;cursor:pointer}.knowledge-compact-row>summary::-webkit-details-marker{display:none}.knowledge-code-badge{display:inline-flex;justify-content:center;padding:5px 8px;border-radius:9px;background:#fff0f1;color:#a72330;font-weight:900}.knowledge-compact-row.complete .knowledge-code-badge{background:#e7f8f0;color:#176a51}.knowledge-module-mini{font-size:11px;color:#6b7d79}.knowledge-description{font-size:13px;line-height:1.35}.knowledge-status-mini{font-size:11px;font-weight:800;color:#9b6a00}.knowledge-compact-row.complete .knowledge-status-mini{color:#176a51}.knowledge-chevron{text-align:center}.knowledge-compact-row[open] .knowledge-chevron{transform:rotate(180deg)}.knowledge-compact-detail{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:10px 12px;border-top:1px solid #e4eeeb;background:#f8fbfa}.knowledge-compact-detail>div{padding:9px;border-radius:10px;background:#fff}.knowledge-compact-detail p{margin:4px 0 0;line-height:1.45}.knowledge-compact-row .knowledge-card-footer{padding:8px 12px;margin:0;border-top:1px solid #e4eeeb}.knowledge-compact-row .knowledge-tips{margin:8px 12px}
 @media(max-width:760px){.error-work-queue{grid-template-columns:repeat(2,minmax(0,1fr))}.error-queue-row{align-items:stretch;flex-direction:column}.error-queue-row>div:first-child{min-width:0}.knowledge-compact-row>summary{grid-template-columns:58px 50px 1fr 22px}.knowledge-status-mini{display:none}.knowledge-compact-detail{grid-template-columns:1fr}.zip-preview-head{flex-wrap:wrap}.zip-search-status{margin-left:0}.zip-preview-head #zipTableSearch{flex:1 1 100%;min-width:0}}
+
+/* V4.1.1 Production Hotfix */
+#errorIntelligenceCard.hidden{display:none!important}
+.registry-row-highlight{background:#fff2a8!important;box-shadow:inset 5px 0 0 #eab308!important}
+.registry-row-highlight td{background:#fff8c7!important}
+.error-queue-modal-card{position:relative}
+.error-queue-modal-card .modal-x{position:absolute;right:16px;top:12px;z-index:5;border:0;background:#fff;border-radius:999px;width:42px;height:42px;font-size:28px;cursor:pointer}
+.error-queue-list{max-height:68vh;overflow:auto;padding-right:4px}
+.error-queue-row small{display:block;color:var(--muted);margin-top:3px}
