@@ -1,12 +1,14 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.1.1
+SSOP Toolkit Professional Edition V4.1.2
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
 */
 const state={file:null,fileName:'',originalText:'',doc:null,activeSection:'',originalDoc:null,selected:new Set()};
 const authState={token:localStorage.getItem('ssopSessionToken')||'',user:null};
+function isViewer(){return String(authState.user?.Role||'').toUpperCase()==='VIEWER';}
+function canWrite(){return !isViewer();}
 window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),700);initializeAuthentication();});
 const aboutModal=document.getElementById('aboutModal');
 document.querySelectorAll('[data-open-about]').forEach(btn=>btn.addEventListener('click',()=>{aboutModal.classList.add('show');aboutModal.setAttribute('aria-hidden','false')}));
@@ -26,6 +28,7 @@ function goHome(){
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function openModule(name){
+ if(isViewer()&&name!=='cancer'){toast('สิทธิ์ VIEWER','สามารถดู ค้นหา และส่งออก CSV จากทะเบียนงานได้เท่านั้น','warning');return;}
  if(name==='cancer'){showPage('registryPage');loadRegistry();return;}
  if(name==='knowledge'){showPage('knowledgePage');loadKnowledge('','ALL');return;}
  if(name==='editor'){showPage('cancerPage');return;}
@@ -80,11 +83,17 @@ const sectionInfo={
 };
 const fileInput=document.getElementById('fileInput'),dropZone=document.getElementById('dropZone');
 async function loadUniversalEditorInput(file){
- if(!file)return;if(!/\.zip$/i.test(file.name)){await loadFile(file);return;}
- if(!window.JSZip){toast('เปิด ZIP ไม่ได้','ไม่พบไลบรารี JSZip','error');return;}
- try{const zip=await JSZip.loadAsync(file);const entries=Object.values(zip.files).filter(e=>!e.dir&&/\.txt$/i.test(e.name));if(!entries.length)throw new Error('ไม่พบไฟล์ .txt ภายใน ZIP');
- const preferred=entries.find(e=>/BILLTRAN/i.test(e.name))||entries.find(e=>/BILLDISP/i.test(e.name))||entries[0];const bytes=new Uint8Array(await preferred.async('arraybuffer'));const extracted=new File([bytes],preferred.name.split('/').pop(),{type:'text/plain'});await loadFile(extracted);toast('เปิด ZIP สำเร็จ',`กำลังแก้ไข ${extracted.name} จาก ${file.name}`,'success');
- }catch(err){showDialog('เปิด ZIP ไม่สำเร็จ',err.message,'error')}
+ if(!file)return;
+ if(/\.zip$/i.test(file.name)){
+  if(isViewer()){toast('สิทธิ์ VIEWER','ไม่สามารถแก้ไขไฟล์ ZIP ได้','warning');return;}
+  // Use the proven Unified ZIP Editor so every file inside the ZIP remains editable,
+  // can be saved back, recalculated MD5 and exported under the original ZIP name.
+  openZipReader();
+  await handleZipFile(file);
+  toast('เปิด ZIP ใน Unified Editor แล้ว','เลือกไฟล์ด้านซ้ายเพื่อแก้ไข เพิ่ม/ลบแถว บันทึก MD5 และสร้าง ZIP กลับชื่อเดิม','success',6500);
+  return;
+ }
+ await loadFile(file);
 }
 fileInput.addEventListener('change',e=>e.target.files[0]&&loadUniversalEditorInput(e.target.files[0]));
 ['dragenter','dragover'].forEach(x=>dropZone.addEventListener(x,e=>{e.preventDefault();dropZone.style.background='#eefaf6'}));
@@ -479,6 +488,7 @@ function splitRegistryErrorCodes(value){
 function itemRegistryErrorCodes(item){
  return [...new Set([
   ...splitRegistryErrorCodes(item?.Latest_Error_Code),
+  ...splitRegistryErrorCodes(item?.All_Error_Codes),
   ...splitRegistryErrorCodes(item?.Latest_Error_Description)
  ])];
 }
@@ -527,8 +537,10 @@ function openErrorQueue(code){
  const stat=buildErrorStats().find(x=>x.code===String(code).toUpperCase());if(!stat)return;
  registryState.activeErrorCode=stat.code;const k=registryState.errorKnowledge.get(stat.code);
  document.getElementById('errorQueueTitle').textContent=`${stat.code} · ${stat.count} ราย`;
- document.getElementById('errorQueueSub').textContent=isWarningCode(stat.code)?'รหัสเตือน: ใช้ติดตามเพื่อปรับปรุงข้อมูลต้นทางใน HIS':(k?.Description||'เลือกเคสเพื่อไปยังทะเบียนงานหรือเปิด ZIP แก้ไข');
- const list=document.getElementById('errorQueueList');list.innerHTML=stat.items.slice().sort((a,b)=>String(a.Session||'').localeCompare(String(b.Session||''))||String(a.Station||'').localeCompare(String(b.Station||''))).map(item=>`<article class="error-queue-row"><div><b>${escapeHtml(item.Session||'-')} : ${escapeHtml(item.Station||'-')}</b><span>Work ${escapeHtml(item.Work_Order_No||'-')}</span></div><div class="grow"><strong>${escapeHtml(item.Patient_Name||item.Case_ID||'-')}</strong><small>HN ${escapeHtml(item.HN||'-')} · ${escapeHtml(item.Case_ID||'-')} · VN ${escapeHtml(item.VN||'-')}</small></div><button class="soft" data-error-goto="${escapeAttr(item.Case_ID)}">ไปทะเบียน</button><button class="primary" data-error-zip="${escapeAttr(item.Case_ID)}">แก้ไข ZIP</button></article>`).join('');
+ const desc=isWarningCode(stat.code)?'รหัสเตือน: ใช้ติดตามเพื่อปรับปรุงข้อมูลต้นทางใน HIS':(k?.Description||'ยังไม่มีคำอธิบายในฐานความรู้');
+ const solution=String(k?.Solution||'').trim();
+ document.getElementById('errorQueueSub').innerHTML=`<span class="queue-description">${escapeHtml(desc)}</span>${solution?`<span class="queue-solution"><b>วิธีแก้ไข:</b> ${escapeHtml(solution)}</span>`:'<span class="queue-solution pending">ยังไม่มีวิธีแก้ไขที่บันทึกไว้</span>'}`;
+ const list=document.getElementById('errorQueueList');list.innerHTML=stat.items.slice().sort((a,b)=>String(a.Session||'').localeCompare(String(b.Session||''))||String(a.Station||'').localeCompare(String(b.Station||''))).map(item=>`<article class="error-queue-row"><div><b>${escapeHtml(item.Session||'-')} : ${escapeHtml(item.Station||'-')}</b><span>Work ${escapeHtml(item.Work_Order_No||'-')}</span></div><div class="grow"><strong>${escapeHtml(item.Patient_Name||item.Case_ID||'-')}</strong><small>HN ${escapeHtml(item.HN||'-')} · ${escapeHtml(item.Case_ID||'-')} · VN ${escapeHtml(item.VN||'-')}</small></div><button class="soft" data-error-goto="${escapeAttr(item.Case_ID)}">ไปทะเบียน</button>${isViewer()?'':`<button class="primary" data-error-zip="${escapeAttr(item.Case_ID)}">แก้ไข ZIP</button>`}</article>`).join('');
  list.querySelectorAll('[data-error-goto]').forEach(b=>b.onclick=()=>focusRegistryCase(b.dataset.errorGoto,stat.code));
  list.querySelectorAll('[data-error-zip]').forEach(b=>b.onclick=()=>{closeErrorQueue();openZipReader(b.dataset.errorZip)});
  const m=document.getElementById('errorQueueModal');m.classList.add('show');m.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
@@ -633,7 +645,7 @@ function registryErrorDescriptions(value){
  return parts.length?parts:[text];
 }
 function registryErrorTagsHtml(x){
- const codes=registryErrorCodes(x.Latest_Error_Code);
+ const codes=registryErrorCodes([x.Latest_Error_Code,x.All_Error_Codes].filter(Boolean).join(','));
  const descParts=registryErrorDescriptions(x.Latest_Error_Description);
  const descByCode=new Map();
  descParts.forEach(part=>{const m=part.match(/^([A-Z]{1,4}\d{1,4})\s*[:：]\s*(.*)$/i);if(m)descByCode.set(m[1].toUpperCase(),m[2].trim())});
@@ -650,7 +662,7 @@ function renderRegistry(){
  const start=(registryState.page-1)*size,rows=registryState.filtered.slice(start,start+size),body=document.getElementById('registryBody');
  const showCDetails=(document.getElementById('registryStatusFilter')?.value||'ALL')==='C';
  document.querySelectorAll('.registry-c-col').forEach(el=>el.classList.toggle('hidden',!showCDetails));
- body.innerHTML=rows.length?rows.map(x=>{const status=String(x.Case_Status||'').trim();const readyAction=status==='รอตรวจสอบ'?`<button class="primary compact-ready" data-case-ready="${escapeHtml(x.Case_ID)}">✓ พร้อมส่ง</button>`:'';const submittedAction=status==='พร้อมส่ง'?`<button class="primary compact-ready" data-case-submitted="${escapeHtml(x.Case_ID)}">📤 บันทึกส่งแล้ว</button>`:'';const reworkAction=(status==='ติดแก้ไข (C)'||x.Latest_Result==='C')?`<button class="primary compact-ready" data-case-rework="${escapeHtml(x.Case_ID)}">🔧 เริ่มแก้ไข</button>`:'';const cCells=showCDetails?`<td class="registry-c-col"><div class="error-code-tags">${registryErrorTagsHtml(x)}</div></td>`:'';return `<tr data-registry-case-id="${escapeAttr(x.Case_ID||'')}" class="${String(x.Case_ID||'')===registryState.highlightCaseId?'registry-row-highlight':''}"><td><div class="case-no">${escapeHtml(x.Case_ID||'-')}</div><div class="subline">ครั้งที่ ${escapeHtml(x.Current_Attempt_No||0)}</div></td><td><b>${escapeHtml(x.HN||'-')}</b><div class="subline">VN: ${escapeHtml(x.VN||'-')}</div></td><td><b>${escapeHtml(x.Patient_Name||'-')}</b><div class="subline">CID: ${escapeHtml(x.CID?String(x.CID).replace(/.(?=.{4})/g,'•'):'-')}</div></td><td>${thDate(x.Service_Date)}</td><td>${escapeHtml(x.SSO_Case_No||'-')}<div class="subline">${escapeHtml(x.Protocol_Code||'-')}</div></td><td class="session-station-col"><b>${escapeHtml(x.Session||'-')}</b> : <b>${escapeHtml(x.Station||'-')}</b></td><td class="work-no-col">${escapeHtml(x.Work_Order_No||'-')}</td><td><span class="status-pill ${statusClassName(x.Case_Status)}">${escapeHtml(x.Case_Status||'รอเตรียมข้อมูล')}</span></td><td><span class="result-pill ${x.Latest_Result==='A'?'a':x.Latest_Result==='C'?'c':''}">${escapeHtml(x.Latest_Result||'-')}</span></td>${cCells}<td>${escapeHtml(x.Assigned_To||'-')}</td><td><div class="row-actions"><button class="soft" data-case-view="${escapeHtml(x.Case_ID)}">ดู</button><button class="soft" data-case-edit="${escapeHtml(x.Case_ID)}">แก้ไข</button><button class="soft" data-case-zip="${escapeHtml(x.Case_ID)}">แก้ไข ZIP</button>${readyAction}${submittedAction}${reworkAction}</div></td></tr>`}).join(''):`<tr><td colspan="${showCDetails?12:11}" class="empty-row">ยังไม่มีข้อมูลทะเบียนงาน</td></tr>`;
+ body.innerHTML=rows.length?rows.map(x=>{const status=String(x.Case_Status||'').trim();const readyAction=status==='รอตรวจสอบ'?`<button class="primary compact-ready" data-case-ready="${escapeHtml(x.Case_ID)}">✓ พร้อมส่ง</button>`:'';const submittedAction=status==='พร้อมส่ง'?`<button class="primary compact-ready" data-case-submitted="${escapeHtml(x.Case_ID)}">📤 บันทึกส่งแล้ว</button>`:'';const reworkAction=(status==='ติดแก้ไข (C)'||x.Latest_Result==='C')?`<button class="primary compact-ready" data-case-rework="${escapeHtml(x.Case_ID)}">🔧 เริ่มแก้ไข</button>`:'';const cCells=showCDetails?`<td class="registry-c-col"><div class="error-code-tags">${registryErrorTagsHtml(x)}</div></td>`:'';const actionHtml=isViewer()?`<button class="soft" data-case-view="${escapeHtml(x.Case_ID)}">ดู</button>`:`<button class="soft" data-case-view="${escapeHtml(x.Case_ID)}">ดู</button><button class="soft" data-case-edit="${escapeHtml(x.Case_ID)}">แก้ไข</button><button class="soft" data-case-zip="${escapeHtml(x.Case_ID)}">แก้ไข ZIP</button>${readyAction}${submittedAction}${reworkAction}`;return `<tr data-registry-case-id="${escapeAttr(x.Case_ID||'')}" class="${String(x.Case_ID||'')===registryState.highlightCaseId?'registry-row-highlight':''}"><td><div class="case-no">${escapeHtml(x.Case_ID||'-')}</div><div class="subline">ครั้งที่ ${escapeHtml(x.Current_Attempt_No||0)}</div></td><td><b>${escapeHtml(x.HN||'-')}</b><div class="subline">VN: ${escapeHtml(x.VN||'-')}</div></td><td><b>${escapeHtml(x.Patient_Name||'-')}</b><div class="subline">CID: ${escapeHtml(x.CID?String(x.CID).replace(/.(?=.{4})/g,'•'):'-')}</div></td><td>${thDate(x.Service_Date)}</td><td>${escapeHtml(x.SSO_Case_No||'-')}<div class="subline">${escapeHtml(x.Protocol_Code||'-')}</div></td><td class="session-station-col"><b>${escapeHtml(x.Session||'-')}</b> : <b>${escapeHtml(x.Station||'-')}</b></td><td class="work-no-col">${escapeHtml(x.Work_Order_No||'-')}</td><td><span class="status-pill ${statusClassName(x.Case_Status)}">${escapeHtml(x.Case_Status||'รอเตรียมข้อมูล')}</span></td><td><span class="result-pill ${x.Latest_Result==='A'?'a':x.Latest_Result==='C'?'c':''}">${escapeHtml(x.Latest_Result||'-')}</span></td>${cCells}<td>${escapeHtml(x.Assigned_To||'-')}</td><td><div class="row-actions">${actionHtml}</div></td></tr>`}).join(''):`<tr><td colspan="${showCDetails?12:11}" class="empty-row">ยังไม่มีข้อมูลทะเบียนงาน</td></tr>`;
  body.querySelectorAll('[data-case-view]').forEach(b=>b.onclick=()=>openCaseDetail(b.dataset.caseView));body.querySelectorAll('[data-case-zip]').forEach(b=>b.onclick=()=>openZipReader(b.dataset.caseZip));body.querySelectorAll('[data-case-edit]').forEach(b=>b.onclick=()=>openCaseModal(b.dataset.caseEdit));body.querySelectorAll('[data-case-ready]').forEach(b=>b.onclick=()=>markCaseReady(b.dataset.caseReady));body.querySelectorAll('[data-case-submitted]').forEach(b=>b.onclick=()=>markCaseSubmitted(b.dataset.caseSubmitted));body.querySelectorAll('[data-case-rework]').forEach(b=>b.onclick=()=>startCaseRework(b.dataset.caseRework));body.querySelectorAll('[data-error-filter]').forEach(b=>b.onclick=()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter');if(search)search.value=b.dataset.errorFilter||'';if(status)status.value='C';applyRegistryFilter()});
  document.getElementById('registryCountText').textContent=total?`แสดง ${start+1}-${Math.min(start+size,total)} จาก ${total} รายการ · หน้า ${registryState.page} / ${pages}`:'0 รายการ · หน้า 1 / 1';
  const pageWrap=document.getElementById('registryPages');pageWrap.innerHTML='';for(let i=1;i<=pages;i++){if(pages>10&&Math.abs(i-registryState.page)>2&&i!==1&&i!==pages)continue;const b=document.createElement('button');b.textContent=i;b.className=i===registryState.page?'active':'';b.onclick=()=>{registryState.page=i;renderRegistry()};pageWrap.appendChild(b)}
@@ -950,7 +962,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.1.1 */
+/* Excel Import V4.1.2 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 function openExcelImport(){resetExcelImport();const m=document.getElementById('excelImportModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}
@@ -1111,7 +1123,12 @@ function bindAuthEvents(){
 function showLogin(message=''){document.getElementById('loginOverlay')?.classList.add('show');document.getElementById('loginMessage').textContent=message;setTimeout(()=>document.getElementById('loginUsername')?.focus(),80)}
 function clearAuthentication(){authState.token='';authState.user=null;localStorage.removeItem('ssopSessionToken');document.getElementById('authBar')?.classList.add('hidden')}
 async function performLogin(){const username=document.getElementById('loginUsername').value.trim(),password=document.getElementById('loginPassword').value,btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='กำลังเข้าสู่ระบบ...';try{const data=await apiRequest('login',{username,password});authState.token=data.sessionToken;localStorage.setItem('ssopSessionToken',authState.token);applyAuthentication(data.user);document.getElementById('loginPassword').value='';}catch(err){document.getElementById('loginMessage').textContent=err.message}finally{btn.disabled=false;btn.textContent='เข้าสู่ระบบ'}}
-function applyAuthentication(user){authState.user=user;document.getElementById('loginOverlay')?.classList.remove('show');document.getElementById('authBar')?.classList.remove('hidden');document.getElementById('authDisplayName').textContent=user.Display_Name;document.getElementById('authRole').textContent=user.Role;document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',user.Role!=='ADMIN'));const page=new URLSearchParams(location.search).get('page');loadDocumentLinks();if(page==='knowledge'){showPage('knowledgePage');loadKnowledge('','ALL');}else if(page==='editor'){showPage('cancerPage');}else{goHome();}}
+function applyRoleUi(){
+ const viewer=isViewer();document.body.classList.toggle('role-viewer',viewer);
+ ['importExcelBtn','openZipReaderBtn','openReplyImportBtn','addCaseBtn','openCancerEditorBtn','registryKnowledgeBtn'].forEach(id=>document.getElementById(id)?.classList.toggle('hidden',viewer));
+ document.querySelectorAll('[data-module="editor"],[data-module="knowledge"],[data-module="admin"]').forEach(el=>el.classList.toggle('hidden',viewer));
+}
+function applyAuthentication(user){authState.user=user;document.getElementById('loginOverlay')?.classList.remove('show');document.getElementById('authBar')?.classList.remove('hidden');document.getElementById('authDisplayName').textContent=user.Display_Name;document.getElementById('authRole').textContent=user.Role;document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',user.Role!=='ADMIN'));applyRoleUi();const page=new URLSearchParams(location.search).get('page');loadDocumentLinks();if(isViewer()){showPage('registryPage');loadRegistry();return;}if(page==='knowledge'){showPage('knowledgePage');loadKnowledge('','ALL');}else if(page==='editor'){showPage('cancerPage');}else{goHome();}}
 async function performLogout(){try{await apiRequest('logout')}catch(_e){}clearAuthentication();showLogin('ออกจากระบบแล้ว')}
 async function loadAdminPage(){if(authState.user?.Role!=='ADMIN')return;await Promise.all([loadSystemUsers(),loadSystemConfig()]);}
 let systemUsersCache=[];
