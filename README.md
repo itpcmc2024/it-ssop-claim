@@ -148,7 +148,7 @@
 - Unknown-action responses now include backend version and received action.
 
 
-## V4.1.2 — ZIP Row Tools
+## V4.1.3 — ZIP Row Tools
 
 - เพิ่ม Checkbox หน้าแถวทุกแถวในหน้าแก้ไข ZIP
 - ปุ่ม − จะเปิดใช้งานเมื่อมีแถวถูกเลือก และลบหลายแถวพร้อมกันได้
@@ -158,7 +158,7 @@
 - ปุ่ม “คืนค่าไฟล์นี้” สามารถย้อนกลับการเพิ่ม/ลบทั้งหมดของไฟล์ที่เปิดได้
 
 
-## V4.1.2 — Unified ZIP Editor
+## V4.1.3 — Unified ZIP Editor
 - แยกโหมดเปิด ZIP อิสระออกจากโหมดแก้ไข ZIP รายผู้ป่วย
 - ซ่อน Smart Auto Fill ในโหมดเปิด ZIP อิสระ
 - แก้การเขียนข้อมูลจาก Grid กลับเข้าไฟล์ SSOP จริง
@@ -168,7 +168,7 @@
 - แสดงสถานะยังไม่บันทึก/บันทึกแล้ว และเตือนก่อนปิดหน้าต่าง
 
 
-## V4.1.2 Production Baseline
+## V4.1.3 Production Baseline
 - Smart Error Dashboard and Error Work Queue
 - Work Queue displays Session : Station and Work No.
 - Error colors: solved knowledge (green), warning W (yellow), unresolved error (red)
@@ -177,10 +177,19 @@
 - ZIP status badge moved before file search
 
 
-## V4.1.2 Production Hotfix
+## V4.1.3 Production Hotfix
 - แก้ปุ่มปิด/แสดงในทะเบียนงานใน Error Work Queue
 - เพิ่ม VN และส่งออก CSV ราย Error Code
 - Work Queue แสดงเฉพาะตัวกรองต้องแก้ (C)
 - ไปทะเบียนข้ามหน้าและคงไฮไลต์
 - อ่าน Error Code จากทั้งรหัสและคำอธิบาย
 - SSO Editor รองรับไฟล์ ZIP และหลายโมดูล
+
+
+## V4.1.3 Production Final Polish
+- ตารางทะเบียนกลับมาใช้ horizontal scrollbar และจำกัดข้อความแต่ละช่องไม่เกิน 2 บรรทัด
+- แสดงสถานะ C แบบย่อเป็น “ติด (C)”
+- Error Work Queue รวบรวม Error/CheckCode ทุกคอลัมน์และทุก Attempt ของเคส C
+- VIEWER ใช้ SSO Editor แบบ Local Processing ได้
+- VIEWER วิเคราะห์ไฟล์ตอบกลับและเพิ่ม Knowledge ได้เฉพาะ Error Code ใหม่ แต่แก้รายการเดิมไม่ได้
+- ไฮไลต์รายการจาก Work Queue ค้างจนเลือกเคสใหม่
