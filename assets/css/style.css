@@ -423,3 +423,58 @@ body.modal-open{overflow:hidden}
 .viewer-kb-locked{background:#f4f7f6}.viewer-kb-locked textarea,.viewer-kb-locked input{background:#eef2f1!important;color:#667874!important;cursor:not-allowed}
 .registry-row-highlight,.registry-row-highlight td{animation:none!important;background:#fff3a8!important}.registry-row-highlight{box-shadow:inset 5px 0 0 #e0a800!important}
 @media(max-width:900px){.registry-horizontal-scroll .registry-table{width:1320px!important;min-width:1320px!important}}
+
+
+/* ======================================================
+   V4.1.4 Production UI + Warning Description Hotfix
+   - Fill registry frame while keeping horizontal scroll when needed
+   - Keep Session : Station and status on one line
+====================================================== */
+.registry-table-wrap{
+  width:100%!important;
+  max-width:100%!important;
+}
+.registry-horizontal-scroll{
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+}
+.registry-horizontal-scroll .registry-table{
+  width:100%!important;
+  min-width:1320px!important;
+  table-layout:fixed!important;
+}
+.registry-table .session-station-col,
+.registry-table th.session-station-col,
+.registry-table td.session-station-col{
+  width:120px!important;
+  min-width:120px!important;
+  white-space:nowrap!important;
+  text-align:center!important;
+  overflow:visible!important;
+}
+.registry-table .session-station-col b{
+  display:inline!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  -webkit-line-clamp:unset!important;
+  -webkit-box-orient:initial!important;
+}
+.registry-table td:nth-child(8),
+.registry-table th:nth-child(8){
+  width:92px!important;
+  min-width:92px!important;
+  white-space:nowrap!important;
+}
+.registry-table .status-pill{
+  display:inline-flex!important;
+  white-space:nowrap!important;
+  max-width:none!important;
+  max-height:none!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  -webkit-line-clamp:unset!important;
+  -webkit-box-orient:initial!important;
+}
