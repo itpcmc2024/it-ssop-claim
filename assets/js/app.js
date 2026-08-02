@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.1.0
+SSOP Toolkit Professional Edition V4.1.1
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -79,10 +79,17 @@ const sectionInfo={
  OPDx:{title:'ข้อมูลการวินิจฉัย',desc:'ข้อมูลวินิจฉัยที่เชื่อมโยงกับบริการ',format:'Class | SvID | Sequence | CodeSet | DiagnosisCode | VerCode',important:['VerCode ต้องเป็น Protocol Code เช่น C0111'],importantCols:[5]}
 };
 const fileInput=document.getElementById('fileInput'),dropZone=document.getElementById('dropZone');
-fileInput.addEventListener('change',e=>e.target.files[0]&&loadFile(e.target.files[0]));
+async function loadUniversalEditorInput(file){
+ if(!file)return;if(!/\.zip$/i.test(file.name)){await loadFile(file);return;}
+ if(!window.JSZip){toast('เปิด ZIP ไม่ได้','ไม่พบไลบรารี JSZip','error');return;}
+ try{const zip=await JSZip.loadAsync(file);const entries=Object.values(zip.files).filter(e=>!e.dir&&/\.txt$/i.test(e.name));if(!entries.length)throw new Error('ไม่พบไฟล์ .txt ภายใน ZIP');
+ const preferred=entries.find(e=>/BILLTRAN/i.test(e.name))||entries.find(e=>/BILLDISP/i.test(e.name))||entries[0];const bytes=new Uint8Array(await preferred.async('arraybuffer'));const extracted=new File([bytes],preferred.name.split('/').pop(),{type:'text/plain'});await loadFile(extracted);toast('เปิด ZIP สำเร็จ',`กำลังแก้ไข ${extracted.name} จาก ${file.name}`,'success');
+ }catch(err){showDialog('เปิด ZIP ไม่สำเร็จ',err.message,'error')}
+}
+fileInput.addEventListener('change',e=>e.target.files[0]&&loadUniversalEditorInput(e.target.files[0]));
 ['dragenter','dragover'].forEach(x=>dropZone.addEventListener(x,e=>{e.preventDefault();dropZone.style.background='#eefaf6'}));
 ['dragleave','drop'].forEach(x=>dropZone.addEventListener(x,e=>{e.preventDefault();dropZone.style.background=''}));
-dropZone.addEventListener('drop',e=>e.dataTransfer.files[0]&&loadFile(e.dataTransfer.files[0]));
+dropZone.addEventListener('drop',e=>e.dataTransfer.files[0]&&loadUniversalEditorInput(e.dataTransfer.files[0]));
 
 async function loadFile(file){
  try{
@@ -200,7 +207,7 @@ function md5(bytes){
    SSOCAC Reply Knowledge Builder V2.3.3
    ประมวลผลไฟล์ตอบกลับใน Browser และเก็บเฉพาะ Error Code
 ====================================================== */
-const replyKnowledgeState={fileName:'',items:[]};
+const replyKnowledgeState={fileName:'',items:[],module:'SSOCAC'};
 let knowledgeCache=[];
 const ssocacSeedKnowledge={
   CD1:{description:'ไม่มีรหัสวินิจฉัยที่สอดคล้องกับ Protocol',cause:'ตรวจสอบรหัสวินิจฉัยและ Protocol ที่ใช้ในรายการ',solution:'ตรวจ OPDx และรหัส Protocol ให้สัมพันธ์กับเงื่อนไข SSOCAC'},
@@ -229,11 +236,11 @@ function parseSSOCACReplyKnowledge(text){
   const codeTokens=dataPart.match(/\b[A-Z]{1,4}\d{1,4}\b/g)||[];
   for(const code of codeTokens){
     const c=code.toUpperCase();
-    if(/^C\d+$/.test(c) || /^S\d+$/.test(c) || /^R\d+$/.test(c) || /^CD\d+$/.test(c) || /^CE\d+$/.test(c)) counts.set(c,(counts.get(c)||0)+1);
+    if(/^[A-Z]{1,4}\d{1,4}$/.test(c)) counts.set(c,(counts.get(c)||0)+1);
   }
   for(const code of descriptions.keys())if(!counts.has(code))counts.set(code,1);
   return [...counts.entries()].map(([code,count])=>({
-    module:'SSOCAC',code,count,
+    module:replyKnowledgeState.module||'SSOCAC',code,count,
     description:descriptions.get(code)||ssocacSeedKnowledge[code]?.description||'ไม่พบคำอธิบายในไฟล์ตอบกลับ',
     cause:ssocacSeedKnowledge[code]?.cause||'',
     solution:ssocacSeedKnowledge[code]?.solution||'',
@@ -241,21 +248,19 @@ function parseSSOCACReplyKnowledge(text){
   })).sort((a,b)=>a.code.localeCompare(b.code));
 }
 async function analyzeSSOCACReply(){
-  const input=document.getElementById('replyFileInput');
-  const file=input?.files?.[0];
-  if(!file){toast('ยังไม่ได้เลือกไฟล์','กรุณาเลือกไฟล์ตอบกลับ .BIL หรือ .txt','warning');return}
+  const input=document.getElementById('replyFileInput'),file=input?.files?.[0],module=document.getElementById('replyModule')?.value||'SSOCAC';
+  if(!file){toast('ยังไม่ได้เลือกไฟล์','กรุณาเลือกไฟล์ตอบกลับ .ZIP, .BIL หรือ .txt','warning');return}
   try{
-    const bytes=new Uint8Array(await file.arrayBuffer());
-    const text=decodeReplyFile(bytes);
-    if(!/SSOCAC/i.test(text)){
-      const ok=await showDialog('ตรวจไม่พบคำว่า SSOCAC','ไฟล์นี้อาจไม่ใช่ไฟล์ตอบกลับ Cancer Care ต้องการวิเคราะห์ต่อหรือไม่','warning',[{text:'ยกเลิก',value:false,className:'soft'},{text:'วิเคราะห์ต่อ',value:true,className:'primary'}]);
-      if(!ok)return;
-    }
-    replyKnowledgeState.fileName=file.name;
-    replyKnowledgeState.items=parseSSOCACReplyKnowledge(text);
-    renderReplyKnowledge();
-    if(replyKnowledgeState.items.length){toast('วิเคราะห์สำเร็จ',`พบ Error Code ${replyKnowledgeState.items.length} รหัส โดยไม่จัดเก็บข้อมูลผู้ป่วย`,'success');await hydrateReplyKnowledgeFromDatabase();}
-    else toast('ไม่พบ Error Code','ยังไม่พบรูปแบบ CheckCode ที่ระบบรองรับในไฟล์นี้','warning');
+    replyKnowledgeState.module=module;replyKnowledgeState.fileName=file.name;
+    const merged=new Map();
+    const consume=(text)=>parseSSOCACReplyKnowledge(text).forEach(x=>{x.module=module;const old=merged.get(x.code);if(old){old.count+=x.count;if(old.description==='ไม่พบคำอธิบายในไฟล์ตอบกลับ'&&x.description)old.description=x.description}else merged.set(x.code,x)});
+    if(/\.zip$/i.test(file.name)){
+      if(!window.JSZip)throw new Error('ไม่พบไลบรารี JSZip');const zip=await JSZip.loadAsync(file);let found=0;
+      for(const entry of Object.values(zip.files)){if(entry.dir||!/(\.bil|\.txt)$/i.test(entry.name))continue;consume(decodeReplyFile(new Uint8Array(await entry.async('arraybuffer'))));found++;}
+      if(!found)throw new Error('ไม่พบไฟล์ .BIL หรือ .txt ภายใน ZIP');
+    }else consume(decodeReplyFile(new Uint8Array(await file.arrayBuffer())));
+    replyKnowledgeState.items=[...merged.values()].sort((a,b)=>a.code.localeCompare(b.code));renderReplyKnowledge();
+    if(replyKnowledgeState.items.length){toast('วิเคราะห์สำเร็จ',`พบ Error Code ${replyKnowledgeState.items.length} รหัส จาก ${module}`,'success');await hydrateReplyKnowledgeFromDatabase();}else toast('ไม่พบ Error Code','ยังไม่พบรูปแบบ CheckCode ที่ระบบรองรับ','warning');
   }catch(err){showDialog('อ่านไฟล์ไม่สำเร็จ',err?.message||String(err),'error')}
 }
 function renderReplyKnowledge(){
@@ -264,7 +269,7 @@ function renderReplyKnowledge(){
   summary.classList.remove('hidden');wrap.classList.toggle('hidden',!items.length);
   const total=items.reduce((s,x)=>s+x.count,0),known=items.filter(x=>x.cause||x.solution).length;
   summary.innerHTML=`<div class="reply-summary-card"><div class="reply-stat"><b>${items.length}</b><span>Error Code ไม่ซ้ำ</span></div><div class="reply-stat"><b>${total}</b><span>จำนวนที่ตรวจพบ</span></div><div class="reply-stat"><b>${known}</b><span>มีแนวทางแก้เริ่มต้น</span></div></div>`;
-  body.innerHTML=items.map((x,i)=>`<tr><td>${escapeHtml(x.code)}<div class="meta">SSOCAC</div></td><td>${escapeHtml(x.description)}</td><td><textarea data-reply-index="${i}" data-field="cause" placeholder="เพิ่มสาเหตุหรือข้อสังเกต...">${escapeHtml(x.cause)}</textarea></td><td><textarea data-reply-index="${i}" data-field="solution" placeholder="เพิ่มแนวทางแก้...">${escapeHtml(x.solution)}</textarea></td><td><input class="knowledge-inline-input" data-reply-index="${i}" data-field="relatedFile" placeholder="เช่น BILLTRAN" value="${escapeHtml(x.relatedFile||'')}"></td><td><input class="knowledge-inline-input" data-reply-index="${i}" data-field="relatedField" placeholder="เช่น VerCode" value="${escapeHtml(x.relatedField||'')}"></td><td>${x.count}</td><td><span class="db-badge ${x.dbStatus==='มีในฐานข้อมูล'?'ok':'pending'}">${escapeHtml(x.dbStatus)}</span></td></tr>`).join('');
+  body.innerHTML=items.map((x,i)=>`<tr><td>${escapeHtml(x.code)}<div class="meta">${escapeHtml(x.module||replyKnowledgeState.module||'SSOCAC')}</div></td><td>${escapeHtml(x.description)}</td><td><textarea data-reply-index="${i}" data-field="cause" placeholder="เพิ่มสาเหตุหรือข้อสังเกต...">${escapeHtml(x.cause)}</textarea></td><td><textarea data-reply-index="${i}" data-field="solution" placeholder="เพิ่มแนวทางแก้...">${escapeHtml(x.solution)}</textarea></td><td><input class="knowledge-inline-input" data-reply-index="${i}" data-field="relatedFile" placeholder="เช่น BILLTRAN" value="${escapeHtml(x.relatedFile||'')}"></td><td><input class="knowledge-inline-input" data-reply-index="${i}" data-field="relatedField" placeholder="เช่น VerCode" value="${escapeHtml(x.relatedField||'')}"></td><td>${x.count}</td><td><span class="db-badge ${x.dbStatus==='มีในฐานข้อมูล'?'ok':'pending'}">${escapeHtml(x.dbStatus)}</span></td></tr>`).join('');
   body.querySelectorAll('textarea, input[data-reply-index]').forEach(el=>el.addEventListener('input',()=>{const i=Number(el.dataset.replyIndex);replyKnowledgeState.items[i][el.dataset.field]=el.value}));
 }
 function csvCell(v){return `"${String(v??'').replace(/"/g,'""')}"`}
@@ -274,7 +279,7 @@ function exportReplyKnowledgeCSV(){
   const rows=replyKnowledgeState.items.map(x=>[x.module,x.code,x.description,x.cause,x.solution,x.count,replyKnowledgeState.fileName]);
   const csv='\uFEFF'+[headers,...rows].map(r=>r.map(csvCell).join(',')).join('\r\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);a.download=`SSOCAC_Error_Knowledge_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  a.href=URL.createObjectURL(blob);a.download=`${replyKnowledgeState.module||'SSOP'}_Error_Knowledge_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   toast('ส่งออกแล้ว','ไฟล์ CSV มีเฉพาะ Error Code และองค์ความรู้ ไม่มีข้อมูลผู้ป่วย','success');
 }
 
@@ -290,7 +295,7 @@ async function apiRequest(action,payload={}){
 }
 async function hydrateReplyKnowledgeFromDatabase(){
   try{
-    const data=await apiRequest('getByCodes',{module:'SSOCAC',codes:replyKnowledgeState.items.map(x=>x.code)});
+    const data=await apiRequest('getByCodes',{module:replyKnowledgeState.module||'SSOCAC',codes:replyKnowledgeState.items.map(x=>x.code)});
     const map=new Map((data.items||[]).map(x=>[String(x.ErrorCode||'').toUpperCase(),x]));
     replyKnowledgeState.items.forEach(item=>{
       const db=map.get(item.code.toUpperCase());
@@ -463,13 +468,21 @@ document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportRe
 /* ======================================================
    Cancer Care Registry V3.2.0
 ====================================================== */
-const registryState={items:[],filtered:[],page:1,pageSize:20,selected:null,errorKnowledge:new Map(),activeErrorCode:''};
+const registryState={items:[],filtered:[],page:1,pageSize:20,selected:null,errorKnowledge:new Map(),activeErrorCode:'',highlightCaseId:''};
 function thDate(v){if(!v)return '-';const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleDateString('th-TH',{year:'numeric',month:'2-digit',day:'2-digit'});}
 function thDateTime(v){if(!v)return '-';const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString('th-TH');}
 
 function splitRegistryErrorCodes(value){
- return [...new Set(String(value||'').toUpperCase().split(/[|,;\s]+/).map(v=>v.trim()).filter(v=>/^[A-Z]{1,4}\d{1,4}$/.test(v)))];
+ const text=String(value||'').toUpperCase();
+ return [...new Set(text.match(/\b[A-Z]{1,4}\d{1,4}\b/g)||[])];
 }
+function itemRegistryErrorCodes(item){
+ return [...new Set([
+  ...splitRegistryErrorCodes(item?.Latest_Error_Code),
+  ...splitRegistryErrorCodes(item?.Latest_Error_Description)
+ ])];
+}
+function isCaseC(item){return String(item?.Latest_Result||'').toUpperCase()==='C'||String(item?.Case_Status||'').trim()==='ติดแก้ไข (C)';}
 function isWarningCode(code){return /^W/i.test(String(code||''));}
 function knowledgeCompleteForCode(code){
  const k=registryState.errorKnowledge.get(String(code||'').toUpperCase());
@@ -477,7 +490,7 @@ function knowledgeCompleteForCode(code){
 }
 function buildErrorStats(){
  const map=new Map();
- registryState.items.forEach(item=>splitRegistryErrorCodes(item.Latest_Error_Code).forEach(code=>{
+ registryState.items.filter(isCaseC).forEach(item=>itemRegistryErrorCodes(item).forEach(code=>{
   if(!map.has(code))map.set(code,{code,count:0,items:[],sessions:new Map()});
   const x=map.get(code);x.count++;x.items.push(item);
   const session=String(item.Session||'-');x.sessions.set(session,(x.sessions.get(session)||0)+1);
@@ -488,7 +501,7 @@ function buildErrorStats(){
  });
 }
 async function hydrateRegistryErrorKnowledge(){
- const codes=[...new Set(registryState.items.flatMap(x=>splitRegistryErrorCodes(x.Latest_Error_Code)))];
+ const codes=[...new Set(registryState.items.filter(isCaseC).flatMap(itemRegistryErrorCodes))];
  registryState.errorKnowledge=new Map();
  if(!codes.length){renderErrorIntelligence();return;}
  try{const data=await apiRequest('getByCodes',{module:'SSOCAC',codes});(data.items||[]).forEach(k=>registryState.errorKnowledge.set(String(k.ErrorCode||'').toUpperCase(),k));}
@@ -497,7 +510,10 @@ async function hydrateRegistryErrorKnowledge(){
 }
 function errorCardClass(code){if(isWarningCode(code))return'warning';return knowledgeCompleteForCode(code)?'solved':'critical';}
 function renderErrorIntelligence(){
- const wrap=document.getElementById('errorWorkQueue'),score=document.getElementById('knowledgeCoverage');if(!wrap)return;
+ const wrap=document.getElementById('errorWorkQueue'),score=document.getElementById('knowledgeCoverage'),card=document.getElementById('errorIntelligenceCard');if(!wrap)return;
+ const show=(document.getElementById('registryStatusFilter')?.value||'ALL')==='C';
+ if(card)card.classList.toggle('hidden',!show);
+ if(!show)return;
  const stats=buildErrorStats();const nonWarnings=stats.filter(x=>!isWarningCode(x.code));const complete=nonWarnings.filter(x=>knowledgeCompleteForCode(x.code)).length;
  const pct=nonWarnings.length?Math.round(complete/nonWarnings.length*100):100;if(score)score.textContent=`Knowledge ${pct}%`;
  wrap.innerHTML=stats.length?stats.slice(0,12).map(x=>{
@@ -512,24 +528,53 @@ function openErrorQueue(code){
  registryState.activeErrorCode=stat.code;const k=registryState.errorKnowledge.get(stat.code);
  document.getElementById('errorQueueTitle').textContent=`${stat.code} · ${stat.count} ราย`;
  document.getElementById('errorQueueSub').textContent=isWarningCode(stat.code)?'รหัสเตือน: ใช้ติดตามเพื่อปรับปรุงข้อมูลต้นทางใน HIS':(k?.Description||'เลือกเคสเพื่อไปยังทะเบียนงานหรือเปิด ZIP แก้ไข');
- const list=document.getElementById('errorQueueList');list.innerHTML=stat.items.slice().sort((a,b)=>String(a.Session||'').localeCompare(String(b.Session||''))||String(a.Station||'').localeCompare(String(b.Station||''))).map(item=>`<article class="error-queue-row"><div><b>${escapeHtml(item.Session||'-')} : ${escapeHtml(item.Station||'-')}</b><span>Work ${escapeHtml(item.Work_Order_No||'-')}</span></div><div class="grow"><strong>${escapeHtml(item.Patient_Name||item.Case_ID||'-')}</strong><small>HN ${escapeHtml(item.HN||'-')} · ${escapeHtml(item.Case_ID||'-')}</small></div><button class="soft" data-error-goto="${escapeAttr(item.Case_ID)}">ไปทะเบียน</button><button class="primary" data-error-zip="${escapeAttr(item.Case_ID)}">แก้ไข ZIP</button></article>`).join('');
+ const list=document.getElementById('errorQueueList');list.innerHTML=stat.items.slice().sort((a,b)=>String(a.Session||'').localeCompare(String(b.Session||''))||String(a.Station||'').localeCompare(String(b.Station||''))).map(item=>`<article class="error-queue-row"><div><b>${escapeHtml(item.Session||'-')} : ${escapeHtml(item.Station||'-')}</b><span>Work ${escapeHtml(item.Work_Order_No||'-')}</span></div><div class="grow"><strong>${escapeHtml(item.Patient_Name||item.Case_ID||'-')}</strong><small>HN ${escapeHtml(item.HN||'-')} · ${escapeHtml(item.Case_ID||'-')} · VN ${escapeHtml(item.VN||'-')}</small></div><button class="soft" data-error-goto="${escapeAttr(item.Case_ID)}">ไปทะเบียน</button><button class="primary" data-error-zip="${escapeAttr(item.Case_ID)}">แก้ไข ZIP</button></article>`).join('');
  list.querySelectorAll('[data-error-goto]').forEach(b=>b.onclick=()=>focusRegistryCase(b.dataset.errorGoto,stat.code));
  list.querySelectorAll('[data-error-zip]').forEach(b=>b.onclick=()=>{closeErrorQueue();openZipReader(b.dataset.errorZip)});
  const m=document.getElementById('errorQueueModal');m.classList.add('show');m.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
 }
 function closeErrorQueue(){const m=document.getElementById('errorQueueModal');if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');if(!document.querySelector('.modal.show'))document.body.classList.remove('modal-open');}
 function filterRegistryByError(code){
- const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter');if(search)search.value=code;if(status)status.value=isWarningCode(code)?'ALL':'C';closeErrorQueue();applyRegistryFilter();document.querySelector('.registry-table-wrap')?.scrollIntoView({behavior:'smooth',block:'start'});
+ const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter');if(search)search.value=code;if(status)status.value='C';closeErrorQueue();applyRegistryFilter();document.querySelector('.registry-table-wrap')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
-function focusRegistryCase(caseId,code){filterRegistryByError(code);setTimeout(()=>{const btn=document.querySelector(`[data-case-view="${CSS.escape(caseId)}"]`);const tr=btn?.closest('tr');if(tr){tr.classList.add('registry-row-highlight');tr.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>tr.classList.remove('registry-row-highlight'),3500)}},100);}
+function focusRegistryCase(caseId,code){
+ registryState.highlightCaseId=String(caseId||'');
+ const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter');
+ if(search)search.value=code||'';if(status)status.value='C';
+ closeErrorQueue();applyRegistryFilter();
+ const index=registryState.filtered.findIndex(x=>String(x.Case_ID)===registryState.highlightCaseId);
+ if(index>=0){registryState.page=Math.floor(index/registryState.pageSize)+1;renderRegistry();requestAnimationFrame(()=>{const tr=document.querySelector(`tr[data-registry-case-id="${CSS.escape(registryState.highlightCaseId)}"]`);tr?.scrollIntoView({behavior:'smooth',block:'center'});});}
+ else toast('ไม่พบรายการ','ไม่พบเคสที่เลือกในผลกรองปัจจุบัน','warning');
+}
+
+function exportErrorQueueCsv(){
+ const code=String(registryState.activeErrorCode||'').toUpperCase();
+ const stat=buildErrorStats().find(x=>x.code===code);
+ if(!stat?.items?.length){toast('ไม่มีข้อมูล','ยังไม่มีรายการสำหรับส่งออก','warning');return;}
+ const headers=['Case_ID','Module_Code','HN','VN','CID','Patient_Name','Service_Date','Coverage','Chemo_Drug','SSO_Case_No','Protocol_Code','TFlag','Session : Station','Work_Order_No','Error_Code'];
+ const rows=stat.items.map(x=>[x.Case_ID,x.Module_Code||'SSOCAC',x.HN,x.VN,x.CID,x.Patient_Name,thDate(x.Service_Date),x.Coverage,x.Chemo_Drug,x.SSO_Case_No,x.Protocol_Code,x.TFlag,`${x.Session||''} : ${x.Station||''}`,x.Work_Order_No,code]);
+ const csv='\uFEFF'+[headers,...rows].map(r=>r.map(csvCell).join(',')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);a.download=`SSOCAC_${code}_Work_Queue_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ toast('ส่งออก CSV แล้ว',`${code} จำนวน ${rows.length} รายการ`,'success');
+}
 
 async function loadRegistry(){
  const status=document.getElementById('registryStatus');if(!status)return;
  const searchInput=document.getElementById('registrySearch');if(searchInput)searchInput.value='';
  status.textContent='กำลังโหลดข้อมูล...';
- try{const data=await apiRequest('listCases',{module:'SSOCAC',limit:5000});registryState.items=data.items||[];applyRegistryFilter();status.textContent=`เชื่อมต่อฐานข้อมูลแล้ว · ${registryState.items.length} รายการ`;hydrateRegistryErrorKnowledge();}
- catch(err){status.textContent=err.message;document.getElementById('registryBody').innerHTML=`<tr><td colspan="10" class="empty-row">${escapeHtml(err.message)}</td></tr>`;}
+ try{
+  const data=await apiRequest('listCases',{module:'SSOCAC',limit:5000});
+  registryState.items=data.items||[];
+  applyRegistryFilter();
+  status.textContent=`เชื่อมต่อฐานข้อมูลแล้ว · ${registryState.items.length} รายการ`;
+  await hydrateRegistryErrorKnowledge();
+ }catch(err){
+  status.textContent=err.message;
+  document.getElementById('registryBody').innerHTML=`<tr><td colspan="12" class="empty-row">${escapeHtml(err.message)}</td></tr>`;
+ }
 }
+
 function registryDateValue(item){
  const raw=item?.Service_Date||item?.Created_At||item?.Updated_At||'';
  if(raw instanceof Date&&!Number.isNaN(raw.getTime()))return raw.getTime();
@@ -570,7 +615,7 @@ function applyRegistryFilter(){
   const as=registryCaseSequence(a),bs=registryCaseSequence(b);
   return sort==='oldest'?as-bs:bs-as;
  });
- registryState.page=1;syncRegistryStatusCards();renderRegistry();
+ registryState.page=1;syncRegistryStatusCards();renderRegistry();renderErrorIntelligence();
 }
 function registryErrorCodes(value){
  return [...new Set(String(value||'').split(/[|,;\s]+/).map(x=>x.trim().toUpperCase()).filter(Boolean))];
@@ -605,7 +650,7 @@ function renderRegistry(){
  const start=(registryState.page-1)*size,rows=registryState.filtered.slice(start,start+size),body=document.getElementById('registryBody');
  const showCDetails=(document.getElementById('registryStatusFilter')?.value||'ALL')==='C';
  document.querySelectorAll('.registry-c-col').forEach(el=>el.classList.toggle('hidden',!showCDetails));
- body.innerHTML=rows.length?rows.map(x=>{const status=String(x.Case_Status||'').trim();const readyAction=status==='รอตรวจสอบ'?`<button class="primary compact-ready" data-case-ready="${escapeHtml(x.Case_ID)}">✓ พร้อมส่ง</button>`:'';const submittedAction=status==='พร้อมส่ง'?`<button class="primary compact-ready" data-case-submitted="${escapeHtml(x.Case_ID)}">📤 บันทึกส่งแล้ว</button>`:'';const reworkAction=(status==='ติดแก้ไข (C)'||x.Latest_Result==='C')?`<button class="primary compact-ready" data-case-rework="${escapeHtml(x.Case_ID)}">🔧 เริ่มแก้ไข</button>`:'';const cCells=showCDetails?`<td class="registry-c-col"><div class="error-code-tags">${registryErrorTagsHtml(x)}</div></td>`:'';return `<tr><td><div class="case-no">${escapeHtml(x.Case_ID||'-')}</div><div class="subline">ครั้งที่ ${escapeHtml(x.Current_Attempt_No||0)}</div></td><td><b>${escapeHtml(x.HN||'-')}</b><div class="subline">VN: ${escapeHtml(x.VN||'-')}</div></td><td><b>${escapeHtml(x.Patient_Name||'-')}</b><div class="subline">CID: ${escapeHtml(x.CID?String(x.CID).replace(/.(?=.{4})/g,'•'):'-')}</div></td><td>${thDate(x.Service_Date)}</td><td>${escapeHtml(x.SSO_Case_No||'-')}<div class="subline">${escapeHtml(x.Protocol_Code||'-')}</div></td><td class="session-station-col"><b>${escapeHtml(x.Session||'-')}</b> : <b>${escapeHtml(x.Station||'-')}</b></td><td class="work-no-col">${escapeHtml(x.Work_Order_No||'-')}</td><td><span class="status-pill ${statusClassName(x.Case_Status)}">${escapeHtml(x.Case_Status||'รอเตรียมข้อมูล')}</span></td><td><span class="result-pill ${x.Latest_Result==='A'?'a':x.Latest_Result==='C'?'c':''}">${escapeHtml(x.Latest_Result||'-')}</span></td>${cCells}<td>${escapeHtml(x.Assigned_To||'-')}</td><td><div class="row-actions"><button class="soft" data-case-view="${escapeHtml(x.Case_ID)}">ดู</button><button class="soft" data-case-edit="${escapeHtml(x.Case_ID)}">แก้ไข</button><button class="soft" data-case-zip="${escapeHtml(x.Case_ID)}">แก้ไข ZIP</button>${readyAction}${submittedAction}${reworkAction}</div></td></tr>`}).join(''):`<tr><td colspan="${showCDetails?12:11}" class="empty-row">ยังไม่มีข้อมูลทะเบียนงาน</td></tr>`;
+ body.innerHTML=rows.length?rows.map(x=>{const status=String(x.Case_Status||'').trim();const readyAction=status==='รอตรวจสอบ'?`<button class="primary compact-ready" data-case-ready="${escapeHtml(x.Case_ID)}">✓ พร้อมส่ง</button>`:'';const submittedAction=status==='พร้อมส่ง'?`<button class="primary compact-ready" data-case-submitted="${escapeHtml(x.Case_ID)}">📤 บันทึกส่งแล้ว</button>`:'';const reworkAction=(status==='ติดแก้ไข (C)'||x.Latest_Result==='C')?`<button class="primary compact-ready" data-case-rework="${escapeHtml(x.Case_ID)}">🔧 เริ่มแก้ไข</button>`:'';const cCells=showCDetails?`<td class="registry-c-col"><div class="error-code-tags">${registryErrorTagsHtml(x)}</div></td>`:'';return `<tr data-registry-case-id="${escapeAttr(x.Case_ID||'')}" class="${String(x.Case_ID||'')===registryState.highlightCaseId?'registry-row-highlight':''}"><td><div class="case-no">${escapeHtml(x.Case_ID||'-')}</div><div class="subline">ครั้งที่ ${escapeHtml(x.Current_Attempt_No||0)}</div></td><td><b>${escapeHtml(x.HN||'-')}</b><div class="subline">VN: ${escapeHtml(x.VN||'-')}</div></td><td><b>${escapeHtml(x.Patient_Name||'-')}</b><div class="subline">CID: ${escapeHtml(x.CID?String(x.CID).replace(/.(?=.{4})/g,'•'):'-')}</div></td><td>${thDate(x.Service_Date)}</td><td>${escapeHtml(x.SSO_Case_No||'-')}<div class="subline">${escapeHtml(x.Protocol_Code||'-')}</div></td><td class="session-station-col"><b>${escapeHtml(x.Session||'-')}</b> : <b>${escapeHtml(x.Station||'-')}</b></td><td class="work-no-col">${escapeHtml(x.Work_Order_No||'-')}</td><td><span class="status-pill ${statusClassName(x.Case_Status)}">${escapeHtml(x.Case_Status||'รอเตรียมข้อมูล')}</span></td><td><span class="result-pill ${x.Latest_Result==='A'?'a':x.Latest_Result==='C'?'c':''}">${escapeHtml(x.Latest_Result||'-')}</span></td>${cCells}<td>${escapeHtml(x.Assigned_To||'-')}</td><td><div class="row-actions"><button class="soft" data-case-view="${escapeHtml(x.Case_ID)}">ดู</button><button class="soft" data-case-edit="${escapeHtml(x.Case_ID)}">แก้ไข</button><button class="soft" data-case-zip="${escapeHtml(x.Case_ID)}">แก้ไข ZIP</button>${readyAction}${submittedAction}${reworkAction}</div></td></tr>`}).join(''):`<tr><td colspan="${showCDetails?12:11}" class="empty-row">ยังไม่มีข้อมูลทะเบียนงาน</td></tr>`;
  body.querySelectorAll('[data-case-view]').forEach(b=>b.onclick=()=>openCaseDetail(b.dataset.caseView));body.querySelectorAll('[data-case-zip]').forEach(b=>b.onclick=()=>openZipReader(b.dataset.caseZip));body.querySelectorAll('[data-case-edit]').forEach(b=>b.onclick=()=>openCaseModal(b.dataset.caseEdit));body.querySelectorAll('[data-case-ready]').forEach(b=>b.onclick=()=>markCaseReady(b.dataset.caseReady));body.querySelectorAll('[data-case-submitted]').forEach(b=>b.onclick=()=>markCaseSubmitted(b.dataset.caseSubmitted));body.querySelectorAll('[data-case-rework]').forEach(b=>b.onclick=()=>startCaseRework(b.dataset.caseRework));body.querySelectorAll('[data-error-filter]').forEach(b=>b.onclick=()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter');if(search)search.value=b.dataset.errorFilter||'';if(status)status.value='C';applyRegistryFilter()});
  document.getElementById('registryCountText').textContent=total?`แสดง ${start+1}-${Math.min(start+size,total)} จาก ${total} รายการ · หน้า ${registryState.page} / ${pages}`:'0 รายการ · หน้า 1 / 1';
  const pageWrap=document.getElementById('registryPages');pageWrap.innerHTML='';for(let i=1;i<=pages;i++){if(pages>10&&Math.abs(i-registryState.page)>2&&i!==1&&i!==pages)continue;const b=document.createElement('button');b.textContent=i;b.className=i===registryState.page?'active':'';b.onclick=()=>{registryState.page=i;renderRegistry()};pageWrap.appendChild(b)}
@@ -722,7 +767,7 @@ function exportRegistryCsv(){
  toast('ส่งออกแล้ว',`ส่งออก ${rows.length} รายการตามผลการค้นหาและตัวกรองปัจจุบัน`,'success');
 }
 
-document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegistry);document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registryStatusFilter')?.addEventListener('change',applyRegistryFilter);document.querySelectorAll('[data-registry-status]').forEach(card=>card.addEventListener('click',()=>{const select=document.getElementById('registryStatusFilter');if(select)select.value=card.dataset.registryStatus||'ALL';applyRegistryFilter()}));document.getElementById('registryResetFilterBtn')?.addEventListener('click',()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter'),sort=document.getElementById('registrySort');if(search)search.value='';if(status)status.value='ALL';if(sort)sort.value='newest';applyRegistryFilter()});document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseKnowledgeCancel')?.addEventListener('click',closeCaseKnowledgeModal);document.getElementById('caseKnowledgeSave')?.addEventListener('click',saveCaseKnowledge);document.getElementById('caseDetailModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeCaseDetail()});document.getElementById('caseKnowledgeModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeCaseKnowledgeModal()});document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const kb=document.getElementById('caseKnowledgeModal');if(kb?.classList.contains('show')){closeCaseKnowledgeModal();return;}const detail=document.getElementById('caseDetailModal');if(detail?.classList.contains('show'))closeCaseDetail();});
+document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegistry);document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registryStatusFilter')?.addEventListener('change',applyRegistryFilter);document.querySelectorAll('[data-registry-status]').forEach(card=>card.addEventListener('click',()=>{const select=document.getElementById('registryStatusFilter');if(select)select.value=card.dataset.registryStatus||'ALL';applyRegistryFilter()}));document.getElementById('registryResetFilterBtn')?.addEventListener('click',()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter'),sort=document.getElementById('registrySort');if(search)search.value='';if(status)status.value='ALL';if(sort)sort.value='newest';registryState.highlightCaseId='';applyRegistryFilter()});document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseKnowledgeCancel')?.addEventListener('click',closeCaseKnowledgeModal);document.getElementById('caseKnowledgeSave')?.addEventListener('click',saveCaseKnowledge);document.getElementById('caseDetailModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeCaseDetail()});document.getElementById('caseKnowledgeModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeCaseKnowledgeModal()});document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const kb=document.getElementById('caseKnowledgeModal');if(kb?.classList.contains('show')){closeCaseKnowledgeModal();return;}const detail=document.getElementById('caseDetailModal');if(detail?.classList.contains('show'))closeCaseDetail();});
 
 
 
@@ -905,7 +950,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.1.0 */
+/* Excel Import V4.1.1 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 function openExcelImport(){resetExcelImport();const m=document.getElementById('excelImportModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}
@@ -1077,4 +1122,9 @@ async function saveSystemUser(){const item={User_ID:document.getElementById('use
 async function loadSystemConfig(){const grid=document.getElementById('systemConfigGrid');if(!grid)return;grid.innerHTML='<div>กำลังโหลด...</div>';try{const data=await apiRequest('listSystemConfig');grid.innerHTML=(data.items||[]).map((x,i)=>`<div class="config-item"><div><b>${escapeHtml(x.Config_Key||'')}</b><small>${escapeHtml(x.Description||'')}</small></div><input data-config-value="${i}" value="${escapeAttr(x.Config_Value||'')}"><button class="soft" data-config-save="${i}">บันทึก</button></div>`).join('')||'<div class="meta">ยังไม่มีค่ากำหนด</div>';grid.querySelectorAll('[data-config-save]').forEach(btn=>btn.onclick=async()=>{const i=Number(btn.dataset.configSave),x=data.items[i];x.Config_Value=grid.querySelector(`[data-config-value="${i}"]`).value;try{await apiRequest('saveSystemConfig',{item:x});toast('บันทึกแล้ว',x.Config_Key,'success')}catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error')}})}catch(err){grid.innerHTML=`<div>${escapeHtml(err.message)}</div>`}}
 
 // V4.1 Error Work Queue events
-document.getElementById('errorQueueClose')?.addEventListener('click',closeErrorQueue);document.getElementById('errorQueueDone')?.addEventListener('click',closeErrorQueue);document.getElementById('errorQueueFilterBtn')?.addEventListener('click',()=>registryState.activeErrorCode&&filterRegistryByError(registryState.activeErrorCode));document.getElementById('errorQueueModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeErrorQueue()});
+document.addEventListener('click',e=>{
+ if(e.target.closest('#errorQueueClose,#errorQueueDone')){e.preventDefault();closeErrorQueue();return;}
+ if(e.target.closest('#errorQueueFilterBtn')){e.preventDefault();if(registryState.activeErrorCode)filterRegistryByError(registryState.activeErrorCode);return;}
+ if(e.target.closest('#errorQueueCsvBtn')){e.preventDefault();exportErrorQueueCsv();return;}
+ const modal=e.target.closest('#errorQueueModal');if(modal&&e.target===modal)closeErrorQueue();
+});
