@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.1.4
+SSOP Toolkit Professional Edition V4.1.5
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -9,6 +9,23 @@ const state={file:null,fileName:'',originalText:'',doc:null,activeSection:'',ori
 const authState={token:localStorage.getItem('ssopSessionToken')||'',user:null};
 function isViewer(){return String(authState.user?.Role||'').toUpperCase()==='VIEWER';}
 function canWrite(){return !isViewer();}
+const MODULE_ACCESS_MAP={cancer:'SSOCAC',main:'MAIN',cross:'CROSS',cpap:'STCPAP',sleep:'STSLEEP',editor:'EDITOR',knowledge:'KNOWLEDGE',admin:'ADMIN'};
+function allowedModuleSet(){
+ const role=String(authState.user?.Role||'').toUpperCase();
+ if(role==='ADMIN')return new Set(['ALL']);
+ const raw=String(authState.user?.Allowed_Modules||'').trim().toUpperCase();
+ const set=new Set(raw.split(/[;,|\s]+/).map(v=>v.trim()).filter(Boolean));
+ set.add('EDITOR');
+ return set;
+}
+function hasModuleAccess(name){
+ const code=MODULE_ACCESS_MAP[String(name||'').toLowerCase()]||String(name||'').toUpperCase();
+ if(code==='EDITOR')return true;
+ if(code==='ADMIN')return String(authState.user?.Role||'').toUpperCase()==='ADMIN';
+ const set=allowedModuleSet();
+ return set.has('ALL')||set.has(code);
+}
+function moduleAccessLabel(name){const labels={cancer:'Cancer Care (SSOCAC)',main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test',editor:'SSO Editor',knowledge:'SSOP Knowledge Center',admin:'จัดการระบบ'};return labels[name]||name;}
 window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),700);initializeAuthentication();});
 const aboutModal=document.getElementById('aboutModal');
 document.querySelectorAll('[data-open-about]').forEach(btn=>btn.addEventListener('click',()=>{aboutModal.classList.add('show');aboutModal.setAttribute('aria-hidden','false')}));
@@ -28,7 +45,7 @@ function goHome(){
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function openModule(name){
- if(isViewer()&&!['cancer','editor'].includes(name)){toast('สิทธิ์ VIEWER','สามารถดูทะเบียน ส่งออก CSV และใช้ SSO Editor ได้','warning');return;}
+ if(!hasModuleAccess(name)){toast('ไม่มีสิทธิ์',`บัญชีนี้ไม่มีสิทธิ์ใช้งานโมดูล ${moduleAccessLabel(name)}`,'warning',5200);return;}
  if(name==='cancer'){showPage('registryPage');loadRegistry();return;}
  if(name==='knowledge'){showPage('knowledgePage');loadKnowledge('','ALL');return;}
  if(name==='editor'){showPage('cancerPage');return;}
@@ -1125,6 +1142,8 @@ function bindAuthEvents(){
   document.getElementById('addUserBtn')?.addEventListener('click',()=>openUserModal());
   document.getElementById('userModalClose')?.addEventListener('click',closeUserModal);
   document.getElementById('userModalCancel')?.addEventListener('click',closeUserModal);
+document.getElementById('userModulesAllBtn')?.addEventListener('click',()=>setUserModuleSelection('ALL'));
+document.getElementById('userModulesClearBtn')?.addEventListener('click',()=>setUserModuleSelection('EDITOR'));
   document.getElementById('userSaveBtn')?.addEventListener('click',saveSystemUser);
   document.getElementById('reloadConfigBtn')?.addEventListener('click',loadSystemConfig);
 }
@@ -1136,17 +1155,41 @@ function applyRoleUi(){
  // VIEWER ห้ามแก้ฐานทะเบียน แต่ใช้ SSO Editor แบบ Local Processing ได้
  ['importExcelBtn','openZipReaderBtn','openReplyImportBtn','addCaseBtn','registryKnowledgeBtn'].forEach(id=>document.getElementById(id)?.classList.toggle('hidden',viewer));
  document.getElementById('openCancerEditorBtn')?.classList.remove('hidden');
- document.querySelectorAll('[data-module="knowledge"],[data-module="admin"]').forEach(el=>el.classList.toggle('hidden',viewer));
+ document.querySelectorAll('[data-module="knowledge"]').forEach(el=>el.classList.remove('hidden'));
+ document.querySelectorAll('[data-module="admin"]').forEach(el=>el.classList.toggle('hidden',authState.user?.Role!=='ADMIN'));
  document.querySelectorAll('[data-module="editor"]').forEach(el=>el.classList.remove('hidden'));
 }
-function applyAuthentication(user){authState.user=user;document.getElementById('loginOverlay')?.classList.remove('show');document.getElementById('authBar')?.classList.remove('hidden');document.getElementById('authDisplayName').textContent=user.Display_Name;document.getElementById('authRole').textContent=user.Role;document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',user.Role!=='ADMIN'));applyRoleUi();const page=new URLSearchParams(location.search).get('page');loadDocumentLinks();if(isViewer()){showPage('registryPage');loadRegistry();return;}if(page==='knowledge'){showPage('knowledgePage');loadKnowledge('','ALL');}else if(page==='editor'){showPage('cancerPage');}else{goHome();}}
+function applyAuthentication(user){authState.user=user;document.getElementById('loginOverlay')?.classList.remove('show');document.getElementById('authBar')?.classList.remove('hidden');document.getElementById('authDisplayName').textContent=user.Display_Name;document.getElementById('authRole').textContent=user.Role;document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',user.Role!=='ADMIN'));applyRoleUi();refreshModuleCardsForUser();const page=new URLSearchParams(location.search).get('page');loadDocumentLinks();if(page==='knowledge'&&hasModuleAccess('knowledge')){showPage('knowledgePage');loadKnowledge('','ALL');}else if(page==='editor'){showPage('cancerPage');}else{goHome();}}
 async function performLogout(){try{await apiRequest('logout')}catch(_e){}clearAuthentication();showLogin('ออกจากระบบแล้ว')}
 async function loadAdminPage(){if(authState.user?.Role!=='ADMIN')return;await Promise.all([loadSystemUsers(),loadSystemConfig()]);}
 let systemUsersCache=[];
 async function loadSystemUsers(){const body=document.getElementById('systemUsersBody');body.innerHTML='<tr><td colspan="8">กำลังโหลด...</td></tr>';try{const data=await apiRequest('listUsers');systemUsersCache=data.items||[];body.innerHTML=systemUsersCache.map((u,i)=>`<tr><td><b>${escapeHtml(u.User_ID)}</b></td><td>${escapeHtml(u.Display_Name)}</td><td>${escapeHtml(u.Email||'-')}</td><td><span class="role-badge">${escapeHtml(u.Role)}</span></td><td>${escapeHtml(u.Department||'-')}</td><td>${u.Active?'<span class="db-badge ok">ใช้งาน</span>':'<span class="db-badge pending">ปิด</span>'}</td><td>${thDateTime(u.Last_Login_At)}</td><td><button class="soft" data-user-edit="${i}">แก้ไข</button></td></tr>`).join('')||'<tr><td colspan="8">ยังไม่มีผู้ใช้</td></tr>';body.querySelectorAll('[data-user-edit]').forEach(b=>b.onclick=()=>openUserModal(systemUsersCache[Number(b.dataset.userEdit)]));}catch(err){body.innerHTML=`<tr><td colspan="8">${escapeHtml(err.message)}</td></tr>`}}
-function openUserModal(u=null){document.getElementById('userModalTitle').textContent=u?'แก้ไขผู้ใช้':'เพิ่มผู้ใช้';document.getElementById('userId').value=u?.User_ID||'';document.getElementById('userId').readOnly=Boolean(u);document.getElementById('userDisplayName').value=u?.Display_Name||'';document.getElementById('userEmail').value=u?.Email||'';document.getElementById('userRole').value=u?.Role||'USER';document.getElementById('userDepartment').value=u?.Department||'';document.getElementById('userModules').value=u?.Allowed_Modules||'ALL';document.getElementById('userPassword').value='';document.getElementById('userActive').checked=u?.Active!==false;document.getElementById('userModal').classList.add('show')}
+function setUserModuleSelection(value){
+ const raw=String(value||'').trim().toUpperCase();
+ const all=raw==='ALL';
+ const selected=new Set(raw.split(/[;,|\s]+/).map(v=>v.trim()).filter(Boolean));
+ document.querySelectorAll('#userModules input[type=checkbox]').forEach(cb=>{
+   if(cb.value==='EDITOR'){cb.checked=true;return;}
+   cb.checked=all||selected.has(cb.value);
+ });
+}
+function getUserModuleSelection(){
+ const selected=[...document.querySelectorAll('#userModules input[type=checkbox]:checked')].map(cb=>cb.value).filter(v=>v!=='EDITOR');
+ const allCodes=['SSOCAC','MAIN','CROSS','STCPAP','STSLEEP','KNOWLEDGE'];
+ if(allCodes.every(code=>selected.includes(code)))return 'ALL';
+ return ['EDITOR',...selected].join(',');
+}
+function refreshModuleCardsForUser(){
+ document.querySelectorAll('.module-card[data-module]').forEach(card=>{
+   const allowed=hasModuleAccess(card.dataset.module);
+   card.classList.toggle('module-no-access',!allowed);
+   card.setAttribute('aria-disabled',allowed?'false':'true');
+   card.title=allowed?'':`ไม่มีสิทธิ์ใช้งาน ${moduleAccessLabel(card.dataset.module)}`;
+ });
+}
+function openUserModal(u=null){document.getElementById('userModalTitle').textContent=u?'แก้ไขผู้ใช้':'เพิ่มผู้ใช้';document.getElementById('userId').value=u?.User_ID||'';document.getElementById('userId').readOnly=Boolean(u);document.getElementById('userDisplayName').value=u?.Display_Name||'';document.getElementById('userEmail').value=u?.Email||'';document.getElementById('userRole').value=u?.Role||'USER';document.getElementById('userDepartment').value=u?.Department||'';setUserModuleSelection(u?.Allowed_Modules||'ALL');document.getElementById('userPassword').value='';document.getElementById('userActive').checked=u?.Active!==false;document.getElementById('userModal').classList.add('show')}
 function closeUserModal(){document.getElementById('userModal').classList.remove('show')}
-async function saveSystemUser(){const item={User_ID:document.getElementById('userId').value.trim(),Display_Name:document.getElementById('userDisplayName').value.trim(),Email:document.getElementById('userEmail').value.trim(),Role:document.getElementById('userRole').value,Department:document.getElementById('userDepartment').value.trim(),Allowed_Modules:document.getElementById('userModules').value.trim()||'ALL',Password:document.getElementById('userPassword').value,Active:document.getElementById('userActive').checked};try{await apiRequest('saveUser',{item});closeUserModal();toast('บันทึกสำเร็จ','ข้อมูลผู้ใช้ได้รับการอัปเดตแล้ว','success');loadSystemUsers()}catch(err){toast('บันทึกผู้ใช้ไม่สำเร็จ',err.message,'error',6500)}}
+async function saveSystemUser(){const item={User_ID:document.getElementById('userId').value.trim(),Display_Name:document.getElementById('userDisplayName').value.trim(),Email:document.getElementById('userEmail').value.trim(),Role:document.getElementById('userRole').value,Department:document.getElementById('userDepartment').value.trim(),Allowed_Modules:getUserModuleSelection(),Password:document.getElementById('userPassword').value,Active:document.getElementById('userActive').checked};try{await apiRequest('saveUser',{item});closeUserModal();toast('บันทึกสำเร็จ','ข้อมูลผู้ใช้ได้รับการอัปเดตแล้ว','success');loadSystemUsers()}catch(err){toast('บันทึกผู้ใช้ไม่สำเร็จ',err.message,'error',6500)}}
 async function loadSystemConfig(){const grid=document.getElementById('systemConfigGrid');if(!grid)return;grid.innerHTML='<div>กำลังโหลด...</div>';try{const data=await apiRequest('listSystemConfig');grid.innerHTML=(data.items||[]).map((x,i)=>`<div class="config-item"><div><b>${escapeHtml(x.Config_Key||'')}</b><small>${escapeHtml(x.Description||'')}</small></div><input data-config-value="${i}" value="${escapeAttr(x.Config_Value||'')}"><button class="soft" data-config-save="${i}">บันทึก</button></div>`).join('')||'<div class="meta">ยังไม่มีค่ากำหนด</div>';grid.querySelectorAll('[data-config-save]').forEach(btn=>btn.onclick=async()=>{const i=Number(btn.dataset.configSave),x=data.items[i];x.Config_Value=grid.querySelector(`[data-config-value="${i}"]`).value;try{await apiRequest('saveSystemConfig',{item:x});toast('บันทึกแล้ว',x.Config_Key,'success')}catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error')}})}catch(err){grid.innerHTML=`<div>${escapeHtml(err.message)}</div>`}}
 
 // V4.1 Error Work Queue events
