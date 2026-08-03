@@ -478,3 +478,36 @@ body.modal-open{overflow:hidden}
   -webkit-line-clamp:unset!important;
   -webkit-box-orient:initial!important;
 }
+
+
+/* V4.1.5 Module Permissions + Flexible Registry Final */
+.module-permission-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:6px}
+.module-permission-item{display:flex;align-items:center;gap:8px;min-height:46px;padding:9px 11px;border:1px solid #d5e6e2;border-radius:11px;background:#f8fcfb;cursor:pointer}
+.module-permission-item input{width:17px;height:17px;flex:0 0 auto}
+.module-permission-item span{font-weight:700;line-height:1.2}
+.module-permission-item small{margin-left:auto;color:#55736d;white-space:nowrap}
+.module-permission-item.editor-default{background:#e9f8f3;border-color:#8fd5c6;cursor:default}
+.module-permission-actions{display:flex;gap:7px;margin-top:9px}.module-permission-actions .mini{padding:6px 9px;font-size:12px}
+.module-card.module-no-access{opacity:.62;filter:saturate(.55)}
+.module-card.module-no-access::after{content:'🔒 ไม่มีสิทธิ์';display:inline-block;margin-top:8px;padding:4px 8px;border-radius:999px;background:#fff0f0;color:#a33;font-size:11px;font-weight:800}
+
+/* Keep every registry value on one line; columns expand naturally and horizontal scroll remains available. */
+.registry-table-wrap{width:100%!important;max-width:100%!important;overflow:hidden!important}
+.registry-horizontal-scroll{display:block!important;width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-gutter:stable!important}
+.registry-horizontal-scroll .registry-table{table-layout:auto!important;width:max-content!important;min-width:100%!important;font-size:12px!important}
+.registry-table th,.registry-table td{width:auto!important;min-width:max-content!important;max-width:none!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:normal!important;word-break:normal!important;vertical-align:middle!important;padding:8px 10px!important;height:auto!important;max-height:none!important}
+.registry-table td>*:not(.row-actions):not(.error-code-tags),.registry-table .case-no,.registry-table td b,.registry-table .subline,.registry-table .status-pill{display:block!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;max-height:none!important;-webkit-line-clamp:unset!important;-webkit-box-orient:initial!important}
+.registry-table .row-actions{display:flex!important;flex-wrap:nowrap!important;white-space:nowrap!important;gap:5px!important;max-height:none!important}
+.registry-table .error-code-tags{display:flex!important;flex-wrap:wrap!important;min-width:180px;max-width:320px;gap:4px}
+.registry-table .session-station-col,.registry-table th.session-station-col,.registry-table td.session-station-col{min-width:112px!important;white-space:nowrap!important;text-align:center!important}
+.registry-table th:nth-child(1),.registry-table td:nth-child(1){min-width:120px!important}
+.registry-table th:nth-child(2),.registry-table td:nth-child(2){min-width:120px!important}
+.registry-table th:nth-child(3),.registry-table td:nth-child(3){min-width:170px!important}
+.registry-table th:nth-child(4),.registry-table td:nth-child(4){min-width:105px!important}
+.registry-table th:nth-child(5),.registry-table td:nth-child(5){min-width:145px!important}
+.registry-table th:nth-child(7),.registry-table td:nth-child(7){min-width:82px!important;text-align:center!important}
+.registry-table th:nth-child(8),.registry-table td:nth-child(8){min-width:86px!important;text-align:center!important}
+.registry-table th:nth-child(9),.registry-table td:nth-child(9){min-width:62px!important;text-align:center!important}
+.registry-table th:nth-child(11),.registry-table td:nth-child(11){min-width:95px!important}
+.registry-table th:nth-child(12),.registry-table td:nth-child(12){min-width:210px!important}
+@media(max-width:720px){.module-permission-grid{grid-template-columns:1fr}}
