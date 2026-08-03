@@ -15,7 +15,7 @@
   All Rights Reserved.
   ======================================================
   -->
-  <link rel="stylesheet" href="assets/css/style.css?v=4.1.4" />
+  <link rel="stylesheet" href="assets/css/style.css?v=4.1.5" />
 </head>
 <body>
   <div class="test-system-banner">ระบบงาน SSOP Toolkit V4 · Production</div><div id="authBar" class="auth-bar hidden"><span id="authDisplayName"></span><span id="authRole" class="role-badge"></span><button id="logoutBtn" class="soft">ออกจากระบบ</button></div>
@@ -301,7 +301,15 @@
 <div id="loginOverlay" class="login-overlay">
   <div class="login-card"><div class="login-logo">🔐</div><h1>SSOP Toolkit</h1><p>เข้าสู่ระบบเพื่อใช้งาน</p><div class="field"><label>ชื่อผู้ใช้หรืออีเมล</label><input id="loginUsername" autocomplete="username"></div><div class="field"><label>รหัสผ่าน</label><input id="loginPassword" type="password" autocomplete="current-password"></div><button class="primary login-btn" id="loginBtn">เข้าสู่ระบบ</button><div id="loginMessage" class="login-message"></div></div>
 </div>
-<div class="modal" id="userModal" aria-hidden="true"><div class="modal-card user-modal"><div class="modal-head"><strong id="userModalTitle">เพิ่มผู้ใช้</strong><button class="close-x" id="userModalClose">✕ ปิด</button></div><div class="modal-body"><div class="case-form-grid"><div class="field"><label>User ID *</label><input id="userId"></div><div class="field"><label>Display Name *</label><input id="userDisplayName"></div><div class="field"><label>Email</label><input id="userEmail" type="email"></div><div class="field"><label>Role</label><select id="userRole"><option value="VIEWER">VIEWER</option><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select></div><div class="field"><label>หน่วยงาน</label><input id="userDepartment"></div><div class="field"><label>โมดูลที่อนุญาต</label><input id="userModules" value="ALL"></div><div class="field"><label>รหัสผ่าน <small>(เว้นว่างหากไม่เปลี่ยน)</small></label><input id="userPassword" type="password"></div><div class="field"><label><input id="userActive" type="checkbox" checked> เปิดใช้งาน</label></div></div><div class="modal-actions"><button class="soft" id="userModalCancel">ยกเลิก</button><button class="primary" id="userSaveBtn">บันทึกผู้ใช้</button></div></div></div></div>
+<div class="modal" id="userModal" aria-hidden="true"><div class="modal-card user-modal"><div class="modal-head"><strong id="userModalTitle">เพิ่มผู้ใช้</strong><button class="close-x" id="userModalClose">✕ ปิด</button></div><div class="modal-body"><div class="case-form-grid"><div class="field"><label>User ID *</label><input id="userId"></div><div class="field"><label>Display Name *</label><input id="userDisplayName"></div><div class="field"><label>Email</label><input id="userEmail" type="email"></div><div class="field"><label>Role</label><select id="userRole"><option value="VIEWER">VIEWER</option><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select></div><div class="field"><label>หน่วยงาน</label><input id="userDepartment"></div><div class="field span-2"><label>โมดูลที่อนุญาต</label><div id="userModules" class="module-permission-grid" role="group" aria-label="โมดูลที่อนุญาต">
+<label class="module-permission-item editor-default"><input type="checkbox" value="EDITOR" checked disabled> <span>SSO Editor</span><small>ทุกผู้ใช้ใช้งานได้</small></label>
+<label class="module-permission-item"><input type="checkbox" value="SSOCAC"> <span>Cancer Care (SSOCAC)</span></label>
+<label class="module-permission-item"><input type="checkbox" value="MAIN"> <span>ประกันสังคม Main</span></label>
+<label class="module-permission-item"><input type="checkbox" value="CROSS"> <span>ประกันสังคมข้ามเขต</span></label>
+<label class="module-permission-item"><input type="checkbox" value="STCPAP"> <span>ประกันสังคม CPAP</span></label>
+<label class="module-permission-item"><input type="checkbox" value="STSLEEP"> <span>ประกันสังคม Sleep Test</span></label>
+<label class="module-permission-item"><input type="checkbox" value="KNOWLEDGE"> <span>SSOP Knowledge Center</span></label>
+</div><div class="module-permission-actions"><button type="button" class="soft mini" id="userModulesAllBtn">เลือกโมดูลทั้งหมด</button><button type="button" class="soft mini" id="userModulesClearBtn">ล้างการเลือก</button></div><div class="meta">SSO Editor เปิดใช้งานเป็นค่าเริ่มต้นสำหรับทุกบัญชี</div></div><div class="field"><label>รหัสผ่าน <small>(เว้นว่างหากไม่เปลี่ยน)</small></label><input id="userPassword" type="password"></div><div class="field"><label><input id="userActive" type="checkbox" checked> เปิดใช้งาน</label></div></div><div class="modal-actions"><button class="soft" id="userModalCancel">ยกเลิก</button><button class="primary" id="userSaveBtn">บันทึกผู้ใช้</button></div></div></div></div>
 
 <div class="modal" id="errorQueueModal" aria-hidden="true">
   <div class="modal-card error-queue-modal-card">
@@ -315,8 +323,8 @@
 <div class="dialog-overlay" id="dialogOverlay"><div class="dialog-box"><div class="dialog-icon" id="dialogIcon">ℹ️</div><h3 id="dialogTitle"></h3><p id="dialogMessage"></p><div class="dialog-actions" id="dialogActions"></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="assets/js/config.js?v=4.1.4"></script>
-<script src="assets/js/app.js?v=4.1.4"></script>
+<script src="assets/js/config.js?v=4.1.5"></script>
+<script src="assets/js/app.js?v=4.1.5"></script>
 
 </body>
 </html>
