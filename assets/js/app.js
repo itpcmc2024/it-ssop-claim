@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.2.3
+SSOP Toolkit Professional Edition V4.2.5
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -599,8 +599,8 @@ function exportErrorQueueCsv(){
 
 
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.4'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.4'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.5'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.5'}
 };
 function openRegistryModule(moduleCode){currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();applyRegistryModuleUi();showPage('registryPage');loadRegistry();}
 function applyRegistryModuleUi(){
@@ -884,32 +884,55 @@ function collectZipCaseSignals(rawItems){
 function verifyZipAgainstSelectedCase(rawItems,fileName){
  const c=zipReaderState.caseItem;if(!c)return{ok:true,warnings:[],lines:[]};
  const sig=collectZipCaseSignals(rawItems),mismatch=[],warnings=[],lines=[];
- const checks=[
-  ['HN',zipNormId(c.HN,9),sig.hn],['CID',zipNormId(c.CID,13),sig.cid],['Session',zipNormId(c.Session),sig.session],['Station',zipNormId(c.Station,2),sig.station]
+ // HN / Session / Station are strict guards for a ZIP opened from a registry row.
+ const strictChecks=[
+  ['HN',zipNormId(c.HN,9),sig.hn],
+  ['Session',zipNormId(c.Session),sig.session],
+  ['Station',zipNormId(c.Station,2),sig.station]
  ];
- checks.forEach(([label,expected,set])=>{
-  if(!expected)return;
-  if(!set.size){warnings.push(`${label}: ไม่พบค่าใน ZIP เพื่อเปรียบเทียบ`);return;}
+ strictChecks.forEach(([label,expected,set])=>{
+  if(!expected){mismatch.push(`${label}: ทะเบียนไม่มีค่า จึงไม่สามารถยืนยัน ZIP ได้`);return;}
+  if(!set.size){mismatch.push(`${label}: ไม่พบค่าใน ZIP จึงไม่อนุญาตให้เปิดจากแถวทะเบียนนี้`);return;}
   if(!set.has(expected))mismatch.push(`${label}: ทะเบียน ${expected} แต่ ZIP พบ ${[...set].join(', ')}`);else lines.push(`${label}: ตรงกัน (${expected})`);
  });
- const vn=zipNormId(c.VN);if(vn){const found=String(sig.allText).includes(vn);if(found)lines.push(`VN: พบ ${vn} ใน ZIP`);else warnings.push(`VN: ไม่พบ ${vn} ใน ZIP จึงตรวจยืนยันจาก HN/CID/Session/Station แทน`);}
- const name=String(fileName||'');const fs=name.match(/_(\d{4})_(\d{1,3})_/);if(fs){const fSession=zipNormId(fs[1]),fStation=zipNormId(fs[2],2);if(c.Session&&fSession!==zipNormId(c.Session))mismatch.push(`ชื่อ ZIP: Session ${fSession} ไม่ตรงทะเบียน ${zipNormId(c.Session)}`);if(c.Station&&fStation!==zipNormId(c.Station,2))mismatch.push(`ชื่อ ZIP: Station ${fStation} ไม่ตรงทะเบียน ${zipNormId(c.Station,2)}`);}
+ // CID is compared strictly when the registry contains it and the ZIP exposes it.
+ const expectedCid=zipNormId(c.CID,13);
+ if(expectedCid){
+  if(sig.cid.size&&!sig.cid.has(expectedCid))mismatch.push(`CID: ทะเบียน ${expectedCid} แต่ ZIP พบ ${[...sig.cid].join(', ')}`);
+  else if(sig.cid.has(expectedCid))lines.push(`CID: ตรงกัน (${expectedCid})`);
+  else warnings.push('CID: ไม่พบค่าใน ZIP จึงใช้ HN / Session / Station เป็นตัวตรวจหลัก');
+ }
+ // VN is not present in every SSOP file. Compare it whenever it is actually present.
+ const vn=zipNormId(c.VN);
+ if(vn){const found=String(sig.allText).includes(vn);if(found)lines.push(`VN: พบ ${vn} ใน ZIP`);else warnings.push(`VN: ไม่พบ ${vn} ในเนื้อหา ZIP (แฟ้ม SSOP บางรูปแบบไม่มี VN)`);}
+ const name=String(fileName||'');const fs=name.match(/_(\d{4})_(\d{1,3})_/);
+ if(!fs)mismatch.push('ชื่อ ZIP: ไม่พบรูปแบบ Session_Station สำหรับยืนยันเคส');
+ else{
+  const fSession=zipNormId(fs[1]),fStation=zipNormId(fs[2],2);
+  if(fSession!==zipNormId(c.Session))mismatch.push(`ชื่อ ZIP: Session ${fSession} ไม่ตรงทะเบียน ${zipNormId(c.Session)}`);else lines.push(`ชื่อ ZIP Session: ตรงกัน (${fSession})`);
+  if(fStation!==zipNormId(c.Station,2))mismatch.push(`ชื่อ ZIP: Station ${fStation} ไม่ตรงทะเบียน ${zipNormId(c.Station,2)}`);else lines.push(`ชื่อ ZIP Station: ตรงกัน (${fStation})`);
+ }
  return{ok:mismatch.length===0,mismatch,warnings,lines};
 }
 async function handleZipFile(file){if(!file)return;if(!window.JSZip){toast('เปิด ZIP ไม่ได้','ไม่พบไลบรารี JSZip กรุณาตรวจสอบอินเทอร์เน็ต','error');return}if(!/\.zip$/i.test(file.name)){toast('ชนิดไฟล์ไม่ถูกต้อง','กรุณาเลือกไฟล์ .zip','warning');return}try{
- const summary=document.getElementById('zipSummary');document.getElementById('zipChooseStep').classList.add('hidden');document.getElementById('zipWorkspace').classList.remove('hidden');summary.innerHTML='<div class="zip-loading">กำลังอ่าน แยกโครงสร้าง และตรวจสอบว่าเป็นเคสที่เลือก...</div>';
+ const chooseStep=document.getElementById('zipChooseStep'),workspace=document.getElementById('zipWorkspace'),chooseBtn=document.getElementById('zipChooseBtn');
+ if(chooseBtn){chooseBtn.disabled=true;chooseBtn.textContent='กำลังตรวจ ZIP...';}
+ // Do not reveal the editor until identity checks pass.
+ chooseStep?.classList.remove('hidden');workspace?.classList.add('hidden');
  const zip=await JSZip.loadAsync(file);const rawEntries=Object.values(zip.files).filter(e=>!e.dir);const entries=[];const logicalPresent=new Set(),verifyItems=[];
  for(const e of rawEntries){let logicalSections=[],text='';try{const buf=await e.async('arraybuffer');text=decodeSsopBuffer(buf);const parsed=parseZipSsopSections(text);logicalSections=Object.keys(parsed);logicalSections.forEach(x=>logicalPresent.add(x));verifyItems.push({name:e.name,text,sections:parsed});}catch(_e){}
   entries.push({name:e.name,size:e._data?.uncompressedSize||0,type:classifySsopFile(e.name),logicalSections,entry:e,text:text||null,originalText:text||null,sections:text?parseZipSsopSections(text):null,modified:false,saved:false,savedText:null,plainDelimiter:null,plainHasHeader:false,autoChangedCells:{},changeStats:{cells:0,added:0,deleted:0}});
  }
  const verified=verifyZipAgainstSelectedCase(verifyItems,file.name);
  if(!verified.ok){throw new Error('ZIP ไม่ตรงกับแถวผู้ป่วยที่เลือก\n'+verified.mismatch.join('\n'));}
+ chooseStep?.classList.add('hidden');workspace?.classList.remove('hidden');
+ const summary=document.getElementById('zipSummary');
  zipReaderState.zip=zip;zipReaderState.file=file;zipReaderState.entries=entries;
  const expected=['BILLTRAN','BillItems','Dispensing','DispensedItems','OPServices','OPDx'];const missing=expected.filter(x=>!logicalPresent.has(x));
  summary.innerHTML=`<div class="summary-card"><span>ชื่อ ZIP</span><strong>${escapeHtml(file.name)}</strong></div><div class="summary-card"><span>จำนวนไฟล์</span><strong>${entries.length}</strong></div><div class="summary-card"><span>ส่วนข้อมูลที่อ่านได้</span><strong>${logicalPresent.size}</strong></div><div class="summary-card ${missing.length?'warn':''}"><span>ส่วนข้อมูลที่ยังไม่พบ</span><strong>${missing.length?escapeHtml(missing.join(', ')):'พบส่วนข้อมูลมาตรฐานครบ'}</strong></div>`;
  renderZipFileList();if(entries.length)await selectZipEntry(entries[0].name);
  if(zipReaderState.caseItem){if(verified.warnings.length)toast('ตรวจเคสแล้ว มีข้อสังเกต',verified.warnings.join(' · '),'warning',8000);else toast('ตรวจสอบเคสตรงกัน',verified.lines.join(' · '),'success',5000);markZipLoadedForCase(file.name).catch(err=>{console.warn('markCaseZipLoaded failed',err);toast('อ่าน ZIP สำเร็จ','เปิดข้อมูลได้แล้ว แต่ยังอัปเดตสถานะทะเบียนไม่สำเร็จ: '+(err.message||'กรุณาลองสร้าง ZIP อีกครั้ง'),'warning',7000)})}
- }catch(err){resetZipReader();toast('อ่าน ZIP ไม่สำเร็จ',err.message||'ไฟล์ ZIP อาจเสียหายหรือไม่ตรงกับเคสที่เลือก','error',9000)}}
+ }catch(err){resetZipReader();toast('ไม่อนุญาตให้เปิด ZIP',err.message||'ไฟล์ ZIP อาจเสียหายหรือไม่ตรงกับเคสที่เลือก','error',12000)}finally{const b=document.getElementById('zipChooseBtn');if(b){b.disabled=false;b.textContent='เลือกไฟล์ ZIP';}}}
 function renderZipFileList(){const wrap=document.getElementById('zipFileList');wrap.innerHTML=zipReaderState.entries.length?zipReaderState.entries.map(e=>`<button class="zip-file-item ${zipReaderState.selected===e.name?'active':''}" data-zip-entry="${escapeHtml(e.name)}"><span class="zip-file-icon">📄</span><span class="grow"><b>${escapeHtml(baseName(e.name))}</b><small>${escapeHtml(e.logicalSections.length?e.logicalSections.join(' + '):e.type)} · ${(e.size/1024).toFixed(1)} KB</small></span></button>`).join(''):'<div class="empty-row">ไม่พบไฟล์ภายใน ZIP</div>';wrap.querySelectorAll('[data-zip-entry]').forEach(b=>b.onclick=()=>selectZipEntry(b.dataset.zipEntry))}
 async function selectZipEntry(name){const item=zipReaderState.entries.find(e=>e.name===name);if(!item)return;zipReaderState.selected=name;renderZipFileList();document.getElementById('zipPreviewTitle').textContent=baseName(name);document.getElementById('zipPreviewMeta').textContent=`${item.type} · กำลังอ่านข้อมูล...`;document.getElementById('zipPreviewBody').innerHTML='<tr><td class="empty-row">กำลังอ่านไฟล์...</td></tr>';try{const buf=await item.entry.async('arraybuffer');const text=item.text??decodeSsopBuffer(buf);if(item.text===null){item.text=text;item.originalText=text}const sections=item.sections??parseZipSsopSections(text);item.sections=sections;zipReaderState.sections=sections;zipReaderState.dirty=!!item.modified;updateZipEditStatus();const names=Object.keys(sections);const search=document.getElementById('zipTableSearch');search.disabled=false;search.value='';if(names.length){zipReaderState.activeSection=names[0];renderZipSectionTabs();selectZipSection(names[0])}else{const parsed=parseSsopText(text);const firstLine=String(text||'').replace(/^\uFEFF/,'').split(/\r?\n/).find(x=>x.trim()!=='')||'';item.plainDelimiter=detectDelimiter(firstLine)||'|';item.plainHasHeader=parsed.headers.some(h=>!/^คอลัมน์ \d+$/.test(h)&&h!=='ข้อความ');item.plainRows=parsed.rows;item.plainHeaders=parsed.headers;zipReaderState.activeSection='';zipReaderState.headers=item.plainHeaders;zipReaderState.rows=item.plainRows;renderZipSectionTabs();document.getElementById('zipPreviewMeta').textContent=`${item.type} · ${parsed.rows.length.toLocaleString('th-TH')} แถว · ${parsed.headers.length} คอลัมน์`;renderZipPreview()}}catch(err){document.getElementById('zipPreviewBody').innerHTML=`<tr><td class="empty-row">อ่านไฟล์ไม่ได้: ${escapeHtml(err.message)}</td></tr>`}}
 function renderZipSectionTabs(){const wrap=document.getElementById('zipSectionTabs');if(!wrap)return;const names=Object.keys(zipReaderState.sections||{});wrap.innerHTML=names.map(name=>`<button class="zip-section-tab ${zipReaderState.activeSection===name?'active':''}" data-zip-section="${escapeHtml(name)}">${escapeHtml(name)} <span>${zipReaderState.sections[name].length}</span></button>`).join('');wrap.querySelectorAll('[data-zip-section]').forEach(b=>b.onclick=()=>selectZipSection(b.dataset.zipSection))}
@@ -1062,7 +1085,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.2.3 */
+/* Excel Import V4.2.5 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','เลขกำกับเบิก','tflag','session','station','JobNo'];
