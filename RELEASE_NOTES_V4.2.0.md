@@ -21,4 +21,14 @@
 
 ## JobNo / Work Order
 
-- เพิ่มหัวคอลัมน์ `JobNo`
+- เพิ่มหัวคอลัมน์ `JobNo` เป็นข้อมูลจำเป็นของไฟล์ Excel CPAP
+- Mapping `JobNo` ไปยัง `Case_SSOCPAP.Work_Order_No`
+- แสดง Work No. ในหน้าตรวจสอบก่อนนำเข้า
+- เก็บเป็นข้อความเพื่อรักษาเลข 0 นำหน้า (ถ้ามี)
+
+## Migration Edition Hotfix
+- `setupDatabase()` เปลี่ยนเป็นการ Migration แบบเพิ่มเฉพาะคอลัมน์ที่ขาดต่อท้าย
+- ไม่ลบ ไม่ย้าย ไม่เรียง และไม่เปลี่ยนหัวตารางเดิม
+- คงลำดับ `Claim_Case` ตาม V4.1.5 Production เดิม
+- ฟิลด์เฉพาะ CPAP/JobNo เก็บใน `Case_SSOCPAP.Work_Order_No`
+- `checkDatabaseV3()` ตรวจจากชื่อหัวตาราง ไม่บังคับตำแหน่งคอลัมน์
