@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.2.5
+SSOP Toolkit Professional Edition V4.2.6
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -86,6 +86,43 @@ const fieldMeta={
  ]
 };
 
+const cpapFieldMeta={
+ BILLTRAN:[
+  ['Station','หมายเลขลำดับสถานีในงวดส่ง ใช้จับคู่กับทะเบียนและชื่อ ZIP','เช่น 39','important'],
+  ['AuthCode','รหัสโครงการสำหรับการเบิก CPAP และ Sleep Test','STCPAP','important'],
+  ['DTTran','วันและเวลาที่เกิดธุรกรรมหรือวันที่รับบริการ'],
+  ['Hcode','รหัสสถานพยาบาล 5 หลัก'],
+  ['InvNo','เลขที่ใบแจ้งหนี้ ใช้เป็นคีย์เชื่อม BILLTRAN, BillItems, BILLDISP และ OPServices'],
+  ['BillNo','เลขที่ใบเสร็จรับเงิน ถ้ามี'],
+  ['HN','เลขประจำตัวผู้ป่วยของโรงพยาบาล ต้องตรงกับทะเบียน SSOCPAP'],
+  ['MemberNo','เลขสมาชิกหรือเลขอ้างอิงตามรูปแบบแฟ้ม ถ้าไม่มีเงื่อนไขเฉพาะสามารถคงค่าเดิม'],
+  ['Amount','ยอดค่าบริการรวม ต้องสัมพันธ์กับผลรวม BillItems.ChargeAmt'],
+  ['Paid','จำนวนเงินที่ผู้ป่วยชำระจริง'],
+  ['VerCode','รหัสอนุมัติหรือรหัสอ้างอิงเพิ่มเติม ถ้ามี'],
+  ['Tflag','ประเภทการส่งข้อมูล ดึงจาก Excel/ทะเบียน และยังแก้ไขได้','A หรือ E','important'],
+  ['PID','เลขบัตรประชาชน 13 หลัก ต้องตรงกับทะเบียน'],
+  ['Name','ชื่อผู้รับบริการ'],
+  ['Hmain','รหัสสถานพยาบาลหลัก'],
+  ['PayPlan','รหัสแผนการจ่ายหรือสิทธิ'],
+  ['ClaimAmt','ยอดเงินที่ขอเบิกรวม ต้องสัมพันธ์กับผลรวม BillItems.ClaimAmount'],
+  ['OtherPay','ยอดชำระจากแหล่งอื่น'],
+  ['AdditionalField','ฟิลด์เพิ่มเติมตามรุ่นของแฟ้มต้นฉบับ']
+ ],
+ BillItems:[
+  ['InvNo','เลขที่ใบแจ้งหนี้ ต้องตรงกับ BILLTRAN.InvNo'],['SvDate','วันที่ให้บริการ'],['BillMuad','หมวดค่ารักษาพยาบาล'],['LCCode','รหัสรายการภายในสถานพยาบาล'],
+  ['STDCode','รหัสมาตรฐานรายการ: 3012 เครื่อง CPAP, 3013 หน้ากาก CPAP','3012 / 3013','important'],['Description','ชื่อรายการค่ารักษาพยาบาลหรืออุปกรณ์'],['Quantity','จำนวน'],['UnitPrice','ราคาต่อหน่วย'],['ChargeAmt','ยอดเรียกเก็บจริง'],['ClaimUP','ราคาต่อหน่วยที่ขอเบิก'],['ClaimAmount','ยอดที่ขอเบิกรายการนั้น'],['SvRefID','รหัสอ้างอิงบริการ'],['ClaimCat','หาก STDCode เป็น 3012 หรือ 3013 ต้องระบุ OPF','OPF','important']
+ ],
+ Dispensing:fieldMeta.Dispensing,
+ DispensedItems:fieldMeta.DispensedItems.map(m=>m[0]==='ClaimCat'?['ClaimCat','ประเภทบัญชีการเบิกของรายการยา/เวชภัณฑ์ ให้ตรวจตามหลักเกณฑ์ของรายการนั้น','ตรวจตามรายการ','important']:m),
+ OPServices:[
+  ['InvNo','เลขที่ใบแจ้งหนี้ ต้องตรงกับ BILLTRAN'],['SvID','รหัสอ้างอิงบริการ'],['Class','สำหรับการเบิกเครื่อง CPAP ต้องเป็น ED','ED','important'],['Hcode','รหัสสถานพยาบาล'],['HN','HN ต้องตรงกับทะเบียน'],['PID','เลขบัตรประชาชนต้องตรงกับทะเบียน'],['CareAccount','ลำดับหรือบัญชีบริการ'],['TypeServ','ประเภทบริการ'],['Clinic','คลินิก'],['SubClinic','คลินิกย่อย'],['DateField','วันที่ตามโครงสร้างต้นทาง'],['SvPID','เลขใบอนุญาตประกอบวิชาชีพแพทย์ (ว.แพทย์) ต้องมีในเคส CPAP','เช่น ว22858','important'],['ProviderType','ประเภทผู้ให้บริการ'],['BegDT','วันเวลาเริ่มบริการ'],['EndDT','วันเวลาสิ้นสุดบริการ'],['LCCode','รหัสบริการภายใน'],['CodeSet','ชุดรหัส'],['STDCode','รหัสมาตรฐาน'],['ChargeAmt','ยอดค่าใช้จ่าย'],['Completion','สถานะความสมบูรณ์'],['SvTxCode','เลขกำกับเบิก ดึงจากทะเบียน SSOCPAP','เช่น DTAECI','important'],['ClaimCat','หมวดการเบิก']
+ ],
+ OPDx:[
+  ['Class','ต้องเป็น ED และตรงกับ OPServices.Class สำหรับเคส CPAP','ED','important'],['SvID','รหัสอ้างอิงบริการ ต้องพบใน OPServices.SvID'],['Sequence','ลำดับการวินิจฉัย'],['CodeSet','ชุดรหัสวินิจฉัย เช่น IT'],['DiagnosisCode','รหัสวินิจฉัย เช่น G473 สามารถเว้นว่างใน Excel แล้วกรอกหรือแก้ไขภายหลังได้','เช่น G473','important'],['VerCode','รหัสเพิ่มเติมตามโครงสร้างแฟ้ม ถ้ามี']
+ ]
+};
+function activeGuideMeta(){return currentRegistryModule==='STCPAP'?cpapFieldMeta:fieldMeta;}
+const CPAP_ANNOUNCEMENT_URL='assets/docs/CHI67-A03.pdf';
 const documentState={ANNOUNCEMENT:null,PROTOCOL:null};
 const fieldGuideState={overrides:new Map(),dirty:new Map()};
 function fieldGuideKey(section,fieldName){return `${String(section).trim().toUpperCase()}|${String(fieldName).trim().toUpperCase()}`;}
@@ -214,9 +251,10 @@ function validateSSOCAC(){
 }
 function renderDictionary(){
  const order=['BILLTRAN','BillItems','Dispensing','DispensedItems','OPServices','OPDx'];
- document.getElementById('dictionaryBody').innerHTML=order.map(sec=>{const rows=fieldMeta[sec]||[];return `<div class="dict-section"><h3>${escapeHtml(sec)}</h3><table class="dict-table"><thead><tr><th style="width:50px">ลำดับ</th><th style="width:180px">ชื่อฟิลด์</th><th>ความหมาย</th><th style="width:250px">เงื่อนไข/ตัวอย่าง</th></tr></thead><tbody>${rows.map((m,i)=>`<tr><td>${i+1}</td><td class="${m[3]==='important'?'dict-important':''}">${escapeHtml(m[0])}${m[3]==='important'?' ★':''}</td><td>${escapeHtml(m[1]||'')}</td><td>${escapeHtml(String(m[2]||'-'))}</td></tr>`).join('')}</tbody></table></div>`}).join('');
+ const metaSource=activeGuideMeta();
+ document.getElementById('dictionaryBody').innerHTML=order.map(sec=>{const rows=metaSource[sec]||[];return `<div class="dict-section"><h3>${escapeHtml(sec)}</h3><table class="dict-table"><thead><tr><th style="width:50px">ลำดับ</th><th style="width:180px">ชื่อฟิลด์</th><th>ความหมาย</th><th style="width:250px">เงื่อนไข/ตัวอย่าง</th></tr></thead><tbody>${rows.map((m,i)=>`<tr><td>${i+1}</td><td class="${m[3]==='important'?'dict-important':''}">${escapeHtml(m[0])}${m[3]==='important'?' ★':''}</td><td>${escapeHtml(m[1]||'')}</td><td>${escapeHtml(String(m[2]||'-'))}</td></tr>`).join('')}</tbody></table></div>`}).join('');
 }
-const dictionaryModal=document.getElementById('dictionaryModal');const openDictionary=()=>{dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');renderDictionary();};document.getElementById('dictionaryBtn').onclick=openDictionary;document.getElementById('registryDictionaryBtn')?.addEventListener('click',openDictionary);document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
+const dictionaryModal=document.getElementById('dictionaryModal');const openDictionary=()=>{const cpap=currentRegistryModule==='STCPAP';const title=dictionaryModal.querySelector('.modal-head strong');const meta=dictionaryModal.querySelector('.modal-head .meta');if(title)title.textContent=cpap?'📖 คู่มือฟิลด์ SSOCPAP':'📖 คู่มือฟิลด์ SSOCAC';if(meta)meta.textContent=cpap?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับการเบิกเครื่อง CPAP/หน้ากาก':'ใช้สำหรับเปิดดูความหมาย เงื่อนไข และตัวอย่างของแต่ละฟิลด์';dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');renderDictionary();};document.getElementById('dictionaryBtn').onclick=openDictionary;document.getElementById('registryDictionaryBtn')?.addEventListener('click',openDictionary);document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
 function md5(bytes){
  function cmn(q,a,b,x,s,t){return (((a+q+x+t)|0)<<s|((a+q+x+t)|0)>>>32-s)+b|0}function ff(a,b,c,d,x,s,t){return cmn((b&c)|(~b&d),a,b,x,s,t)}function gg(a,b,c,d,x,s,t){return cmn((b&d)|(c&~d),a,b,x,s,t)}function hh(a,b,c,d,x,s,t){return cmn(b^c^d,a,b,x,s,t)}function ii(a,b,c,d,x,s,t){return cmn(c^(b|~d),a,b,x,s,t)}
  const len=bytes.length,bit=len*8,n=((len+8>>6)+1)*16,w=new Int32Array(n);for(let i=0;i<len;i++)w[i>>2]|=bytes[i]<<((i%4)*8);w[len>>2]|=0x80<<((len%4)*8);w[n-2]=bit;
@@ -438,9 +476,10 @@ async function loadDocumentLinks(){
  catch(err){console.warn('Document API:',err.message);}
 }
 async function openDocument(type){
+ if(type==='ANNOUNCEMENT'&&currentRegistryModule==='STCPAP'){window.open(CPAP_ANNOUNCEMENT_URL,'_blank','noopener');return;}
  if(!documentState[type]) await loadDocumentLinks();
  const item=documentState[type];
- if(!item?.url){toast('ยังไม่พบไฟล์ PDF',type==='ANNOUNCEMENT'?'ยังไม่พบ CHI68-A02.pdf ในโฟลเดอร์':'ยังไม่พบ Protocol.pdf ในโฟลเดอร์','warning');return;}
+ if(!item?.url){toast('ยังไม่พบไฟล์ PDF',type==='ANNOUNCEMENT'?'ยังไม่พบไฟล์ประกาศในโฟลเดอร์':'ยังไม่พบ Protocol.pdf ในโฟลเดอร์','warning');return;}
  window.open(item.url,'_blank','noopener');
 }
 function openDocumentUploadModal(type){
@@ -476,7 +515,7 @@ document.getElementById('announcementBtn')?.addEventListener('click',()=>openDoc
 document.getElementById('registryAnnouncementBtn')?.addEventListener('click',()=>openDocument('ANNOUNCEMENT'));
 document.getElementById('protocolBtn')?.addEventListener('click',()=>openDocument('PROTOCOL'));
 document.getElementById('registryProtocolBtn')?.addEventListener('click',()=>openDocument('PROTOCOL'));
-document.getElementById('registryKnowledgeBtn')?.addEventListener('click',()=>{const w=window.open(`${location.origin}${location.pathname}?page=knowledge`,'_blank','noopener');if(!w){showPage('knowledgePage');loadKnowledge('','SSOCAC');}});
+document.getElementById('registryKnowledgeBtn')?.addEventListener('click',()=>{const w=window.open(`${location.origin}${location.pathname}?page=knowledge`,'_blank','noopener');if(!w){showPage('knowledgePage');loadKnowledge('',currentRegistryModule);}});
 document.querySelectorAll('[data-document-type]').forEach(btn=>btn.addEventListener('click',()=>openDocumentUploadModal(btn.dataset.documentType)));
 document.getElementById('documentUploadConfirm')?.addEventListener('click',uploadDocument);
 document.getElementById('documentUploadCancel')?.addEventListener('click',closeDocumentUploadModal);
@@ -599,16 +638,16 @@ function exportErrorQueueCsv(){
 
 
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.5'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.5'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.6'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.6'}
 };
 function openRegistryModule(moduleCode){currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();applyRegistryModuleUi();showPage('registryPage');loadRegistry();}
 function applyRegistryModuleUi(){
  const c=REGISTRY_MODULE_CONFIG[currentRegistryModule]||REGISTRY_MODULE_CONFIG.SSOCAC;const set=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text};
  set('registryModuleIcon',c.icon);set('registryModuleTitle',c.title);set('registryModuleSubtitle',c.subtitle);set('registryFooterTitle',c.footer);
  const cpap=currentRegistryModule==='STCPAP';set('caseModalTitle',cpap?'เพิ่มงาน SSOCPAP':'เพิ่มงาน Cancer Care');set('caseModalSubtitle',cpap?'กรอกข้อมูลตั้งต้น CPAP เพื่อใช้จับคู่ ZIP และปรับปรุงฟิลด์อัตโนมัติ':'กรอกข้อมูลผู้ป่วยหลัง Discharge เพื่อเตรียมส่งเบิก');set('caseSsoNoLabel',cpap?'เลขกำกับเบิก':'Case Number');set('caseProtocolLabel',cpap?'ประเภทบริการ':'Protocol Code');set('caseChemoLabel',cpap?'ว.แพทย์':'ชื่อยา Chemo');
- ['registryAnnouncementBtn','registryProtocolBtn'].forEach(id=>document.getElementById(id)?.closest('.split-doc-action')?.classList.toggle('hidden',cpap));const guide=document.getElementById('registryDictionaryBtn');if(guide)guide.textContent=cpap?'📖 คู่มือฟิลด์ CPAP':'📖 คู่มือฟิลด์';const add=document.getElementById('addCaseBtn');if(add)add.textContent=cpap?'+ เพิ่ม CPAP เอง':'+ เพิ่มเอง';
- ['openZipReaderBtn','openReplyImportBtn'].forEach(id=>document.getElementById(id)?.classList.toggle('hidden',cpap));
+ const annWrap=document.getElementById('registryAnnouncementBtn')?.closest('.split-doc-action');if(annWrap)annWrap.classList.remove('hidden');const protocolWrap=document.getElementById('registryProtocolBtn')?.closest('.split-doc-action');if(protocolWrap)protocolWrap.classList.toggle('hidden',cpap);const guide=document.getElementById('registryDictionaryBtn');if(guide)guide.textContent=cpap?'📖 คู่มือฟิลด์ CPAP':'📖 คู่มือฟิลด์';const add=document.getElementById('addCaseBtn');if(add)add.textContent=cpap?'+ เพิ่ม CPAP เอง':'+ เพิ่มเอง';
+ ['registryReloadBtn','importExcelBtn','openZipReaderBtn','openReplyImportBtn','addCaseBtn'].forEach(id=>document.getElementById(id)?.classList.remove('hidden'));
  document.getElementById('errorIntelligenceCard')?.classList.toggle('hidden',cpap);
  const head=document.querySelector('.registry-table .case-protocol-col');if(head)head.innerHTML=cpap?'เลขกำกับเบิก /<br>ประเภทบริการ':'Case Number /<br>Protocol';
 }
@@ -1085,11 +1124,11 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.2.5 */
+/* Excel Import V4.2.6 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','เลขกำกับเบิก','tflag','session','station','JobNo'];
-function openExcelImport(){resetExcelImport();const m=document.getElementById('excelImportModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}
+function openExcelImport(){resetExcelImport();const cpap=currentRegistryModule==='STCPAP';const m=document.getElementById('excelImportModal');const title=m?.querySelector('.modal-head strong');const meta=m?.querySelector('.modal-head .meta');if(title)title.textContent=cpap?'📥 นำเข้า Excel — SSOCPAP':'📥 นำเข้า Excel — Cancer Care';if(meta)meta.textContent=cpap?'รองรับชีต CPAP และตรวจรายการซ้ำก่อนบันทึก':'รองรับรูปแบบไฟล์ตัวอย่าง DATA และตรวจรายการซ้ำก่อนบันทึก';m.classList.add('show');m.setAttribute('aria-hidden','false')}
 function closeExcelImport(){const m=document.getElementById('excelImportModal');m.classList.remove('show');m.setAttribute('aria-hidden','true')}
 function resetExcelImport(){excelImportState.file=null;excelImportState.rows=[];excelImportState.duplicates={};document.getElementById('excelImportFile').value='';showImportStep('choose')}
 function showImportStep(step){['Choose','Preview','Result'].forEach(n=>document.getElementById('import'+n+'Step')?.classList.toggle('hidden',n.toLowerCase()!==step))}
@@ -1142,7 +1181,7 @@ document.getElementById('importCancelBtn')?.addEventListener('click',closeExcelI
    จับคู่ด้วย CID + วันที่บริการ และเชื่อม Period Key
 ====================================================== */
 const replyImportState={file:null,zip:null,matches:[],unmatched:[],sourceFiles:[],meta:{},descriptions:{},knowledgeByCode:{},knowledgeKnown:0,knowledgeUnknown:0};
-function openReplyImport(){resetReplyImport();const m=document.getElementById('replyImportModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}
+function openReplyImport(){resetReplyImport();const cpap=currentRegistryModule==='STCPAP';const m=document.getElementById('replyImportModal');const title=m?.querySelector('.modal-head strong');const meta=m?.querySelector('.modal-head .meta');if(title)title.textContent=cpap?'📨 นำเข้าผลตอบกลับ SSOCPAP':'📨 นำเข้าผลตอบกลับ Cancer Care';if(meta)meta.textContent=cpap?'อ่าน ZIP/BIL ตอบกลับ จับคู่ด้วยงวดส่ง Session : Station และบันทึก Error Code':'อ่านไฟล์ SOCDBIL และเชื่อมตามงวดส่ง';m.classList.add('show');m.setAttribute('aria-hidden','false')}
 function closeReplyImport(){const m=document.getElementById('replyImportModal');m.classList.remove('show');m.setAttribute('aria-hidden','true')}
 function resetReplyImport(){replyImportState.file=null;replyImportState.zip=null;replyImportState.matches=[];replyImportState.unmatched=[];replyImportState.sourceFiles=[];replyImportState.meta={};replyImportState.descriptions={};replyImportState.knowledgeByCode={};replyImportState.knowledgeKnown=0;replyImportState.knowledgeUnknown=0;const i=document.getElementById('replyImportFile');if(i)i.value='';document.getElementById('replyImportChoose')?.classList.remove('hidden');document.getElementById('replyImportWorkspace')?.classList.add('hidden')}
 function normalizeReplyText(text){return String(text||'').replace(/\u0000/g,'').replace(/\r\n?/g,'\n')}
@@ -1248,7 +1287,7 @@ async function saveReplyImport(){
   const btn=document.getElementById('replyImportSaveBtn');btn.disabled=true;btn.textContent='กำลังบันทึก...';
   try{const data=await apiRequest('importReplyResults',{items,replyFileName:replyImportState.file?.name||'',replyEntryNames:replyImportState.sourceFiles,periodKey:replyImportState.meta?.Period_Key||'',replyNo:replyImportState.meta?.Reply_No||'',replyDate:replyImportState.meta?.Reply_Date||'',updatedBy:authState.user?.Display_Name||''});closeReplyImport();toast('บันทึกผลตอบกลับสำเร็จ',`อัปเดต ${data.updated||0} รายการ · เชื่อม Attempt เดิม ${data.linked||0} · ผล A ${data.resultA||0} · ผล C ${data.resultC||0} · Knowledge ${replyImportState.knowledgeKnown} รหัส · รหัสใหม่ ${replyImportState.knowledgeUnknown}`,'success',7500);await loadRegistry()}catch(err){toast('บันทึกผลไม่สำเร็จ',err.message,'error',7000)}finally{btn.disabled=false;btn.textContent='ยืนยันบันทึกผล'}
 }
-document.getElementById('replyImportCancelBtn')?.addEventListener('click',closeReplyImport);document.getElementById('replyImportChooseBtn')?.addEventListener('click',()=>document.getElementById('replyImportFile')?.click());document.getElementById('replyImportFile')?.addEventListener('change',e=>handleReplyImportFile(e.target.files?.[0]));document.getElementById('replyImportChangeBtn')?.addEventListener('click',resetReplyImport);document.getElementById('replyImportSaveBtn')?.addEventListener('click',saveReplyImport);document.getElementById('replyImportKnowledgeBtn')?.addEventListener('click',()=>{closeReplyImport();showPage('knowledgePage');const q=[...new Set(replyImportState.matches.flatMap(x=>String(x.Error_Codes||'').split(',').map(v=>v.trim()).filter(Boolean)))].join(' ');const input=document.getElementById('knowledgeSearchInput');if(input)input.value=q;loadKnowledge(q,'SSOCAC')});
+document.getElementById('replyImportCancelBtn')?.addEventListener('click',closeReplyImport);document.getElementById('replyImportChooseBtn')?.addEventListener('click',()=>document.getElementById('replyImportFile')?.click());document.getElementById('replyImportFile')?.addEventListener('change',e=>handleReplyImportFile(e.target.files?.[0]));document.getElementById('replyImportChangeBtn')?.addEventListener('click',resetReplyImport);document.getElementById('replyImportSaveBtn')?.addEventListener('click',saveReplyImport);document.getElementById('replyImportKnowledgeBtn')?.addEventListener('click',()=>{closeReplyImport();showPage('knowledgePage');const q=[...new Set(replyImportState.matches.flatMap(x=>String(x.Error_Codes||'').split(',').map(v=>v.trim()).filter(Boolean)))].join(' ');const input=document.getElementById('knowledgeSearchInput');if(input)input.value=q;loadKnowledge(q,currentRegistryModule)});
 
 
 /* ======================================================
