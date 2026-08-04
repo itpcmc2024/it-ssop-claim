@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.2.0
+SSOP Toolkit Professional Edition V4.2.1
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -599,8 +599,8 @@ function exportErrorQueueCsv(){
 
 
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.0'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.0'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.1'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.1'}
 };
 function openRegistryModule(moduleCode){currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();applyRegistryModuleUi();showPage('registryPage');loadRegistry();}
 function applyRegistryModuleUi(){
@@ -1005,7 +1005,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.2.0 */
+/* Excel Import V4.2.1 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','เลขกำกับเบิก','tflag','session','station','JobNo'];
@@ -1016,9 +1016,26 @@ function showImportStep(step){['Choose','Preview','Result'].forEach(n=>document.
 function cleanText(v){return String(v??'').replace(/\s+/g,' ').trim()}
 function excelDateToIso(v){
  if(v===null||v===undefined||v==='')return'';
- if(typeof v==='number'&&window.XLSX?.SSF){const d=XLSX.SSF.parse_date_code(v);if(d)return `${String(d.y).padStart(4,'0')}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`}
- const t=cleanText(v),m=t.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);if(m){let y=Number(m[3]);if(y>2400)y-=543;return `${String(y).padStart(4,'0')}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`}
- const d=new Date(t);return isNaN(d)?'':d.toISOString().slice(0,10)
+ const normalizeParts=(y,m,d)=>{
+   y=Number(y);m=Number(m);d=Number(d);
+   if(!y||!m||!d)return'';
+   if(y>2400)y-=543;
+   // ไฟล์ Excel เดิมบางชุดเก็บ Serial Date คลาด 57 ปีและ 1 วัน
+   // แก้เฉพาะปีเก่าผิดปกติ เพื่อไม่กระทบวันที่ของ SSOCAC
+   if(y>=1960&&y<2000){
+     const fixed=new Date(Date.UTC(y+57,m-1,d));
+     fixed.setUTCDate(fixed.getUTCDate()+1);
+     y=fixed.getUTCFullYear();m=fixed.getUTCMonth()+1;d=fixed.getUTCDate();
+   }
+   if(y<2000||y>2100)return'';
+   return `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+ };
+ if(v instanceof Date&&!isNaN(v))return normalizeParts(v.getFullYear(),v.getMonth()+1,v.getDate());
+ if(typeof v==='number'&&window.XLSX?.SSF){const d=XLSX.SSF.parse_date_code(v);if(d)return normalizeParts(d.y,d.m,d.d)}
+ const t=cleanText(v);
+ let m=t.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);if(m)return normalizeParts(m[3],m[2],m[1]);
+ m=t.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);if(m)return normalizeParts(m[1],m[2],m[3]);
+ const d=new Date(t);return isNaN(d)?'':normalizeParts(d.getFullYear(),d.getMonth()+1,d.getDate());
 }
 
 function mapCancerExcelRow(r,index){const item={_row:index+2,Module_Code:'SSOCAC',Service_Date:excelDateToIso(r['วันที่มารับบริการ']),HN:cleanText(r['HN']),VN:cleanText(r['vn']??r['VN']),CID:cleanText(r['เลขบัตรประชาชน']),Patient_Name:cleanText(r['ชื่อ-นามสกุล']),Coverage:cleanText(r['สิทธิการรักษา']),Chemo_Drug:cleanText(r['ยา Chemo']),SSO_Case_No:cleanText(r['Case No.']),Protocol_Code:cleanText(r['Protocal']??r['Protocol']),TFlag:cleanText(r['TFlag']),Session:cleanText(r['Session']),Station:cleanText(r['Station']),Work_Order_No:cleanText(r['JobNo']),Case_Status:'รอเตรียมข้อมูล',Updated_By:authState.user?.Display_Name||''};item._key=item.VN?`SSOCAC|${item.HN}|${item.VN}`:`SSOCAC|${item.HN}|${item.Service_Date}|${item.SSO_Case_No}|${item.Session}|${item.Station}`;item._errors=[];if(!item.Service_Date)item._errors.push('วันที่ไม่ถูกต้อง');if(!item.HN)item._errors.push('ไม่มี HN');if(!item.Patient_Name)item._errors.push('ไม่มีชื่อผู้ป่วย');return item}
