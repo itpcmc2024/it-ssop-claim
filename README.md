@@ -1,15 +1,4 @@
-# it-ssop-claim V3.7.5 Production
-
-ต่อยอดจาก V3.4.8 Stable ที่ผ่านการทดสอบ โดยคงระบบ API และ Workflow เดิมทั้งหมด
-
-## เพิ่มในเวอร์ชันนี้
-
-- เพิ่มตัวกรองสถานะในหน้าทะเบียนงาน
-- คลิกการ์ด Dashboard เพื่อกรองรายการตามกลุ่มสถานะได้ทันที
-- เพิ่มปุ่ม `ล้างตัวกรอง` เพื่อกลับไปแสดงข้อมูลทั้งหมด
-- ตัวกรองสถานะทำงานร่วมกับช่องค้นหา การเรียงลำดับ การแบ่งหน้า และส่งออก CSV
-- การ์ดที่กำลังใช้กรองจะแสดงกรอบเน้นให้เห็นชัดเจน
-- ไม่เปลี่ยน API, โครงสร้างชีต หรือ Workflow ที่ทดสอบผ่านแล้ว
+ โครงสร้างชีต หรือ Workflow ที่ทดสอบผ่านแล้ว
 - เลขเวอร์ชันทุกส่วนเป็น V3.6.5
 
 ไม่ต้อง Run setupDatabase และไม่ต้องเพิ่มชีทหรือคอลัมน์
@@ -148,7 +137,7 @@
 - Unknown-action responses now include backend version and received action.
 
 
-## V4.2.0 — ZIP Row Tools
+## V4.2.1 — ZIP Row Tools
 
 - เพิ่ม Checkbox หน้าแถวทุกแถวในหน้าแก้ไข ZIP
 - ปุ่ม − จะเปิดใช้งานเมื่อมีแถวถูกเลือก และลบหลายแถวพร้อมกันได้
@@ -158,7 +147,7 @@
 - ปุ่ม “คืนค่าไฟล์นี้” สามารถย้อนกลับการเพิ่ม/ลบทั้งหมดของไฟล์ที่เปิดได้
 
 
-## V4.2.0 — Unified ZIP Editor
+## V4.2.1 — Unified ZIP Editor
 - แยกโหมดเปิด ZIP อิสระออกจากโหมดแก้ไข ZIP รายผู้ป่วย
 - ซ่อน Smart Auto Fill ในโหมดเปิด ZIP อิสระ
 - แก้การเขียนข้อมูลจาก Grid กลับเข้าไฟล์ SSOP จริง
@@ -168,7 +157,7 @@
 - แสดงสถานะยังไม่บันทึก/บันทึกแล้ว และเตือนก่อนปิดหน้าต่าง
 
 
-## V4.2.0 Production Baseline
+## V4.2.1 Production Baseline
 - Smart Error Dashboard and Error Work Queue
 - Work Queue displays Session : Station and Work No.
 - Error colors: solved knowledge (green), warning W (yellow), unresolved error (red)
@@ -177,7 +166,7 @@
 - ZIP status badge moved before file search
 
 
-## V4.2.0 Production Hotfix
+## V4.2.1 Production Hotfix
 - แก้ปุ่มปิด/แสดงในทะเบียนงานใน Error Work Queue
 - เพิ่ม VN และส่งออก CSV ราย Error Code
 - Work Queue แสดงเฉพาะตัวกรองต้องแก้ (C)
@@ -186,7 +175,7 @@
 - SSO Editor รองรับไฟล์ ZIP และหลายโมดูล
 
 
-## V4.2.0 Production Final Polish
+## V4.2.1 Production Final Polish
 - ตารางทะเบียนกลับมาใช้ horizontal scrollbar และจำกัดข้อความแต่ละช่องไม่เกิน 2 บรรทัด
 - แสดงสถานะ C แบบย่อเป็น “ติด (C)”
 - Error Work Queue รวบรวม Error/CheckCode ทุกคอลัมน์และทุก Attempt ของเคส C
@@ -195,7 +184,7 @@
 - ไฮไลต์รายการจาก Work Queue ค้างจนเลือกเคสใหม่
 
 
-## V4.2.0 SSOCPAP Development — Sprint 1
+## V4.2.1 SSOCPAP Development — Sprint 1
 - เพิ่มการ์ดและทะเบียนงาน SSOCPAP โดยใช้หน้า Registry กลางร่วมกับ SSOCAC
 - เพิ่มชีต Case_SSOCPAP โดยไม่แก้โครงสร้าง Case_SSOCAC
 - รองรับนำเข้า CPAP-Pattern.xlsx จากชีต CPAP
