@@ -511,3 +511,6 @@ body.modal-open{overflow:hidden}
 .registry-table th:nth-child(11),.registry-table td:nth-child(11){min-width:95px!important}
 .registry-table th:nth-child(12),.registry-table td:nth-child(12){min-width:210px!important}
 @media(max-width:720px){.module-permission-grid{grid-template-columns:1fr}}
+
+/* V4.2.0 SSOCPAP development */
+.module-card[data-module="cpap"].ready{border-color:#9fd8c9;background:linear-gradient(180deg,#f7fffc,#e9f8f3)}
