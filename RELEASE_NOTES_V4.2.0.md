@@ -1,4 +1,4 @@
-# SSOP Toolkit V4.2.0 — SSOCPAP Development Sprint 1
+# SSOP Toolkit V4.2.1 — SSOCPAP Development Sprint 1
 
 ฐานพัฒนา: V4.1.5 Production Module Access & UI Final
 
@@ -32,3 +32,9 @@
 - คงลำดับ `Claim_Case` ตาม V4.1.5 Production เดิม
 - ฟิลด์เฉพาะ CPAP/JobNo เก็บใน `Case_SSOCPAP.Work_Order_No`
 - `checkDatabaseV3()` ตรวจจากชื่อหัวตาราง ไม่บังคับตำแหน่งคอลัมน์
+
+
+## Sprint 1 Import Hotfix
+- สร้าง Case_ID แยกทุกแถวในชุดนำเข้า ไม่เขียนทับเคสเดิม
+- แก้วันที่จาก Excel แบบพุทธศักราช/Serial Date ของไฟล์ต้นทาง
+- JobNo ยังคง Mapping ไป Case_SSOCPAP.Work_Order_No
