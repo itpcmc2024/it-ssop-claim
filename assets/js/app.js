@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.2.1
+SSOP Toolkit Professional Edition V4.2.2
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -599,8 +599,8 @@ function exportErrorQueueCsv(){
 
 
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.1'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.1'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.2'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.2'}
 };
 function openRegistryModule(moduleCode){currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();applyRegistryModuleUi();showPage('registryPage');loadRegistry();}
 function applyRegistryModuleUi(){
@@ -742,7 +742,7 @@ function openCaseModal(id=''){
 function closeCaseModal(){const m=document.getElementById('caseModal');m.classList.remove('show');m.setAttribute('aria-hidden','true')}
 async function saveCase(){
  const get=id=>document.getElementById(id).value.trim(),cpap=currentRegistryModule==='STCPAP';const payload={Case_ID:get('caseId'),Module_Code:currentRegistryModule,HN:get('caseHN'),VN:get('caseVN'),CID:get('caseCID'),Patient_Name:get('casePatientName'),Service_Date:get('caseServiceDate'),Coverage:get('caseCoverage'),Case_Status:get('caseStatus'),Assigned_To:get('caseAssigned'),Updated_By:get('caseUpdatedBy'),TFlag:registryState.selected?.TFlag||'',Session:get('caseSession'),Station:get('caseStation'),Work_Order_No:get('caseWorkOrder'),Remark:get('caseRemark')};
- if(cpap){payload.Claim_Control_No=get('caseSsoNo');payload.Service_Type=get('caseProtocol')||'CPAP';payload.Doctor_License=get('caseChemo');payload.Diagnosis_Code=registryState.selected?.Diagnosis_Code||'G473'}else{payload.SSO_Case_No=get('caseSsoNo');payload.Protocol_Code=get('caseProtocol');payload.Chemo_Drug=get('caseChemo')}
+ if(cpap){payload.Claim_Control_No=get('caseSsoNo');payload.Service_Type=get('caseProtocol')||'CPAP';payload.Doctor_License=get('caseChemo');payload.Diagnosis_Code=registryState.selected?.Diagnosis_Code||''}else{payload.SSO_Case_No=get('caseSsoNo');payload.Protocol_Code=get('caseProtocol');payload.Chemo_Drug=get('caseChemo')}
  if(!payload.HN||!payload.Patient_Name||!payload.Service_Date){toast('ข้อมูลไม่ครบ','กรุณากรอก HN ชื่อผู้ป่วย และวันที่รับบริการ','warning');return}const btn=document.getElementById('caseSaveBtn');btn.disabled=true;btn.textContent='กำลังบันทึก...';try{await apiRequest('saveCase',{module:currentRegistryModule,item:payload});closeCaseModal();toast('บันทึกสำเร็จ',payload.Case_ID?'แก้ไขทะเบียนงานแล้ว':'สร้างทะเบียนงานใหม่แล้ว','success');await loadRegistry()}catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500)}finally{btn.disabled=false;btn.textContent='บันทึก'}
 }
 async function openCaseDetail(id){
@@ -1005,7 +1005,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.2.1 */
+/* Excel Import V4.2.2 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','เลขกำกับเบิก','tflag','session','station','JobNo'];
@@ -1042,7 +1042,7 @@ function mapCancerExcelRow(r,index){const item={_row:index+2,Module_Code:'SSOCAC
 
 function mapCpapExcelRow(r,index){
  const get=(...keys)=>{for(const k of keys){if(r[k]!==undefined&&cleanText(r[k])!=='')return r[k]}return''};
- const item={_row:index+2,Module_Code:'STCPAP',Service_Type:cleanText(get('Service_Type','ประเภทบริการ'))||'CPAP',Service_Date:excelDateToIso(get('วันที่รับบริการ','Service_Date')),CID:cleanText(get('บัตรประชาชน','CID')),HN:cleanText(get('HN')),VN:cleanText(get('VN','vn')),Patient_Name:cleanText(get('ชื่อ-นามสกุล','ชื่อผู้ป่วย','Patient_Name')),Coverage:cleanText(get('สิทธิการรักษา','Coverage'))||'ประกันสังคม',Claim_Control_No:cleanText(get('เลขกำกับเบิก','Claim_Control_No')),TFlag:cleanText(get('tflag','TFlag')),Session:cleanText(get('session','Session')),Station:cleanText(get('station','Station')),Doctor_License:cleanText(get('ว.แพทย์','Doctor_License')),Diagnosis_Code:cleanText(get('รหัสวินิจฉัย','Diagnosis_Code'))||'G473',Work_Order_No:cleanText(get('JobNo','Work_Order_No')),Case_Status:'รอเตรียมข้อมูล',Updated_By:authState.user?.Display_Name||''};
+ const item={_row:index+2,Module_Code:'STCPAP',Service_Type:cleanText(get('Service_Type','ประเภทบริการ'))||'CPAP',Service_Date:excelDateToIso(get('วันที่รับบริการ','Service_Date')),CID:cleanText(get('บัตรประชาชน','CID')),HN:cleanText(get('HN')),VN:cleanText(get('VN','vn')),Patient_Name:cleanText(get('ชื่อ-นามสกุล','ชื่อผู้ป่วย','Patient_Name')),Coverage:cleanText(get('สิทธิการรักษา','Coverage'))||'ประกันสังคม',Claim_Control_No:cleanText(get('เลขกำกับเบิก','Claim_Control_No')),TFlag:cleanText(get('tflag','TFlag')),Session:cleanText(get('session','Session')),Station:cleanText(get('station','Station')),Doctor_License:cleanText(get('ว.แพทย์','Doctor_License')),Diagnosis_Code:cleanText(get('รหัสวินิจฉัย','Diagnosis_Code')),Work_Order_No:cleanText(get('JobNo','Work_Order_No')),Case_Status:'รอเตรียมข้อมูล',Updated_By:authState.user?.Display_Name||''};
  item._key=item.VN?`STCPAP|${item.HN}|${item.VN}`:`STCPAP|${item.HN}|${item.Service_Date}|${item.Claim_Control_No}|${item.Session}|${item.Station}`;item._errors=[];if(!item.Service_Date)item._errors.push('วันที่ไม่ถูกต้อง');if(!item.HN)item._errors.push('ไม่มี HN');if(!item.Patient_Name)item._errors.push('ไม่มีชื่อผู้ป่วย');if(!item.Claim_Control_No)item._errors.push('ไม่มีเลขกำกับเบิก');if(!item.TFlag)item._errors.push('ไม่มี TFlag');return item;
 }
 async function handleExcelFile(file){
