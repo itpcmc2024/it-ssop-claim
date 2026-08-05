@@ -513,4 +513,11 @@ body.modal-open{overflow:hidden}
 @media(max-width:720px){.module-permission-grid{grid-template-columns:1fr}}
 
 /* V4.2.0 SSOCPAP development */
-.module-card[data-module="cpap"].ready{border-color:#9fd8c9;background:linear-gradient(180deg,#f7fffc,#e9f8f3)}
+
+
+
+/* V4.3.2 Module status colors */
+.module-card.ready{background:#fff;border-color:var(--line)}
+.module-card.planned{background:linear-gradient(180deg,#fffdf7,#fff6e6);border-color:#f1d59f}
+.module-card.module-active{background:linear-gradient(180deg,#f4faff,#e8f4ff)!important;border:2px solid #82b9e8!important;box-shadow:0 18px 38px rgba(55,126,184,.20)!important;transform:translateY(-2px)}
+.module-card.module-active .module-badge{background:#dceeff!important;color:#185b91!important;font-weight:800}
