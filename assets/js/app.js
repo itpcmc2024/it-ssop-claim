@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.3.2
+SSOP Toolkit Professional Edition V4.3.3
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -12,6 +12,9 @@ let registryLoadToken=0;
 function isViewer(){return String(authState.user?.Role||'').toUpperCase()==='VIEWER';}
 function canWrite(){return !isViewer();}
 const MODULE_ACCESS_MAP={cancer:'SSOCAC',main:'MAIN',cross:'CROSS',cpap:'STCPAP',sleep:'STSLEEP',editor:'EDITOR',knowledge:'KNOWLEDGE',admin:'ADMIN'};
+const KNOWLEDGE_MODULES=['MAIN','CROSS','SSOCAC','STCPAP','STSLEEP'];
+function canonicalKnowledgeModule(v){const x=String(v||'').trim().toUpperCase();const aliases={CANCER:'SSOCAC','CANCER CARE':'SSOCAC',CPAP:'STCPAP','SLEEP TEST':'STSLEEP','SLEEPTEST':'STSLEEP'};return KNOWLEDGE_MODULES.includes(x)?x:(aliases[x]||'SSOCAC');}
+function knowledgeModuleLabel(v){return ({MAIN:'Main',CROSS:'Cross',SSOCAC:'Cancer',STCPAP:'CPAP',STSLEEP:'Sleep Test'})[canonicalKnowledgeModule(v)]||v;}
 function allowedModuleSet(){
  const role=String(authState.user?.Role||'').toUpperCase();
  if(role==='ADMIN')return new Set(['ALL']);
@@ -346,7 +349,7 @@ function parseSSOCACReplyKnowledge(text){
   }
   for(const code of descriptions.keys())if(!counts.has(code))counts.set(code,1);
   return [...counts.entries()].map(([code,count])=>({
-    module:replyKnowledgeState.module||'SSOCAC',code,count,
+    module:canonicalKnowledgeModule(replyKnowledgeState.module||'SSOCAC'),code,count,
     description:descriptions.get(code)||ssocacSeedKnowledge[code]?.description||'ไม่พบคำอธิบายในไฟล์ตอบกลับ',
     cause:ssocacSeedKnowledge[code]?.cause||'',
     solution:ssocacSeedKnowledge[code]?.solution||'',
@@ -401,7 +404,7 @@ async function apiRequest(action,payload={}){
 }
 async function hydrateReplyKnowledgeFromDatabase(){
   try{
-    const data=await apiRequest('getByCodes',{module:replyKnowledgeState.module||'SSOCAC',codes:replyKnowledgeState.items.map(x=>x.code)});
+    const data=await apiRequest('getByCodes',{module:canonicalKnowledgeModule(replyKnowledgeState.module||'SSOCAC'),codes:replyKnowledgeState.items.map(x=>x.code)});
     const map=new Map((data.items||[]).map(x=>[String(x.ErrorCode||'').toUpperCase(),x]));
     replyKnowledgeState.items.forEach(item=>{
       const db=map.get(item.code.toUpperCase());
@@ -444,7 +447,7 @@ async function saveReplyKnowledge(){
   confirmBtn.disabled=true;confirmBtn.textContent='กำลังบันทึก...';
   try{
     const items=sourceItems.map(x=>({
-      Module:replyKnowledgeState.module||'SSOCAC',ErrorCode:x.code,Description:x.description,Cause:x.cause,Solution:x.solution,
+      Module:canonicalKnowledgeModule(replyKnowledgeState.module||'SSOCAC'),ErrorCode:x.code,Description:x.description,Cause:x.cause,Solution:x.solution,
       RelatedFile:x.relatedFile||'',RelatedField:x.relatedField||'',Tips:x.tips||'',UpdatedBy:updatedBy,Active:true
     }));
     const data=await apiRequest('upsertKnowledge',{items,writePin,createOnly:isViewer()});
@@ -458,7 +461,7 @@ async function saveReplyKnowledge(){
 function knowledgeCard(item,index){
  const complete=Boolean(String(item.Solution||'').trim());
  return `<details class="knowledge-compact-row ${complete?'complete':'incomplete'}" data-knowledge-index="${index}">
-   <summary><span class="knowledge-code-badge">${escapeHtml(item.ErrorCode||'-')}</span><span class="knowledge-module-mini">${escapeHtml(item.Module||'-')}</span><strong class="knowledge-description">${escapeHtml(item.Description||'ยังไม่มีคำอธิบาย')}</strong><span class="knowledge-status-mini">${complete?'✓ มีวิธีแก้':'รอเติมวิธีแก้'}</span><span class="knowledge-chevron">⌄</span></summary>
+   <summary><label class="knowledge-select admin-only" onclick="event.stopPropagation()"><input type="checkbox" data-k-select="${index}"></label><span class="knowledge-code-badge">${escapeHtml(item.ErrorCode||'-')}</span><span class="knowledge-module-mini">${escapeHtml(knowledgeModuleLabel(item.Module||'-'))}</span><strong class="knowledge-description">${escapeHtml(item.Description||'ยังไม่มีคำอธิบาย')}</strong><span class="knowledge-status-mini">${complete?'✓ มีวิธีแก้':'รอเติมวิธีแก้'}</span><span class="knowledge-chevron">⌄</span></summary>
    <div class="knowledge-compact-detail"><div><b>สาเหตุ/ข้อสังเกต</b><p>${escapeHtml(item.Cause||'-')}</p></div><div><b>แนวทางแก้</b><textarea class="knowledge-edit-textarea" data-k-index="${index}" data-k-field="Solution" placeholder="กรอกแนวทางแก้...">${escapeHtml(item.Solution||'')}</textarea></div><div><b>ไฟล์ที่เกี่ยวข้อง</b><input class="knowledge-edit-input" data-k-index="${index}" data-k-field="RelatedFile" value="${escapeAttr(item.RelatedFile||'')}" placeholder="เช่น BILLTRAN"></div><div><b>ฟิลด์ที่เกี่ยวข้อง</b><input class="knowledge-edit-input" data-k-index="${index}" data-k-field="RelatedField" value="${escapeAttr(item.RelatedField||'')}" placeholder="เช่น VerCode"></div></div>
    ${item.Tips?`<div class="knowledge-tips"><b>Tips:</b> ${escapeHtml(item.Tips)}</div>`:''}
    <div class="knowledge-card-footer"><div class="meta">อัปเดต ${escapeHtml(item.UpdatedAt||'-')} โดย ${escapeHtml(item.UpdatedBy||'-')}</div><button type="button" class="primary knowledge-edit-save" data-k-save-index="${index}">✏️ แก้ไข / บันทึก</button></div>
@@ -483,11 +486,12 @@ function bindKnowledgeEditors(){
     const index=Number(el.dataset.kIndex); const field=el.dataset.kField;
     if(knowledgeCache[index]) knowledgeCache[index][field]=el.value;
   }));
-  document.querySelectorAll('[data-k-save-index]').forEach(btn=>btn.addEventListener('click',()=>openKnowledgeEditModal(Number(btn.dataset.kSaveIndex))));
+  document.querySelectorAll('[data-k-save-index]').forEach(btn=>btn.addEventListener('click',()=>openKnowledgeEditModal(Number(btn.dataset.kSaveIndex))));document.querySelectorAll('[data-k-select]').forEach(el=>el.addEventListener('change',updateKnowledgeSelectedCount));
 }
 function openKnowledgeEditModal(index){
   if(!knowledgeCache[index]) return;
   document.getElementById('knowledgeEditIndex').value=String(index);
+  document.getElementById('knowledgeEditModule').value=canonicalKnowledgeModule(knowledgeCache[index].Module);document.getElementById('knowledgeEditModule').disabled=authState.user?.Role!=='ADMIN';
   document.getElementById('knowledgeEditWritePin').value='';
   const modal=document.getElementById('knowledgeEditModal');modal.classList.add('show');modal.setAttribute('aria-hidden','false');
   setTimeout(()=>document.getElementById('knowledgeEditUpdatedBy').focus(),80);
@@ -502,7 +506,9 @@ async function saveKnowledgeEdit(){
   if(!updatedBy||!writePin){toast('ข้อมูลไม่ครบ','กรุณากรอกชื่อผู้แก้ไขและ PIN','warning');return;}
   const btn=document.getElementById('knowledgeEditConfirm');btn.disabled=true;btn.textContent='กำลังบันทึก...';
   try{
-    const payload={Module:item.Module,ErrorCode:item.ErrorCode,Description:item.Description,Cause:item.Cause,Solution:item.Solution||'',RelatedFile:item.RelatedFile||'',RelatedField:item.RelatedField||'',Tips:item.Tips||'',UpdatedBy:updatedBy,Active:item.Active!==false};
+    const sourceModule=canonicalKnowledgeModule(item.Module),targetModule=canonicalKnowledgeModule(document.getElementById('knowledgeEditModule').value);
+    if(targetModule!==sourceModule){await apiRequest('moveKnowledge',{sourceModule,sourceCode:item.ErrorCode,targetModule,merge:false});item.Module=targetModule;}
+    const payload={Module:targetModule,ErrorCode:item.ErrorCode,Description:item.Description,Cause:item.Cause,Solution:item.Solution||'',RelatedFile:item.RelatedFile||'',RelatedField:item.RelatedField||'',Tips:item.Tips||'',UpdatedBy:updatedBy,Active:item.Active!==false};
     await apiRequest('upsertKnowledge',{items:[payload],writePin});
     item.UpdatedBy=updatedBy;item.UpdatedAt=new Date().toLocaleDateString('en-US');
     closeKnowledgeEditModal();toast('บันทึกสำเร็จ',`${item.ErrorCode} ได้รับการอัปเดตแล้ว`,'success');
@@ -510,7 +516,10 @@ async function saveKnowledgeEdit(){
   }catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500);}
   finally{btn.disabled=false;btn.textContent='บันทึกการแก้ไข';}
 }
-function runKnowledgeSearch(){loadKnowledge(document.getElementById('knowledgeSearchInput').value.trim(),document.getElementById('knowledgeModuleFilter').value);}
+function selectedKnowledgeItems(){return [...document.querySelectorAll('[data-k-select]:checked')].map(el=>knowledgeCache[Number(el.dataset.kSelect)]).filter(Boolean);}
+function updateKnowledgeSelectedCount(){const n=selectedKnowledgeItems().length;const el=document.getElementById('knowledgeSelectedCount');if(el)el.textContent=`เลือก ${n} รายการ`;}
+async function bulkMoveKnowledge(){const items=selectedKnowledgeItems(),targetModule=canonicalKnowledgeModule(document.getElementById('knowledgeBulkModule')?.value);if(!items.length){toast('ยังไม่ได้เลือกรายการ','กรุณาติ๊ก Error Code ที่ต้องการย้ายโมดูล','warning');return;}if(authState.user?.Role!=='ADMIN'){toast('ไม่มีสิทธิ์','เฉพาะ Admin เท่านั้นที่ย้ายโมดูลหลายรายการได้','error');return;}const btn=document.getElementById('knowledgeBulkMoveBtn');btn.disabled=true;btn.textContent='กำลังย้าย...';let moved=0,conflicts=[];try{for(const item of items){try{await apiRequest('moveKnowledge',{sourceModule:canonicalKnowledgeModule(item.Module),sourceCode:item.ErrorCode,targetModule,merge:false});moved++;}catch(e){conflicts.push(`${item.ErrorCode}: ${e.message}`);}}toast('ย้ายโมดูลเสร็จ',`ย้ายสำเร็จ ${moved} รายการ${conflicts.length?` · ข้าม ${conflicts.length} รายการที่ซ้ำ`:''}`,'success',6500);await runKnowledgeSearch();}finally{btn.disabled=false;btn.textContent='ย้ายโมดูลที่เลือก';}}
+function runKnowledgeSearch(){return loadKnowledge(document.getElementById('knowledgeSearchInput').value.trim(),document.getElementById('knowledgeModuleFilter').value);}
 
 async function loadDocumentLinks(){
  try{const data=await apiRequest('getDocuments');(data.items||[]).forEach(x=>documentState[x.type]=x);}
@@ -543,7 +552,7 @@ async function uploadDocument(){
 }
 
 document.getElementById('knowledgeSearchBtn')?.addEventListener('click',runKnowledgeSearch);
-document.getElementById('knowledgeReloadBtn')?.addEventListener('click',()=>loadKnowledge('','ALL'));
+document.getElementById('knowledgeReloadBtn')?.addEventListener('click',()=>loadKnowledge('','ALL'));document.getElementById('knowledgeBulkMoveBtn')?.addEventListener('click',bulkMoveKnowledge);
 document.getElementById('knowledgeSearchInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')runKnowledgeSearch();});
 document.getElementById('saveKnowledgeBtn')?.addEventListener('click',openSaveKnowledgeModal);
 document.getElementById('saveKnowledgeConfirm')?.addEventListener('click',saveReplyKnowledge);
@@ -576,7 +585,7 @@ document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportRe
    Cancer Care Registry V3.2.0
 ====================================================== */
 const registryState={items:[],filtered:[],page:1,pageSize:20,selected:null,errorKnowledge:new Map(),activeErrorCode:'',highlightCaseId:''};
-/* Core Stability V4.3.2: date-only values never pass through UTC. */
+/* Core Stability V4.3.3: date-only values never pass through UTC. */
 const DateEngine={
  parts(value){
   if(value===null||value===undefined||value==='')return null;
@@ -697,9 +706,9 @@ function exportErrorQueueCsv(){
 
 
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.3.2'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.3.2'},
- STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.3.2'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.3.3'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.3.3'},
+ STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.3.3'}
 };
 function openRegistryModule(moduleCode){currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();registryState.items=[];registryState.filtered=[];registryState.page=1;applyRegistryModuleUi();showPage('registryPage');const body=document.getElementById('registryBody');if(body)body.innerHTML='<tr><td colspan="12" class="empty-row">กำลังโหลดข้อมูล...</td></tr>';loadRegistry();}
 function applyRegistryModuleUi(){
@@ -867,8 +876,9 @@ function openCaseKnowledgeModal(code,caseId,fileDescription='',existing=null){
  const item=existing||null,isEdit=Boolean(item);
  document.getElementById('caseKnowledgeTitle').textContent=isEdit?'แก้ไขข้อมูลใน Knowledge Base':'เพิ่มข้อมูลเข้า Knowledge Base';
  document.getElementById('caseKnowledgeCode').value=String(code||item?.ErrorCode||'').trim().toUpperCase();
+ const explicitModule=canonicalKnowledgeModule(item?.Module||zipReaderState.caseItem?.Module_Code||currentRegistryModule);document.getElementById('caseKnowledgeModule').value=explicitModule;document.getElementById('caseKnowledgeModule').disabled=isEdit&&authState.user?.Role!=='ADMIN';modal.dataset.sourceModule=canonicalKnowledgeModule(item?.Module||explicitModule);
  document.getElementById('caseKnowledgeCaseId').value=caseId||'';
- const draftDescription=String(item?.Description||fileDescription||'').trim()||`พบ Error Code ${String(code||item?.ErrorCode||'').trim().toUpperCase()} จากไฟล์ตอบกลับ SSOCAC`;
+ const draftDescription=String(item?.Description||fileDescription||'').trim()||`พบ Error Code ${String(code||item?.ErrorCode||'').trim().toUpperCase()} จากไฟล์ตอบกลับ ${knowledgeModuleLabel(explicitModule)}`;
  document.getElementById('caseKnowledgeDescription').value=draftDescription;
  document.getElementById('caseKnowledgeCause').value=item?.Cause||'';
  document.getElementById('caseKnowledgeSolution').value=item?.Solution||'';
@@ -890,16 +900,17 @@ function closeCaseKnowledgeModal(){
 }
 async function saveCaseKnowledge(){
  const get=id=>document.getElementById(id)?.value.trim()||'';
- const code=get('caseKnowledgeCode').toUpperCase(),description=get('caseKnowledgeDescription'),cause=get('caseKnowledgeCause'),solution=get('caseKnowledgeSolution'),relatedFile=get('caseKnowledgeRelatedFile'),relatedField=get('caseKnowledgeRelatedField'),updatedBy=get('caseKnowledgeUpdatedBy'),writePin=get('caseKnowledgeWritePin'),caseId=get('caseKnowledgeCaseId');
+ const code=get('caseKnowledgeCode').toUpperCase(),module=canonicalKnowledgeModule(get('caseKnowledgeModule')),description=get('caseKnowledgeDescription'),cause=get('caseKnowledgeCause'),solution=get('caseKnowledgeSolution'),relatedFile=get('caseKnowledgeRelatedFile'),relatedField=get('caseKnowledgeRelatedField'),updatedBy=get('caseKnowledgeUpdatedBy'),writePin=get('caseKnowledgeWritePin'),caseId=get('caseKnowledgeCaseId');
  if(!description){toast('ข้อมูลไม่ครบ','กรุณากรอกความหมายของ Error Code','warning');return;}
  if(!updatedBy){toast('ข้อมูลไม่ครบ','กรุณากรอกชื่อผู้บันทึก','warning');return;}
  const isEdit=document.getElementById('caseKnowledgeModal')?.dataset.mode==='edit';
  if(isEdit&&!writePin){toast('กรอก PIN','กรุณากรอก PIN สำหรับแก้ไข Knowledge Base','warning');return;}
  const btn=document.getElementById('caseKnowledgeSave');btn.disabled=true;btn.textContent='กำลังบันทึก...';
  try{
-  await apiRequest('upsertKnowledge',{items:[{Module:currentRegistryModule||'SSOCAC',ErrorCode:code,Description:description,Cause:cause,Solution:solution,RelatedFile:relatedFile,RelatedField:relatedField,Tips:'',UpdatedBy:updatedBy,Active:true}],writePin:'',createWithoutPin:true});
+  const sourceModule=canonicalKnowledgeModule(document.getElementById('caseKnowledgeModal')?.dataset.sourceModule||module);if(isEdit&&module!==sourceModule){await apiRequest('moveKnowledge',{sourceModule,sourceCode:code,targetModule:module,merge:false});}
+  await apiRequest('upsertKnowledge',{items:[{Module:module,ErrorCode:code,Description:description,Cause:cause,Solution:solution,RelatedFile:relatedFile,RelatedField:relatedField,Tips:'',UpdatedBy:updatedBy,Active:true}],writePin:isEdit?writePin:'',createWithoutPin:!isEdit});
   closeCaseKnowledgeModal();toast('บันทึกสำเร็จ',`${code} ถูกบันทึกใน Knowledge Base แล้ว`,'success');
-  replyImportState.knowledgeByCode[code]={Module:currentRegistryModule,ErrorCode:code,Description:description,Cause:cause,Solution:solution,RelatedFile:relatedFile,RelatedField:relatedField,Active:true};
+  replyImportState.knowledgeByCode[code]={Module:module,ErrorCode:code,Description:description,Cause:cause,Solution:solution,RelatedFile:relatedFile,RelatedField:relatedField,Active:true};
   replyImportState.knowledgeKnown=Object.keys(replyImportState.knowledgeByCode).length;replyImportState.knowledgeUnknown=Math.max(0,replyImportState.knowledgeUnknown-1);
   if(caseId)await openCaseDetail(caseId);if(document.getElementById('replyImportModal')?.classList.contains('show')){renderReplyImport();}
  }catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500)}finally{btn.disabled=false;btn.textContent='บันทึก Knowledge';}
@@ -1212,7 +1223,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.3.2 */
+/* Excel Import V4.3.3 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','สิทธิ','เลขกำกับเบิก','ว.แพทย์','รหัสวินิจฉัย','tflag','session','station','JobNo'];
@@ -1489,7 +1500,7 @@ document.addEventListener('click',e=>{
 });
 
 
-/* V4.3.2 Core scroll recovery: release body lock whenever no visible modal remains. */
+/* V4.3.3 Core scroll recovery: release body lock whenever no visible modal remains. */
 function recoverPageScroll(){
  const anyVisible=[...document.querySelectorAll('.modal.show')].some(m=>getComputedStyle(m).display!=='none');
  if(!anyVisible){document.body.classList.remove('modal-open');document.documentElement.style.overflow='';document.body.style.overflow='';}
