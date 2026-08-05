@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.2.8
+SSOP Toolkit Professional Edition V4.2.9
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -663,9 +663,9 @@ function exportErrorQueueCsv(){
 
 
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.8'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.8'},
- STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.2.8'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.9'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.9'},
+ STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.2.9'}
 };
 function openRegistryModule(moduleCode){currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();applyRegistryModuleUi();showPage('registryPage');loadRegistry();}
 function applyRegistryModuleUi(){
@@ -1020,18 +1020,36 @@ async function deleteSelectedZipRows(){
  const ok=await confirmDialog('ยืนยันการลบแถว',`ต้องการลบ ${count.toLocaleString('th-TH')} แถวที่เลือกจาก ${zipReaderState.activeSection||baseName(currentZipItem()?.name||'ไฟล์')} ใช่หรือไม่?\n\nสามารถกด “คืนค่าไฟล์นี้” เพื่อย้อนกลับเป็นไฟล์ต้นฉบับได้`,'ลบแถว');if(!ok)return;
  const item=currentZipItem();const rows=zipReaderState.activeSection?(zipReaderState.sections[zipReaderState.activeSection]||[]):(item?.plainRows||zipReaderState.rows||[]);[...selected].sort((a,b)=>b-a).forEach(i=>{if(i>=0&&i<rows.length)rows.splice(i,1)});selected.clear();zipReaderState.rows=rows;if(zipReaderState.activeSection)zipReaderState.headers=sectionHeaders(zipReaderState.activeSection,rows);else if(item)item.plainRows=rows;markCurrentZipModified('delete');renderZipSectionTabs();renderZipPreview();toast('ลบแถวแล้ว',`ลบ ${count.toLocaleString('th-TH')} แถวจาก ${zipReaderState.activeSection||baseName(item?.name||'ไฟล์')}`,'success',3500)
 }
-function zipIsCpap(){return String(zipReaderState.caseItem?.Module_Code||'').toUpperCase()==='STCPAP'}
+function zipModuleCode(){return String(zipReaderState.caseItem?.Module_Code||'').toUpperCase()}
+function zipIsCpap(){return zipModuleCode()==='STCPAP'}
+function zipIsSleep(){return zipModuleCode()==='STSLEEP'}
 function zipFieldMeta(section,index){
- const base=(fieldMeta[section]||[])[index];if(!zipIsCpap())return base;
- const overrides={
-  BILLTRAN:{1:['AuthCode','รหัสโครงการสำหรับ CPAP และ Sleep Test ต้องเป็น STCPAP','STCPAP','important'],11:['Tflag','ประเภทการส่งข้อมูล ดึงจากทะเบียน SSOCPAP และยังแก้ไขเองได้','A หรือ E','important']},
-  BillItems:{4:['STDCode','รหัสมาตรฐานรายการ CPAP/หน้ากาก เช่น 3012 หรือ 3013','3012 / 3013','important'],12:['ClaimCat','เมื่อ STDCode เป็น 3012 หรือ 3013 ต้องระบุ OPF','OPF','important']},
-  OPServices:{2:['Class','ประเภทบริการ CPAP ต้องเป็น ED','ED','important'],11:['SvPID','เลขใบอนุญาตประกอบวิชาชีพแพทย์ (ว.แพทย์)','ว22858','important'],20:['SvTxCode','เลขกำกับเบิก ดึงจากทะเบียน SSOCPAP','เลขกำกับเบิก','important']},
-  OPDx:{0:['Class','ประเภทข้อมูลวินิจฉัย CPAP ต้องเป็น ED และตรงกับ OPServices.Class','ED','important'],4:['DiagnosisCode','รหัสวินิจฉัย สามารถเว้นว่างใน Excel แล้วกรอกหรือแก้ไขภายหลังได้','เช่น G473','important']}
- };
- return overrides[section]?.[index]||base;
+ const base=(fieldMeta[section]||[])[index];
+ if(zipIsCpap()){
+  const overrides={
+   BILLTRAN:{1:['AuthCode','รหัสโครงการสำหรับ CPAP ต้องเป็น STCPAP','STCPAP','important'],11:['Tflag','ประเภทการส่งข้อมูล ดึงจากทะเบียน SSOCPAP และยังแก้ไขเองได้','A หรือ E','important']},
+   BillItems:{4:['STDCode','รหัสมาตรฐานรายการ CPAP/หน้ากาก เช่น 3012 หรือ 3013','3012 / 3013','important'],12:['ClaimCat','เมื่อ STDCode เป็น 3012 หรือ 3013 ต้องระบุ OPF','OPF','important']},
+   OPServices:{2:['Class','ประเภทบริการ CPAP ต้องเป็น ED','ED','important'],11:['SvPID','เลขใบอนุญาตประกอบวิชาชีพแพทย์ (ว.แพทย์)','ว22858','important'],20:['SvTxCode','เลขกำกับเบิก ดึงจากทะเบียน SSOCPAP','เลขกำกับเบิก','important']},
+   OPDx:{0:['Class','ประเภทข้อมูลวินิจฉัย CPAP ต้องเป็น ED และตรงกับ OPServices.Class','ED','important'],4:['DiagnosisCode','รหัสวินิจฉัย สามารถเว้นว่างใน Excel แล้วกรอกหรือแก้ไขภายหลังได้','เช่น G473','important']}
+  };
+  return overrides[section]?.[index]||base;
+ }
+ if(zipIsSleep()){
+  const overrides={
+   BILLTRAN:{1:['AuthCode','รหัสโครงการสำหรับ Sleep Test ต้องเป็น STCPAP','STCPAP','important'],11:['Tflag','ประเภทการส่งข้อมูล ดึงจากทะเบียน Sleep Test','A หรือ E','important']},
+   BillItems:{4:['STDCode','รหัสมาตรฐาน Sleep Test: 51120 ชนิดที่ 1 หรือ 51121 ชนิดที่ 2','51120 / 51121','important'],12:['ClaimCat','เมื่อ STDCode เป็น 51120 หรือ 51121 ต้องระบุ OPF','OPF','important']},
+   OPServices:{2:['Class','Class ของ OPServices ต้องตรงกับ OPDx.Class โดยคงค่าจากแฟ้มต้นฉบับ','ตัวอย่าง EC','important'],20:['SvTxCode','เลขกำกับเบิก ดึงจากทะเบียน Sleep Test','เลขกำกับเบิก','important']},
+   OPDx:{0:['Class','Class ของ OPDx ต้องตรงกับ OPServices.Class','ตัวอย่าง EC','important'],4:['DiagnosisCode','รหัสวินิจฉัย ดึงจาก PDx.ICD10 ในทะเบียน และยังแก้ไขเองได้','เช่น G473','important']}
+  };
+  return overrides[section]?.[index]||base;
+ }
+ return base;
 }
-function zipImportantCols(section){if(!zipIsCpap())return (sectionInfo[section]?.importantCols)||[];return ({BILLTRAN:[1,11],BillItems:[4,12],OPServices:[2,11,20],OPDx:[0,4]})[section]||[]}
+function zipImportantCols(section){
+ if(zipIsCpap())return ({BILLTRAN:[1,11],BillItems:[4,12],OPServices:[2,11,20],OPDx:[0,4]})[section]||[];
+ if(zipIsSleep())return ({BILLTRAN:[1,11],BillItems:[4,12],OPServices:[2,20],OPDx:[0,4]})[section]||[];
+ return (sectionInfo[section]?.importantCols)||[];
+}
 function renderZipPreview(){const q=(document.getElementById('zipTableSearch')?.value||'').trim().toLowerCase();const all=zipReaderState.rows;const indexed=all.map((r,i)=>({r,i}));const filtered=q?indexed.filter(x=>x.r.some(v=>String(v||'').toLowerCase().includes(q))):indexed;const rows=filtered.slice(0,500);const importantCols=zipImportantCols(zipReaderState.activeSection);const selected=currentZipSelection();document.getElementById('zipPreviewHead').innerHTML=`<tr><th class="zip-select-col"><input type="checkbox" id="zipSelectAllRows" aria-label="เลือกทุกแถวที่แสดง" title="เลือกทุกแถวที่แสดง"></th><th>#</th>${zipReaderState.headers.map((h,i)=>{const meta=zipFieldMeta(zipReaderState.activeSection,i);const desc=meta?.[1]||'ยังไม่มีคำอธิบายสำหรับหัวข้อนี้';const example=meta?getConditionExample(zipReaderState.activeSection,meta):'';return `<th class="field-tip ${importantCols.includes(i)?'important-head':''}" data-tip-title="${escapeAttr(h)}" data-tip-desc="${escapeAttr(desc)}" data-tip-example="${escapeAttr(example)}"><span class="head-wrap">${escapeHtml(h)}${importantCols.includes(i)?' ★':''}<span class="tip-dot">i</span></span></th>`}).join('')}</tr>`;bindTooltips();const body=document.getElementById('zipPreviewBody');body.innerHTML=rows.length?rows.map(x=>`<tr class="${selected.has(x.i)?'zip-row-selected':''}"><td class="zip-select-col"><input type="checkbox" data-zip-select-row="${x.i}" ${selected.has(x.i)?'checked':''} aria-label="เลือกแถว ${x.i+1}"></td><td>${x.i+1}</td>${zipReaderState.headers.map((_,c)=>`<td contenteditable="true" data-zip-row="${x.i}" data-zip-col="${c}" class="zip-edit-cell ${importantCols.includes(c)?'important-cell':''} ${currentZipItem()?.autoChangedCells?.[zipReaderState.activeSection]?.has(`${x.i}|${c}`)?'auto-filled':''}" title="${escapeAttr(x.r[c]??'')}">${escapeHtml(x.r[c]??'')}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${zipReaderState.headers.length+2}" class="empty-row">ไม่พบข้อมูล</td></tr>`;body.querySelectorAll('[data-zip-row]').forEach(td=>td.addEventListener('input',()=>{const r=+td.dataset.zipRow,c=+td.dataset.zipCol;zipReaderState.rows[r][c]=td.textContent;markCurrentZipModified();td.classList.add('changed')}));body.querySelectorAll('[data-zip-select-row]').forEach(cb=>cb.addEventListener('change',()=>{const i=+cb.dataset.zipSelectRow;if(cb.checked)selected.add(i);else selected.delete(i);cb.closest('tr')?.classList.toggle('zip-row-selected',cb.checked);updateZipRowTools()}));const selectAll=document.getElementById('zipSelectAllRows');if(selectAll)selectAll.addEventListener('change',()=>{rows.forEach(x=>selectAll.checked?selected.add(x.i):selected.delete(x.i));renderZipPreview()});updateZipRowTools();if(filtered.length>500){const meta=document.getElementById('zipPreviewMeta');meta.textContent+=` · แสดง 500 จาก ${filtered.length.toLocaleString('th-TH')} แถว`}}
 function currentZipItem(){return zipReaderState.entries.find(e=>e.name===zipReaderState.selected)||null}
 function updateZipEditStatus(text){const el=document.getElementById('zipEditStatus');if(!el)return;const current=currentZipItem();el.textContent=text||(current?.modified?'ยังไม่ได้บันทึก':current?.saved?'บันทึกแล้ว · MD5 ใหม่':'พร้อมแก้ไข');el.className='status '+(current?.modified||zipReaderState.dirty?'warn':'ok')}
@@ -1081,44 +1099,57 @@ function setZipAutoValue(item,section,row,col,value,stats,label){
 async function autoFillZipFromCase(){
  const c=zipReaderState.caseItem;
  if(!c){toast('ยังไม่ได้ผูกกับทะเบียน','กรุณาเปิด ZIP จากปุ่ม “แก้ไข ZIP” ในแถวผู้ป่วย','warning',6000);return;}
- const cpap=String(c.Module_Code||'').toUpperCase()==='STCPAP';
- if(cpap){
-  const required=[['TFlag',c.TFlag],['เลขกำกับเบิก',c.Claim_Control_No],['ว.แพทย์',c.Doctor_License]];
+ const moduleCode=String(c.Module_Code||'').toUpperCase();
+ const cpap=moduleCode==='STCPAP',sleep=moduleCode==='STSLEEP';
+ if(cpap||sleep){
+  const required=cpap?[['TFlag',c.TFlag],['เลขกำกับเบิก',c.Claim_Control_No],['ว.แพทย์',c.Doctor_License]]:[['TFlag',c.TFlag],['เลขกำกับเบิก',c.Claim_Control_No]];
   const missing=required.filter(([,v])=>!String(v||'').trim()).map(([k])=>k);
-  if(missing.length){const ok=await showDialog('ข้อมูลทะเบียนยังไม่ครบ',`ไม่พบ ${missing.join(', ')} ในทะเบียน SSOCPAP\nระบบจะปรับปรุงเฉพาะข้อมูลที่มีอยู่ และทุกฟิลด์ยังแก้ไขเองได้ ต้องการดำเนินการต่อหรือไม่`,'warning',[{text:'ยกเลิก',value:false,className:'soft'},{text:'ดำเนินการต่อ',value:true,className:'primary'}]);if(!ok)return;}
+  if(missing.length){const ok=await showDialog('ข้อมูลทะเบียนยังไม่ครบ',`ไม่พบ ${missing.join(', ')} ในทะเบียน ${cpap?'SSOCPAP':'Sleep Test'}
+ระบบจะปรับปรุงเฉพาะข้อมูลที่มีอยู่ และทุกฟิลด์ยังแก้ไขเองได้ ต้องการดำเนินการต่อหรือไม่`,'warning',[{text:'ยกเลิก',value:false,className:'soft'},{text:'ดำเนินการต่อ',value:true,className:'primary'}]);if(!ok)return;}
   const stats={AuthCode:0,TFlag:0,ClaimCat:0,Class:0,SvPID:0,SvTxCode:0,Diagnosis:0};
   for(const item of zipReaderState.entries){
    if(item.text===null){try{const buf=await item.entry.async('arraybuffer');item.text=decodeSsopBuffer(buf);item.originalText=item.text;}catch(_e){continue;}}
    if(!item.sections)item.sections=parseZipSsopSections(item.text||'');
    (item.sections.BILLTRAN||[]).forEach((_,r)=>{setZipAutoValue(item,'BILLTRAN',r,1,'STCPAP',stats,'AuthCode');if(String(c.TFlag||'').trim())setZipAutoValue(item,'BILLTRAN',r,11,c.TFlag,stats,'TFlag');});
-   (item.sections.BillItems||[]).forEach((row,r)=>{const std=String(row[4]||'').trim();if(['3012','3013'].includes(std))setZipAutoValue(item,'BillItems',r,12,'OPF',stats,'ClaimCat');});
-   (item.sections.OPServices||[]).forEach((_,r)=>{setZipAutoValue(item,'OPServices',r,2,'ED',stats,'Class');if(String(c.Doctor_License||'').trim())setZipAutoValue(item,'OPServices',r,11,c.Doctor_License,stats,'SvPID');if(String(c.Claim_Control_No||'').trim())setZipAutoValue(item,'OPServices',r,20,c.Claim_Control_No,stats,'SvTxCode');});
-   (item.sections.OPDx||[]).forEach((_,r)=>{setZipAutoValue(item,'OPDx',r,0,'ED',stats,'Class');if(String(c.Diagnosis_Code||'').trim())setZipAutoValue(item,'OPDx',r,4,c.Diagnosis_Code,stats,'Diagnosis');});
+   (item.sections.BillItems||[]).forEach((row,r)=>{const std=String(row[4]||'').trim();const targets=cpap?['3012','3013']:['51120','51121'];if(targets.includes(std))setZipAutoValue(item,'BillItems',r,12,'OPF',stats,'ClaimCat');});
+   (item.sections.OPServices||[]).forEach((row,r)=>{
+    if(cpap){setZipAutoValue(item,'OPServices',r,2,'ED',stats,'Class');if(String(c.Doctor_License||'').trim())setZipAutoValue(item,'OPServices',r,11,c.Doctor_License,stats,'SvPID');}
+    if(String(c.Claim_Control_No||'').trim())setZipAutoValue(item,'OPServices',r,20,c.Claim_Control_No,stats,'SvTxCode');
+   });
+   (item.sections.OPDx||[]).forEach((row,r)=>{
+    if(cpap)setZipAutoValue(item,'OPDx',r,0,'ED',stats,'Class');
+    if(sleep){const opClass=String((item.sections.OPServices||[])[0]?.[2]||'').trim();if(opClass)setZipAutoValue(item,'OPDx',r,0,opClass,stats,'Class');}
+    if(String(c.Diagnosis_Code||'').trim())setZipAutoValue(item,'OPDx',r,4,c.Diagnosis_Code,stats,'Diagnosis');
+   });
   }
   const current=currentZipItem();if(current){zipReaderState.sections=current.sections||{};zipReaderState.dirty=!!current.modified;const active=zipReaderState.activeSection;if(active&&zipReaderState.sections[active])selectZipSection(active);else{const names=Object.keys(zipReaderState.sections);if(names.length)selectZipSection(names[0]);}}
   const total=Object.values(stats).reduce((a,b)=>a+b,0);updateZipEditStatus(total?`ปรับปรุงอัตโนมัติ ${total} จุด`:'ข้อมูลตรงกับทะเบียนแล้ว');
   const lines=[`AuthCode: ${stats.AuthCode} จุด`,`TFlag: ${stats.TFlag} จุด`,`ClaimCat: ${stats.ClaimCat} จุด`,`Class: ${stats.Class} จุด`,`SvPID: ${stats.SvPID} จุด`,`SvTxCode: ${stats.SvTxCode} จุด`,`Diagnosis: ${stats.Diagnosis} จุด`];
-  showDialog(total?'ปรับปรุงข้อมูล CPAP อัตโนมัติแล้ว':'ข้อมูลตรงกับทะเบียนแล้ว',lines.join('\n')+'\n\nทุกฟิลด์ยังสามารถแก้ไขเองได้ก่อนบันทึก',total?'success':'info');return;
+  showDialog(total?`ปรับปรุงข้อมูล ${cpap?'CPAP':'Sleep Test'} อัตโนมัติแล้ว`:'ข้อมูลตรงกับทะเบียนแล้ว',lines.join('\n')+'\n\nทุกฟิลด์ยังสามารถแก้ไขเองได้ก่อนบันทึก',total?'success':'info');return;
  }
  const required=[['Case Number',c.SSO_Case_No],['Protocol Code',c.Protocol_Code],['TFlag',c.TFlag]];
  const missing=required.filter(([,v])=>!String(v||'').trim()).map(([k])=>k);
- if(missing.length){const ok=await showDialog('ข้อมูลทะเบียนยังไม่ครบ',`ไม่พบ ${missing.join(', ')} ในทะเบียน Case_SSOCAC\nระบบจะปรับปรุงเฉพาะข้อมูลที่มีอยู่ ต้องการดำเนินการต่อหรือไม่`,'warning',[{text:'ยกเลิก',value:false,className:'soft'},{text:'ดำเนินการต่อ',value:true,className:'primary'}]);if(!ok)return;}
+ if(missing.length){const ok=await showDialog('ข้อมูลทะเบียนยังไม่ครบ',`ไม่พบ ${missing.join(', ')} ในทะเบียน Case_SSOCAC
+ระบบจะปรับปรุงเฉพาะข้อมูลที่มีอยู่ ต้องการดำเนินการต่อหรือไม่`,'warning',[{text:'ยกเลิก',value:false,className:'soft'},{text:'ดำเนินการต่อ',value:true,className:'primary'}]);if(!ok)return;}
  const stats={AuthCode:0,MemberNo:0,VerCode:0,TFlag:0,ClaimCat:0};const terms=chemoDrugTerms();
  for(const item of zipReaderState.entries){if(item.text===null){try{const buf=await item.entry.async('arraybuffer');item.text=decodeSsopBuffer(buf);item.originalText=item.text;}catch(_e){continue;}}if(!item.sections)item.sections=parseZipSsopSections(item.text||'');(item.sections.BILLTRAN||[]).forEach((_,r)=>{setZipAutoValue(item,'BILLTRAN',r,1,'SSOCAC',stats,'AuthCode');if(String(c.SSO_Case_No||'').trim())setZipAutoValue(item,'BILLTRAN',r,7,c.SSO_Case_No,stats,'MemberNo');if(String(c.Protocol_Code||'').trim())setZipAutoValue(item,'BILLTRAN',r,10,c.Protocol_Code,stats,'VerCode');if(String(c.TFlag||'').trim())setZipAutoValue(item,'BILLTRAN',r,11,c.TFlag,stats,'TFlag');});(item.sections.BillItems||[]).forEach((row,r)=>{if(rowMatchesChemo(row,[3,4,5],terms))setZipAutoValue(item,'BillItems',r,12,'OPR',stats,'ClaimCat');});}
  const current=currentZipItem();if(current){zipReaderState.sections=current.sections||{};zipReaderState.dirty=!!current.modified;const active=zipReaderState.activeSection;if(active&&zipReaderState.sections[active])selectZipSection(active);else{const names=Object.keys(zipReaderState.sections);if(names.length)selectZipSection(names[0]);}}
  const total=Object.values(stats).reduce((a,b)=>a+b,0);updateZipEditStatus(total?`ปรับปรุงอัตโนมัติ ${total} จุด`:'ข้อมูลตรงกับทะเบียนแล้ว');const lines=[`AuthCode: ${stats.AuthCode} จุด`,`MemberNo: ${stats.MemberNo} จุด`,`VerCode: ${stats.VerCode} จุด`,`TFlag: ${stats.TFlag} จุด`,`ClaimCat: ${stats.ClaimCat} จุด`];const drugNote=terms.length?'':'\nหมายเหตุ: ไม่พบชื่อยา Chemo ในทะเบียน จึงไม่ได้ปรับ ClaimCat';showDialog(total?'ปรับปรุงข้อมูลอัตโนมัติแล้ว':'ข้อมูลตรงกับทะเบียนแล้ว',lines.join('\n')+drugNote,total?'success':'info');
 }
+
 function validateZipActive(){
- const sec=zipReaderState.sections||{},problems=[],c=zipReaderState.caseItem,cpap=String(c?.Module_Code||'').toUpperCase()==='STCPAP';
- if(cpap){
+ const sec=zipReaderState.sections||{},problems=[],c=zipReaderState.caseItem,moduleCode=String(c?.Module_Code||'').toUpperCase(),cpap=moduleCode==='STCPAP',sleep=moduleCode==='STSLEEP';
+ if(cpap||sleep){
   const bill=sec.BILLTRAN||[];if(!bill.length)problems.push('ไม่พบส่วน BILLTRAN');else{if(bill.some(r=>String(r[1]||'').trim().toUpperCase()!=='STCPAP'))problems.push('BILLTRAN: AuthCode ต้องเป็น STCPAP');if(bill.some(r=>!String(r[11]||'').trim()))problems.push('BILLTRAN: TFlag ว่าง');}
-  const bi=sec.BillItems||[];const target=bi.filter(r=>['3012','3013'].includes(String(r[4]||'').trim()));if(!target.length)problems.push('BillItems: ไม่พบ STDCode 3012 หรือ 3013');else if(target.some(r=>String(r[12]||'').trim().toUpperCase()!=='OPF'))problems.push('BillItems: รายการ STDCode 3012/3013 ต้องมี ClaimCat = OPF');
-  const ops=sec.OPServices||[];if(!ops.length)problems.push('ไม่พบส่วน OPServices');else{if(ops.some(r=>String(r[2]||'').trim().toUpperCase()!=='ED'))problems.push('OPServices: Class ต้องเป็น ED');if(ops.some(r=>!String(r[11]||'').trim()))problems.push('OPServices: SvPID/ว.แพทย์ ว่าง');if(ops.some(r=>!String(r[20]||'').trim()))problems.push('OPServices: SvTxCode/เลขกำกับเบิก ว่าง');}
-  const dx=sec.OPDx||[];if(!dx.length)problems.push('ไม่พบส่วน OPDx');else if(dx.some(r=>String(r[0]||'').trim().toUpperCase()!=='ED'))problems.push('OPDx: Class ต้องเป็น ED');
-  updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':'ตรวจสอบ CPAP เรียบร้อย',problems.length?problems.join('\n'):'ผ่านกฎสำคัญของ SSOCPAP ระบบจะสร้าง Checksum ใหม่ให้ทุกไฟล์ที่แก้ไข และทุกฟิลด์ยังสามารถแก้ไขเองได้ก่อนสร้าง ZIP',problems.length?'warning':'success');return;
+  const targetCodes=cpap?['3012','3013']:['51120','51121'];const bi=sec.BillItems||[];const target=bi.filter(r=>targetCodes.includes(String(r[4]||'').trim()));if(!target.length)problems.push(`BillItems: ไม่พบ STDCode ${targetCodes.join(' หรือ ')}`);else if(target.some(r=>String(r[12]||'').trim().toUpperCase()!=='OPF'))problems.push(`BillItems: รายการ STDCode ${targetCodes.join('/')} ต้องมี ClaimCat = OPF`);
+  const ops=sec.OPServices||[];if(!ops.length)problems.push('ไม่พบส่วน OPServices');else{if(cpap&&ops.some(r=>String(r[2]||'').trim().toUpperCase()!=='ED'))problems.push('OPServices: Class ต้องเป็น ED');if(cpap&&ops.some(r=>!String(r[11]||'').trim()))problems.push('OPServices: SvPID/ว.แพทย์ ว่าง');if(ops.some(r=>!String(r[20]||'').trim()))problems.push('OPServices: SvTxCode/เลขกำกับเบิก ว่าง');}
+  const dx=sec.OPDx||[];if(!dx.length)problems.push('ไม่พบส่วน OPDx');else if(cpap&&dx.some(r=>String(r[0]||'').trim().toUpperCase()!=='ED'))problems.push('OPDx: Class ต้องเป็น ED');
+  if(sleep&&ops.length&&dx.length){const opClasses=[...new Set(ops.map(r=>String(r[2]||'').trim().toUpperCase()).filter(Boolean))];const dxClasses=[...new Set(dx.map(r=>String(r[0]||'').trim().toUpperCase()).filter(Boolean))];if(!opClasses.length)problems.push('OPServices: Class ว่าง');if(!dxClasses.length)problems.push('OPDx: Class ว่าง');if(opClasses.length&&dxClasses.length&&opClasses.some(x=>!dxClasses.includes(x)))problems.push('Sleep Test: OPServices.Class ต้องตรงกับ OPDx.Class');}
+  updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':`ตรวจสอบ ${cpap?'CPAP':'Sleep Test'} เรียบร้อย`,problems.length?problems.join('\n'):`ผ่านกฎสำคัญของ ${cpap?'SSOCPAP':'Sleep Test'} ระบบจะสร้าง Checksum ใหม่ให้ทุกไฟล์ที่แก้ไข และทุกฟิลด์ยังสามารถแก้ไขเองได้ก่อนสร้าง ZIP`,problems.length?'warning':'success');return;
  }
  const bill=sec.BILLTRAN||[];if(bill.some(r=>!(r[7]||'').trim()))problems.push('BILLTRAN: MemberNo/Case Number ว่าง');const terms=chemoDrugTerms(),chemoLabel=zipReaderState.caseItem?.Chemo_Drug||'';if(terms.length){const bi=sec.BillItems||[],matchedBi=bi.filter(r=>rowMatchesChemo(r,[3,4,5],terms)),badBi=matchedBi.filter(r=>(r[12]||'').trim().toUpperCase()!=='OPR');if(badBi.length)problems.push(`BillItems: รายการยา “${chemoLabel}” ที่ตรงกับทะเบียน ยังไม่ได้ระบุ ClaimCat = OPR จำนวน ${badBi.length} แถว`);const di=sec.DispensedItems||[],matchedDi=di.filter(r=>rowMatchesChemo(r,[2,3,5],terms)),badDi=matchedDi.filter(r=>(r[16]||'').trim().toUpperCase()!=='OPR');if(badDi.length)problems.push(`DispensedItems: รายการยา “${chemoLabel}” ที่ตรงกับทะเบียน ยังไม่ได้ระบุ ClaimCat = OPR จำนวน ${badDi.length} แถว`)}const ops=sec.OPServices||[];if(ops.some(r=>!r.some(v=>String(v||'').trim().toUpperCase()==='SSOCAC')))problems.push('OPServices: ไม่พบ SSOCAC ครบทุกแถว');const dx=sec.OPDx||[];if(dx.some(r=>!r.some(v=>/^C\d{4}$/i.test(String(v||'').trim()))))problems.push('OPDx: ไม่พบ Protocol C#### ครบทุกแถว');updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':'ตรวจสอบเรียบร้อย',problems.length?problems.join('\n'):'ข้อมูลตรงกับทะเบียนผู้ป่วย และไม่พบข้อผิดพลาดตามกฎ SSOCAC ที่ตั้งไว้ ระบบจะสร้าง Checksum ใหม่ให้ทุกไฟล์ที่แก้ไข',problems.length?'warning':'success')
 }
+
 async function undoZipEntry(){
  const item=currentZipItem();if(!item)return;
  item.text=item.originalText;item.sections=parseZipSsopSections(item.originalText||'');item.modified=false;item.saved=false;item.savedText=null;item.autoChangedCells={};item.changeStats={cells:0,added:0,deleted:0};
@@ -1150,7 +1181,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.2.8 */
+/* Excel Import V4.2.9 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','สิทธิ','เลขกำกับเบิก','ว.แพทย์','รหัสวินิจฉัย','tflag','session','station','JobNo'];
