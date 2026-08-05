@@ -516,8 +516,11 @@ body.modal-open{overflow:hidden}
 
 
 
-/* V4.3.2 Module status colors */
+/* V4.3.3 Module status colors */
 .module-card.ready{background:#fff;border-color:var(--line)}
 .module-card.planned{background:linear-gradient(180deg,#fffdf7,#fff6e6);border-color:#f1d59f}
 .module-card.module-active{background:linear-gradient(180deg,#f4faff,#e8f4ff)!important;border:2px solid #82b9e8!important;box-shadow:0 18px 38px rgba(55,126,184,.20)!important;transform:translateY(-2px)}
 .module-card.module-active .module-badge{background:#dceeff!important;color:#185b91!important;font-weight:800}
+
+/* V4.3.3 Knowledge Module Isolation */
+.knowledge-bulk-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.knowledge-bulk-tools select{min-width:130px}.knowledge-select{display:inline-flex;align-items:center;margin-right:4px}.knowledge-select input{width:16px;height:16px}.knowledge-compact-row summary{align-items:center}.knowledge-module-mini{min-width:72px;text-align:center}.case-knowledge-grid select{min-height:42px}
