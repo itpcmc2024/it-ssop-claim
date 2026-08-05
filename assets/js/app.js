@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.2.9
+SSOP Toolkit Professional Edition V4.3.0
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -8,6 +8,7 @@ All Rights Reserved.
 const state={file:null,fileName:'',originalText:'',doc:null,activeSection:'',originalDoc:null,selected:new Set()};
 const authState={token:localStorage.getItem('ssopSessionToken')||'',user:null};
 let currentRegistryModule='SSOCAC';
+let registryLoadToken=0;
 function isViewer(){return String(authState.user?.Role||'').toUpperCase()==='VIEWER';}
 function canWrite(){return !isViewer();}
 const MODULE_ACCESS_MAP={cancer:'SSOCAC',main:'MAIN',cross:'CROSS',cpap:'STCPAP',sleep:'STSLEEP',editor:'EDITOR',knowledge:'KNOWLEDGE',admin:'ADMIN'};
@@ -369,7 +370,7 @@ function exportReplyKnowledgeCSV(){
   const rows=replyKnowledgeState.items.map(x=>[x.module,x.code,x.description,x.cause,x.solution,x.count,replyKnowledgeState.fileName]);
   const csv='\uFEFF'+[headers,...rows].map(r=>r.map(csvCell).join(',')).join('\r\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);a.download=`${replyKnowledgeState.module||'SSOP'}_Error_Knowledge_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  a.href=URL.createObjectURL(blob);a.download=`${replyKnowledgeState.module||'SSOP'}_Error_Knowledge_${DateEngine.fileStamp()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   toast('ส่งออกแล้ว','ไฟล์ CSV มีเฉพาะ Error Code และองค์ความรู้ ไม่มีข้อมูลผู้ป่วย','success');
 }
 
@@ -560,7 +561,25 @@ document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportRe
    Cancer Care Registry V3.2.0
 ====================================================== */
 const registryState={items:[],filtered:[],page:1,pageSize:20,selected:null,errorKnowledge:new Map(),activeErrorCode:'',highlightCaseId:''};
-function thDate(v){if(!v)return '-';const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleDateString('th-TH',{year:'numeric',month:'2-digit',day:'2-digit'});}
+/* Core Stability V4.3.0: date-only values never pass through UTC. */
+const DateEngine={
+ parts(value){
+  if(value===null||value===undefined||value==='')return null;
+  if(value instanceof Date&&!Number.isNaN(value.getTime()))return {y:value.getFullYear(),m:value.getMonth()+1,d:value.getDate()};
+  const t=String(value).trim(); if(!t)return null;
+  let m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s].*)?$/);
+  if(m){let y=+m[1];if(y>2400)y-=543;return this.valid(y,+m[2],+m[3]);}
+  m=t.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?:\s.*)?$/);
+  if(m){let y=+m[3];if(y>2400)y-=543;return this.valid(y,+m[2],+m[1]);}
+  return null;
+ },
+ valid(y,m,d){if(y<1900||y>2200||m<1||m>12||d<1||d>31)return null;const x=new Date(y,m-1,d,12,0,0);return x.getFullYear()===y&&x.getMonth()+1===m&&x.getDate()===d?{y,m,d}:null;},
+ iso(value){const p=this.parts(value);return p?`${String(p.y).padStart(4,'0')}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`:'';},
+ thai(value,empty='-'){const p=this.parts(value);return p?`${String(p.d).padStart(2,'0')}/${String(p.m).padStart(2,'0')}/${p.y+543}`:(value?String(value):empty);},
+ sortKey(value){const p=this.parts(value);return p?p.y*10000+p.m*100+p.d:0;},
+ fileStamp(){const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;}
+};
+function thDate(v){return DateEngine.thai(v);}
 function thDateTime(v){if(!v)return '-';const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString('th-TH');}
 
 function splitRegistryErrorCodes(value){
@@ -657,17 +676,17 @@ function exportErrorQueueCsv(){
  const rows=stat.items.map(x=>[x.Case_ID,x.Module_Code||'SSOCAC',x.HN,x.VN,x.CID,x.Patient_Name,thDate(x.Service_Date),x.Coverage,x.Chemo_Drug,x.SSO_Case_No,x.Protocol_Code,x.TFlag,`${x.Session||''} : ${x.Station||''}`,x.Work_Order_No,code]);
  const csv='\uFEFF'+[headers,...rows].map(r=>r.map(csvCell).join(',')).join('\r\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
- a.href=URL.createObjectURL(blob);a.download=`SSOCAC_${code}_Work_Queue_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ a.href=URL.createObjectURL(blob);a.download=`SSOCAC_${code}_Work_Queue_${DateEngine.fileStamp()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
  toast('ส่งออก CSV แล้ว',`${code} จำนวน ${rows.length} รายการ`,'success');
 }
 
 
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.2.9'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.2.9'},
- STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.2.9'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.3.0'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.3.0'},
+ STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.3.0'}
 };
-function openRegistryModule(moduleCode){currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();applyRegistryModuleUi();showPage('registryPage');loadRegistry();}
+function openRegistryModule(moduleCode){currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();registryState.items=[];registryState.filtered=[];registryState.page=1;applyRegistryModuleUi();showPage('registryPage');const body=document.getElementById('registryBody');if(body)body.innerHTML='<tr><td colspan="12" class="empty-row">กำลังโหลดข้อมูล...</td></tr>';loadRegistry();}
 function applyRegistryModuleUi(){
  const c=REGISTRY_MODULE_CONFIG[currentRegistryModule]||REGISTRY_MODULE_CONFIG.SSOCAC;const set=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text};
  set('registryModuleIcon',c.icon);set('registryModuleTitle',c.title);set('registryModuleSubtitle',c.subtitle);set('registryFooterTitle',c.footer);
@@ -678,32 +697,27 @@ function applyRegistryModuleUi(){
  const head=document.querySelector('.registry-table .case-protocol-col');if(head)head.innerHTML=cpap?'เลขกำกับเบิก /<br>ประเภทบริการ':'Case Number /<br>Protocol';
 }
 async function loadRegistry(){
+ const token=++registryLoadToken,moduleAtStart=currentRegistryModule;
  const status=document.getElementById('registryStatus');if(!status)return;
  const searchInput=document.getElementById('registrySearch');if(searchInput)searchInput.value='';
+ registryState.items=[];registryState.filtered=[];registryState.page=1;
+ const body=document.getElementById('registryBody');if(body)body.innerHTML='<tr><td colspan="12" class="empty-row">กำลังโหลดข้อมูล...</td></tr>';
  status.textContent='กำลังโหลดข้อมูล...';
  try{
-  const data=await apiRequest('listCases',{module:currentRegistryModule,limit:5000});
+  const data=await apiRequest('listCases',{module:moduleAtStart,limit:5000});
+  if(token!==registryLoadToken||moduleAtStart!==currentRegistryModule)return;
   registryState.items=data.items||[];
   applyRegistryFilter();
   status.textContent=`เชื่อมต่อฐานข้อมูลแล้ว · ${registryState.items.length} รายการ`;
   await hydrateRegistryErrorKnowledge();
  }catch(err){
+  if(token!==registryLoadToken||moduleAtStart!==currentRegistryModule)return;
   status.textContent=err.message;
-  document.getElementById('registryBody').innerHTML=`<tr><td colspan="12" class="empty-row">${escapeHtml(err.message)}</td></tr>`;
+  if(body)body.innerHTML=`<tr><td colspan="12" class="empty-row">${escapeHtml(err.message)}</td></tr>`;
  }
 }
 
-function registryDateValue(item){
- const raw=item?.Service_Date||item?.Created_At||item?.Updated_At||'';
- if(raw instanceof Date&&!Number.isNaN(raw.getTime()))return raw.getTime();
- const text=String(raw||'').trim();
- if(!text)return 0;
- const thai=text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})(?:\s+.*)?$/);
- if(thai){let year=Number(thai[3]);if(year>2400)year-=543;return new Date(year,Number(thai[2])-1,Number(thai[1])).getTime()||0;}
- const iso=text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
- if(iso){let year=Number(iso[1]);if(year>2400)year-=543;return new Date(year,Number(iso[2])-1,Number(iso[3])).getTime()||0;}
- const parsed=Date.parse(text);return Number.isNaN(parsed)?0:parsed;
-}
+function registryDateValue(item){return DateEngine.sortKey(item?.Service_Date||item?.Created_At||item?.Updated_At||'');}
 function registryCaseSequence(item){
  const m=String(item?.Case_ID||'').match(/(\d+)$/);return m?Number(m[1]):0;
 }
@@ -802,7 +816,7 @@ async function startCaseRework(caseId){
 function renderRegistryStats(){const all=registryState.items;const set=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=n};set('statAll',all.length);set('statPreparing',all.filter(x=>['รอเตรียมข้อมูล','รอตรวจสอบ'].includes(x.Case_Status)).length);set('statReady',all.filter(x=>['พร้อมส่ง','พร้อมสร้างไฟล์','สร้างไฟล์แล้ว'].includes(x.Case_Status)).length);set('statSent',all.filter(x=>['ส่งเบิกแล้ว','รอผลตอบกลับ'].includes(x.Case_Status)).length);set('statA',all.filter(x=>x.Latest_Result==='A'||x.Case_Status==='ผ่าน (A)').length);set('statC',all.filter(x=>x.Latest_Result==='C'||x.Case_Status==='ติดแก้ไข (C)').length)}
 function openCaseModal(id=''){
  const x=id?registryState.items.find(r=>r.Case_ID===id):null;registryState.selected=x||null;const cpap=currentRegistryModule==='STCPAP';const sleep=currentRegistryModule==='STSLEEP';document.getElementById('caseModalTitle').textContent=x?(cpap?'แก้ไขงาน SSOCPAP':'แก้ไขงาน Cancer Care'):(cpap?'เพิ่มงาน SSOCPAP':'เพิ่มงาน Cancer Care');
- const fields={caseId:x?.Case_ID||'',caseHN:x?.HN||'',caseVN:x?.VN||'',caseCID:x?.CID||'',casePatientName:x?.Patient_Name||'',caseServiceDate:x?.Service_Date?String(x.Service_Date).slice(0,10):'',caseCoverage:x?.Coverage||'ประกันสังคม',caseSsoNo:cpap?(x?.Claim_Control_No||''):(x?.SSO_Case_No||''),caseProtocol:cpap?(x?.Service_Type||'CPAP'):(x?.Protocol_Code||''),caseSession:x?.Session||'',caseStation:x?.Station||'',caseWorkOrder:x?.Work_Order_No||'',caseChemo:cpap?(x?.Doctor_License||''):(x?.Chemo_Drug||''),caseDiagnosis:cpap?(x?.Diagnosis_Code||''):'',caseAssigned:x?.Assigned_To||'',caseStatus:x?.Case_Status||'รอเตรียมข้อมูล',caseRemark:x?.Remark||'',caseUpdatedBy:authState.user?.Display_Name||''};Object.entries(fields).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});const diagnosisField=document.getElementById('caseDiagnosisField');if(diagnosisField)diagnosisField.classList.toggle('hidden',!cpap);const m=document.getElementById('caseModal');m.classList.add('show');m.setAttribute('aria-hidden','false');
+ const fields={caseId:x?.Case_ID||'',caseHN:x?.HN||'',caseVN:x?.VN||'',caseCID:x?.CID||'',casePatientName:x?.Patient_Name||'',caseServiceDate:DateEngine.iso(x?.Service_Date),caseCoverage:x?.Coverage||'ประกันสังคม',caseSsoNo:cpap?(x?.Claim_Control_No||''):(x?.SSO_Case_No||''),caseProtocol:cpap?(x?.Service_Type||'CPAP'):(x?.Protocol_Code||''),caseSession:x?.Session||'',caseStation:x?.Station||'',caseWorkOrder:x?.Work_Order_No||'',caseChemo:cpap?(x?.Doctor_License||''):(x?.Chemo_Drug||''),caseDiagnosis:cpap?(x?.Diagnosis_Code||''):'',caseAssigned:x?.Assigned_To||'',caseStatus:x?.Case_Status||'รอเตรียมข้อมูล',caseRemark:x?.Remark||'',caseUpdatedBy:authState.user?.Display_Name||''};Object.entries(fields).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});const diagnosisField=document.getElementById('caseDiagnosisField');if(diagnosisField)diagnosisField.classList.toggle('hidden',!cpap);const m=document.getElementById('caseModal');m.classList.add('show');m.setAttribute('aria-hidden','false');
 }
 function closeCaseModal(){const m=document.getElementById('caseModal');m.classList.remove('show');m.setAttribute('aria-hidden','true')}
 async function saveCase(){
@@ -883,7 +897,7 @@ function exportRegistryCsv(){
  ]);
  const csv='\uFEFF'+[headers,...data].map(r=>r.map(csvCell).join(',')).join('\r\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
- a.href=URL.createObjectURL(blob);a.download=`${currentRegistryModule}_Registry_Filtered_${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ a.href=URL.createObjectURL(blob);a.download=`${currentRegistryModule}_Registry_Filtered_${DateEngine.fileStamp()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
  toast('ส่งออกแล้ว',`ส่งออก ${rows.length} รายการตามผลการค้นหาและตัวกรองปัจจุบัน`,'success');
 }
 
@@ -1181,7 +1195,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.2.9 */
+/* Excel Import V4.3.0 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','สิทธิ','เลขกำกับเบิก','ว.แพทย์','รหัสวินิจฉัย','tflag','session','station','JobNo'];
@@ -1213,7 +1227,7 @@ function excelDateToIso(v){
  const t=cleanText(v);
  let m=t.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);if(m)return normalizeParts(m[3],m[2],m[1]);
  m=t.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);if(m)return normalizeParts(m[1],m[2],m[3]);
- const d=new Date(t);return isNaN(d)?'':normalizeParts(d.getFullYear(),d.getMonth()+1,d.getDate());
+ return '';
 }
 
 function mapCancerExcelRow(r,index){const item={_row:index+2,Module_Code:'SSOCAC',Service_Date:excelDateToIso(r['วันที่มารับบริการ']),HN:cleanText(r['HN']),VN:cleanText(r['vn']??r['VN']),CID:cleanText(r['เลขบัตรประชาชน']),Patient_Name:cleanText(r['ชื่อ-นามสกุล']),Coverage:cleanText(r['สิทธิการรักษา']),Chemo_Drug:cleanText(r['ยา Chemo']),SSO_Case_No:cleanText(r['Case No.']),Protocol_Code:cleanText(r['Protocal']??r['Protocol']),TFlag:cleanText(r['TFlag']),Session:cleanText(r['Session']),Station:cleanText(r['Station']),Work_Order_No:cleanText(r['JobNo']),Case_Status:'รอเตรียมข้อมูล',Updated_By:authState.user?.Display_Name||''};item._key=item.VN?`SSOCAC|${item.HN}|${item.VN}`:`SSOCAC|${item.HN}|${item.Service_Date}|${item.SSO_Case_No}|${item.Session}|${item.Station}`;item._errors=[];if(!item.Service_Date)item._errors.push('วันที่ไม่ถูกต้อง');if(!item.HN)item._errors.push('ไม่มี HN');if(!item.Patient_Name)item._errors.push('ไม่มีชื่อผู้ป่วย');return item}
@@ -1425,3 +1439,13 @@ document.addEventListener('click',e=>{
  if(e.target.closest('#errorQueueCsvBtn')){e.preventDefault();exportErrorQueueCsv();return;}
  const modal=e.target.closest('#errorQueueModal');if(modal&&e.target===modal)closeErrorQueue();
 });
+
+
+/* V4.3.0 Core scroll recovery: release body lock whenever no visible modal remains. */
+function recoverPageScroll(){
+ const anyVisible=[...document.querySelectorAll('.modal.show')].some(m=>getComputedStyle(m).display!=='none');
+ if(!anyVisible){document.body.classList.remove('modal-open');document.documentElement.style.overflow='';document.body.style.overflow='';}
+}
+document.addEventListener('click',()=>setTimeout(recoverPageScroll,0));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')setTimeout(recoverPageScroll,0)});
+setInterval(recoverPageScroll,1500);
