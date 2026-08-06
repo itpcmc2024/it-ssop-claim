@@ -557,7 +557,7 @@ body.modal-open{overflow:hidden}
 .zip-row-selected td{background:#e8f8f3!important}
 
 
-/* V4.3.6 — ZIP Column Filter, 3-row Error Queue, dashboard preparation */
+/* V4.3.7 — ZIP Column Filter, 3-row Error Queue, dashboard preparation */
 .error-work-queue{
   grid-auto-rows:minmax(92px,auto);
   max-height:296px!important; /* 3 rows + 2 gaps */
