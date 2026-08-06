@@ -1,2 +1,16 @@
-/* SSIP XML Parser */
-/* Placeholder */
+(function(){'use strict';
+ const SECTION_ORDER=['Header','ClaimAuth','IPADT','IPDx','IPOp','Invoices','Coinsurance','Raw XML'];
+ const decoder874=()=>{try{return new TextDecoder('windows-874')}catch(_){return new TextDecoder('utf-8')}};
+ function decodeBytes(bytes){return decoder874().decode(bytes)}
+ function stripEndNote(text){return String(text||'').replace(/\s*<\?EndNote\s+HMAC\s*=\s*["'][^"']*["']\s*\?>\s*$/i,'').trimEnd()}
+ function parseXml(text){const clean=stripEndNote(text);const doc=new DOMParser().parseFromString(clean,'application/xml');const err=doc.querySelector('parsererror');if(err)throw new Error('XML ไม่สมบูรณ์: '+err.textContent.slice(0,180));const root=doc.documentElement;if(!root)throw new Error('ไม่พบ Root Element');return {doc,root,kind:String(root.nodeName||'').toUpperCase()}}
+ function directChildren(el){return [...el.children]}
+ function directByName(root,name){return directChildren(root).find(x=>x.nodeName.toLowerCase()===name.toLowerCase())||null}
+ function leafFields(el){if(!el)return[];const attrs=[...el.attributes].map(a=>({name:'@'+a.name,value:a.value,attr:true}));const children=directChildren(el);if(!children.length)return attrs.concat([{name:'#text',value:el.textContent||'',text:true}]);return attrs.concat(children.filter(c=>!c.children.length).map(c=>({name:c.nodeName,value:c.textContent||'',node:c})))}
+ function delimitedInfo(el){if(!el)return null;const text=(el.textContent||'').trim();if(!text||!text.includes('|'))return null;const lines=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);return {lines,rows:lines.map((line,i)=>({id:i,values:line.split('|')})),maxCols:Math.max(0,...lines.map(l=>l.split('|').length))}}
+ function summary(parsed,name){const root=parsed.root;const q=n=>{const e=root.querySelector(n);return e?(e.textContent||'').trim():''};return {name,kind:parsed.kind,an:q('AN')||root.getAttribute('AN')||'',hn:q('HN')||'',pid:q('PID')||q('IDCard')||'',patient:q('Name')||q('PatientName')||'',sections:SECTION_ORDER.filter(x=>x==='Raw XML'||directByName(root,x))}}
+ async function readZip(file){if(!window.JSZip)throw new Error('ไม่พบ JSZip');const zip=await JSZip.loadAsync(file);const entries=[];for(const [path,zf] of Object.entries(zip.files)){if(zf.dir)continue;const bytes=new Uint8Array(await zf.async('arraybuffer'));const isXml=/\.xml$/i.test(path)||/^\s*<\?xml|^\s*<(AIPN|CIPN)/i.test(decodeBytes(bytes).slice(0,200));if(!isXml){entries.push({path,bytes,isXml:false,dirty:false});continue}try{const text=decodeBytes(bytes);const parsed=parseXml(text);entries.push({path,bytes,text,originalText:text,parsed,isXml:true,dirty:false,summary:summary(parsed,path)})}catch(error){entries.push({path,bytes,text:decodeBytes(bytes),isXml:true,dirty:false,error:error.message,summary:{name:path,kind:'XML ERROR',sections:['Raw XML']}})}}return {fileName:file.name,zip,entries,xmlEntries:entries.filter(e=>e.isXml)}}
+ function serialize(doc){return new XMLSerializer().serializeToString(doc)}
+ function refresh(entry){entry.parsed=parseXml(entry.text);entry.summary=summary(entry.parsed,entry.path)}
+ window.SSIPParser={SECTION_ORDER,decodeBytes,stripEndNote,parseXml,directByName,directChildren,leafFields,delimitedInfo,summary,readZip,serialize,refresh};
+})();
