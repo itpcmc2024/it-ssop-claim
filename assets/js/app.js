@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.3.5
+SSOP Toolkit Professional Edition V4.3.6
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -30,7 +30,7 @@ function hasModuleAccess(name){
  const set=allowedModuleSet();
  return set.has('ALL')||set.has(code);
 }
-function moduleAccessLabel(name){const labels={cancer:'Cancer Care (SSOCAC)',main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test',editor:'SSO Editor',knowledge:'SSOP Knowledge Center',admin:'จัดการระบบ'};return labels[name]||name;}
+function moduleAccessLabel(name){const labels={cancer:'Cancer Care (SSOCAC)',main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test',editor:'SSO Editor',knowledge:'SSOP Knowledge Center',aipncipn:'เครื่องมือแก้ไขไฟล์ AIPN/CIPN',admin:'จัดการระบบ'};return labels[name]||name;}
 window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),700);initializeAuthentication();setTimeout(()=>{const p=new URLSearchParams(location.search);if(p.get('page')==='knowledge'){showPage('knowledgePage');const module=p.get('module')||'ALL',q=p.get('q')||'';const input=document.getElementById('knowledgeSearchInput');const sel=document.getElementById('knowledgeModuleFilter');if(input)input.value=q;if(sel&&[...sel.options].some(o=>o.value===module))sel.value=module;loadKnowledge(q,module);}},350);});
 const aboutModal=document.getElementById('aboutModal');
 document.querySelectorAll('[data-open-about]').forEach(btn=>btn.addEventListener('click',()=>{aboutModal.classList.add('show');aboutModal.setAttribute('aria-hidden','false')}));
@@ -64,6 +64,7 @@ function goHome(){
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function openModule(name){
+ if(name==='aipncipn'){setActiveModuleCard('');toast('เตรียมพัฒนา','เครื่องมือ AIPN/CIPN จะเริ่มพัฒนาในขั้นถัดไป','warning',4500);return;}
  if(!hasModuleAccess(name)){toast('ไม่มีสิทธิ์',`บัญชีนี้ไม่มีสิทธิ์ใช้งานโมดูล ${moduleAccessLabel(name)}`,'warning',5200);return;}
  setActiveModuleCard(name);
  if(name==='cancer'){openRegistryModule('SSOCAC');return;}
@@ -597,7 +598,7 @@ document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportRe
    Cancer Care Registry V3.2.0
 ====================================================== */
 const registryState={items:[],filtered:[],page:1,pageSize:20,selected:null,errorKnowledge:new Map(),activeErrorCode:'',highlightCaseId:''};
-/* Core Stability V4.3.5: date-only values never pass through UTC. */
+/* Core Stability V4.3.6: date-only values never pass through UTC. */
 const DateEngine={
  parts(value){
   if(value===null||value===undefined||value==='')return null;
@@ -718,9 +719,9 @@ function exportErrorQueueCsv(){
 
 
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.3.5'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.3.5'},
- STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.3.5'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.3.6'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.3.6'},
+ STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.3.6'}
 };
 function openRegistryModule(moduleCode){currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();registryState.items=[];registryState.filtered=[];registryState.page=1;applyRegistryModuleUi();showPage('registryPage');const body=document.getElementById('registryBody');if(body)body.innerHTML='<tr><td colspan="12" class="empty-row">กำลังโหลดข้อมูล...</td></tr>';loadRegistry();}
 function applyRegistryModuleUi(){
@@ -946,7 +947,7 @@ document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegis
 
 
 /* ZIP Reader V3.2.1 — แยกข้อมูลเป็นคอลัมน์ตามโครงสร้าง SSOP */
-const zipReaderState={zip:null,file:null,entries:[],selected:null,rows:[],headers:[],sections:{},activeSection:'',caseItem:null,dirty:false,rowSelections:{},saving:false};
+const zipReaderState={zip:null,file:null,entries:[],selected:null,rows:[],headers:[],sections:{},activeSection:'',caseItem:null,dirty:false,rowSelections:{},columnFilters:{},filterPopover:null,saving:false};
 function openZipReader(caseId=''){
  zipReaderState.caseItem=caseId?registryState.items.find(x=>x.Case_ID===caseId)||null:null;
  const label=document.getElementById('zipReaderCaseText');
@@ -1104,7 +1105,65 @@ function zipImportantCols(section){
  if(zipIsSleep())return ({BILLTRAN:[1,11],BillItems:[4,12],OPServices:[2,20],OPDx:[0,4]})[section]||[];
  return (sectionInfo[section]?.importantCols)||[];
 }
-function renderZipPreview(){const q=(document.getElementById('zipTableSearch')?.value||'').trim().toLowerCase();const all=zipReaderState.rows;const indexed=all.map((r,i)=>({r,i}));const filtered=q?indexed.filter(x=>x.r.some(v=>String(v||'').toLowerCase().includes(q))):indexed;const rows=filtered.slice(0,500);const importantCols=zipImportantCols(zipReaderState.activeSection);const selected=currentZipSelection();document.getElementById('zipPreviewHead').innerHTML=`<tr><th class="zip-select-col"><input type="checkbox" id="zipSelectAllRows" aria-label="เลือกทุกแถวที่แสดง" title="เลือกทุกแถวที่แสดง"></th><th>#</th>${zipReaderState.headers.map((h,i)=>{const meta=zipFieldMeta(zipReaderState.activeSection,i);const desc=meta?.[1]||'ยังไม่มีคำอธิบายสำหรับหัวข้อนี้';const example=meta?getConditionExample(zipReaderState.activeSection,meta):'';return `<th class="field-tip ${importantCols.includes(i)?'important-head':''}" data-tip-title="${escapeAttr(h)}" data-tip-desc="${escapeAttr(desc)}" data-tip-example="${escapeAttr(example)}"><span class="head-wrap">${escapeHtml(h)}${importantCols.includes(i)?' ★':''}<span class="tip-dot">i</span></span></th>`}).join('')}</tr>`;bindTooltips();const body=document.getElementById('zipPreviewBody');body.innerHTML=rows.length?rows.map(x=>`<tr class="${selected.has(x.i)?'zip-row-selected':''}"><td class="zip-select-col"><input type="checkbox" data-zip-select-row="${x.i}" ${selected.has(x.i)?'checked':''} aria-label="เลือกแถว ${x.i+1}"></td><td>${x.i+1}</td>${zipReaderState.headers.map((_,c)=>`<td contenteditable="true" data-zip-row="${x.i}" data-zip-col="${c}" class="zip-edit-cell ${importantCols.includes(c)?'important-cell':''} ${currentZipItem()?.autoChangedCells?.[zipReaderState.activeSection]?.has(`${x.i}|${c}`)?'auto-filled':''}" title="${escapeAttr(x.r[c]??'')}">${escapeHtml(x.r[c]??'')}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${zipReaderState.headers.length+2}" class="empty-row">ไม่พบข้อมูล</td></tr>`;body.querySelectorAll('[data-zip-row]').forEach(td=>td.addEventListener('input',()=>{const r=+td.dataset.zipRow,c=+td.dataset.zipCol;zipReaderState.rows[r][c]=td.textContent;markCurrentZipModified();td.classList.add('changed')}));body.querySelectorAll('[data-zip-select-row]').forEach(cb=>cb.addEventListener('change',()=>{const i=+cb.dataset.zipSelectRow;if(cb.checked)selected.add(i);else selected.delete(i);cb.closest('tr')?.classList.toggle('zip-row-selected',cb.checked);updateZipRowTools()}));const selectAll=document.getElementById('zipSelectAllRows');if(selectAll)selectAll.addEventListener('change',()=>{rows.forEach(x=>selectAll.checked?selected.add(x.i):selected.delete(x.i));renderZipPreview()});updateZipRowTools();if(filtered.length>500){const meta=document.getElementById('zipPreviewMeta');meta.textContent+=` · แสดง 500 จาก ${filtered.length.toLocaleString('th-TH')} แถว`}}
+
+function zipFilterKey(){const item=currentZipItem();return `${item?.name||''}::${zipReaderState.activeSection||''}`;}
+function currentZipColumnFilters(){const key=zipFilterKey();if(!zipReaderState.columnFilters[key])zipReaderState.columnFilters[key]={};return zipReaderState.columnFilters[key];}
+function zipFilteredIndexedRows(query=''){
+  const q=String(query||'').trim().toLowerCase(), filters=currentZipColumnFilters();
+  return zipReaderState.rows.map((r,i)=>({r,i})).filter(x=>{
+    if(q&&!x.r.some(v=>String(v??'').toLowerCase().includes(q)))return false;
+    return Object.entries(filters).every(([col,values])=>{
+      if(!values||!values.length)return true;
+      return values.includes(String(x.r[Number(col)]??''));
+    });
+  });
+}
+function closeZipColumnFilter(){document.getElementById('zipColumnFilterPopover')?.remove();zipReaderState.filterPopover=null;}
+function openZipColumnFilter(col,anchor){
+  closeZipColumnFilter();
+  const values=[...new Set(zipReaderState.rows.map(r=>String(r[col]??'')))].sort((a,b)=>a.localeCompare(b,'th',{numeric:true}));
+  const active=currentZipColumnFilters()[col]||[];
+  const pop=document.createElement('div');pop.id='zipColumnFilterPopover';pop.className='zip-column-filter-popover';
+  pop.innerHTML=`<div class="zip-filter-title"><b>${escapeHtml(zipReaderState.headers[col]||'คอลัมน์')}</b><button type="button" class="zip-filter-close">×</button></div>
+  <input class="zip-filter-search" placeholder="ค้นหาค่า..." autocomplete="off">
+  <label class="zip-filter-all"><input type="checkbox" data-filter-all ${active.length===0?'checked':''}> ทั้งหมด</label>
+  <div class="zip-filter-values">${values.map((v,i)=>`<label><input type="checkbox" data-filter-value="${escapeAttr(v)}" ${active.includes(v)?'checked':''}> <span>${escapeHtml(v||'(ว่าง)')}</span></label>`).join('')}</div>
+  <div class="zip-filter-actions"><button type="button" class="soft" data-filter-clear>ล้าง</button><button type="button" class="primary" data-filter-apply>ใช้ตัวกรอง</button></div>`;
+  document.body.appendChild(pop);
+  const rect=anchor.getBoundingClientRect(), w=300;
+  pop.style.left=Math.max(8,Math.min(innerWidth-w-8,rect.left))+'px';
+  pop.style.top=Math.min(innerHeight-pop.offsetHeight-8,rect.bottom+6)+'px';
+  pop.querySelector('.zip-filter-close').onclick=closeZipColumnFilter;
+  const search=pop.querySelector('.zip-filter-search');
+  search.oninput=()=>{const q=search.value.toLowerCase();pop.querySelectorAll('.zip-filter-values label').forEach(l=>l.hidden=!l.textContent.toLowerCase().includes(q));};
+  pop.querySelector('[data-filter-all]').onchange=e=>{if(e.target.checked)pop.querySelectorAll('[data-filter-value]').forEach(x=>x.checked=false);};
+  pop.querySelectorAll('[data-filter-value]').forEach(x=>x.onchange=()=>{pop.querySelector('[data-filter-all]').checked=false;});
+  pop.querySelector('[data-filter-clear]').onclick=()=>{delete currentZipColumnFilters()[col];closeZipColumnFilter();renderZipPreview();};
+  pop.querySelector('[data-filter-apply]').onclick=()=>{
+    const selected=[...pop.querySelectorAll('[data-filter-value]:checked')].map(x=>x.dataset.filterValue);
+    if(pop.querySelector('[data-filter-all]').checked||selected.length===0)delete currentZipColumnFilters()[col];else currentZipColumnFilters()[col]=selected;
+    closeZipColumnFilter();renderZipPreview();
+  };
+  setTimeout(()=>search.focus(),0);
+}
+function clearAllZipColumnFilters(){zipReaderState.columnFilters[zipFilterKey()]={};closeZipColumnFilter();renderZipPreview();}
+
+function renderZipPreview(){
+ const q=(document.getElementById('zipTableSearch')?.value||'').trim().toLowerCase();
+ const filtered=zipFilteredIndexedRows(q),rows=filtered.slice(0,500),filters=currentZipColumnFilters();
+ const importantCols=zipImportantCols(zipReaderState.activeSection),selected=currentZipSelection();
+ document.getElementById('zipPreviewHead').innerHTML=`<tr><th class="zip-select-col"><input type="checkbox" id="zipSelectAllRows" aria-label="เลือกทุกแถวที่แสดง" title="เลือกทุกแถวที่แสดง"></th><th>#</th>${zipReaderState.headers.map((h,i)=>{const meta=zipFieldMeta(zipReaderState.activeSection,i),desc=meta?.[1]||'ยังไม่มีคำอธิบายสำหรับหัวข้อนี้',example=meta?getConditionExample(zipReaderState.activeSection,meta):'',active=Array.isArray(filters[i])&&filters[i].length;return `<th class="field-tip ${importantCols.includes(i)?'important-head':''} ${active?'zip-filter-active':''}" data-tip-title="${escapeAttr(h)}" data-tip-desc="${escapeAttr(desc)}" data-tip-example="${escapeAttr(example)}"><span class="head-wrap">${escapeHtml(h)}${importantCols.includes(i)?' ★':''}<span class="tip-dot">i</span><button type="button" class="zip-filter-btn" data-zip-filter-col="${i}" title="กรองคอลัมน์ ${escapeAttr(h)}">${active?'●':'▾'}</button></span></th>`}).join('')}</tr>`;
+ bindTooltips();
+ document.querySelectorAll('[data-zip-filter-col]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openZipColumnFilter(Number(btn.dataset.zipFilterCol),btn)});
+ const body=document.getElementById('zipPreviewBody');
+ body.innerHTML=rows.length?rows.map(x=>`<tr class="${selected.has(x.i)?'zip-row-selected':''}"><td class="zip-select-col"><input type="checkbox" data-zip-select-row="${x.i}" ${selected.has(x.i)?'checked':''} aria-label="เลือกแถว ${x.i+1}"></td><td>${x.i+1}</td>${zipReaderState.headers.map((_,c)=>`<td contenteditable="true" data-zip-row="${x.i}" data-zip-col="${c}" class="zip-edit-cell ${importantCols.includes(c)?'important-cell':''} ${currentZipItem()?.autoChangedCells?.[zipReaderState.activeSection]?.has(`${x.i}|${c}`)?'auto-filled':''}" title="${escapeAttr(x.r[c]??'')}">${escapeHtml(x.r[c]??'')}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${zipReaderState.headers.length+2}" class="empty-row">ไม่พบข้อมูลตามตัวกรอง</td></tr>`;
+ body.querySelectorAll('[data-zip-row]').forEach(td=>td.addEventListener('input',()=>{const r=+td.dataset.zipRow,c=+td.dataset.zipCol;zipReaderState.rows[r][c]=td.textContent;markCurrentZipModified();td.classList.add('changed')}));
+ body.querySelectorAll('[data-zip-select-row]').forEach(cb=>cb.addEventListener('change',()=>{const i=+cb.dataset.zipSelectRow;if(cb.checked)selected.add(i);else selected.delete(i);cb.closest('tr')?.classList.toggle('zip-row-selected',cb.checked);updateZipRowTools()}));
+ const selectAll=document.getElementById('zipSelectAllRows');if(selectAll)selectAll.addEventListener('change',()=>{rows.forEach(x=>selectAll.checked?selected.add(x.i):selected.delete(x.i));renderZipPreview()});
+ updateZipRowTools();
+ const meta=document.getElementById('zipPreviewMeta');
+ if(meta){const activeCount=Object.values(filters).filter(v=>v?.length).length;meta.textContent=`แสดง ${Math.min(filtered.length,500).toLocaleString('th-TH')} จาก ${filtered.length.toLocaleString('th-TH')} แถว${activeCount?` · กรอง ${activeCount} คอลัมน์`:''}`;}
+}
 function currentZipItem(){return zipReaderState.entries.find(e=>e.name===zipReaderState.selected)||null}
 function updateZipEditStatus(text){const el=document.getElementById('zipEditStatus');if(!el)return;const current=currentZipItem();el.textContent=text||(current?.modified?'ยังไม่ได้บันทึก':current?.saved?'บันทึกแล้ว · MD5 ใหม่':'พร้อมแก้ไข');el.className='status '+(current?.modified||zipReaderState.dirty?'warn':'ok')}
 function rebuildZipEntry(item){
@@ -1233,9 +1292,9 @@ async function downloadEditedZip(){
  }catch(err){updateZipEditStatus('สร้าง ZIP ไม่สำเร็จ');toast('สร้าง ZIP ไม่สำเร็จ',err.message,'error',7000)}
 }
 
-document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);document.getElementById('zipTableSearch')?.addEventListener('input',renderZipPreview);document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
+document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);let zipSearchTimer=null;document.getElementById('zipTableSearch')?.addEventListener('input',()=>{clearTimeout(zipSearchTimer);zipSearchTimer=setTimeout(renderZipPreview,120)});document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.3.5 */
+/* Excel Import V4.3.6 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','สิทธิ','เลขกำกับเบิก','ว.แพทย์','รหัสวินิจฉัย','tflag','session','station','JobNo'];
@@ -1492,7 +1551,7 @@ function getUserModuleSelection(){
 }
 function refreshModuleCardsForUser(){
  document.querySelectorAll('.module-card[data-module]').forEach(card=>{
-   const allowed=hasModuleAccess(card.dataset.module);
+   const allowed=card.dataset.module==='aipncipn'||hasModuleAccess(card.dataset.module);
    card.classList.toggle('module-no-access',!allowed);
    card.setAttribute('aria-disabled',allowed?'false':'true');
    card.title=allowed?'':`ไม่มีสิทธิ์ใช้งาน ${moduleAccessLabel(card.dataset.module)}`;
@@ -1512,7 +1571,7 @@ document.addEventListener('click',e=>{
 });
 
 
-/* V4.3.5 Core scroll recovery: release body lock whenever no visible modal remains. */
+/* V4.3.6 Core scroll recovery: release body lock whenever no visible modal remains. */
 function recoverPageScroll(){
  const anyVisible=[...document.querySelectorAll('.modal.show')].some(m=>getComputedStyle(m).display!=='none');
  if(!anyVisible){document.body.classList.remove('modal-open');document.documentElement.style.overflow='';document.body.style.overflow='';}
@@ -1520,3 +1579,6 @@ function recoverPageScroll(){
 document.addEventListener('click',()=>setTimeout(recoverPageScroll,0));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')setTimeout(recoverPageScroll,0)});
 setInterval(recoverPageScroll,1500);
+
+// V4.3.6 ZIP filter lifecycle
+document.addEventListener('click',e=>{const p=document.getElementById('zipColumnFilterPopover');if(p&&!p.contains(e.target)&&!e.target.closest('[data-zip-filter-col]'))closeZipColumnFilter();});
