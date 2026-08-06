@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.3.6
+SSOP Toolkit Professional Edition V4.3.7
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -598,7 +598,7 @@ document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportRe
    Cancer Care Registry V3.2.0
 ====================================================== */
 const registryState={items:[],filtered:[],page:1,pageSize:20,selected:null,errorKnowledge:new Map(),activeErrorCode:'',highlightCaseId:''};
-/* Core Stability V4.3.6: date-only values never pass through UTC. */
+/* Core Stability V4.3.7: date-only values never pass through UTC. */
 const DateEngine={
  parts(value){
   if(value===null||value===undefined||value==='')return null;
@@ -718,12 +718,33 @@ function exportErrorQueueCsv(){
 }
 
 
+const REGISTRY_CACHE_TTL_MS=45000;
+const registryModuleCache=new Map();
+function getRegistryCache(moduleCode){
+ const key=String(moduleCode||'').toUpperCase();
+ const mem=registryModuleCache.get(key);
+ if(mem&&Date.now()-mem.savedAt<REGISTRY_CACHE_TTL_MS)return mem.items;
+ try{const raw=sessionStorage.getItem('ssopRegistryCache:'+key);if(!raw)return null;const parsed=JSON.parse(raw);if(!parsed||Date.now()-Number(parsed.savedAt||0)>=REGISTRY_CACHE_TTL_MS)return null;registryModuleCache.set(key,parsed);return parsed.items||null;}catch(_e){return null;}
+}
+function setRegistryCache(moduleCode,items){
+ const key=String(moduleCode||'').toUpperCase(),entry={savedAt:Date.now(),items:items||[]};registryModuleCache.set(key,entry);
+ try{sessionStorage.setItem('ssopRegistryCache:'+key,JSON.stringify(entry));}catch(_e){}
+}
+function clearRegistryCache(moduleCode){
+ const key=String(moduleCode||'').toUpperCase();registryModuleCache.delete(key);try{sessionStorage.removeItem('ssopRegistryCache:'+key);}catch(_e){}
+}
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.3.6'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.3.6'},
- STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.3.6'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.3.7'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.3.7'},
+ STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.3.7'}
 };
-function openRegistryModule(moduleCode){currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();registryState.items=[];registryState.filtered=[];registryState.page=1;applyRegistryModuleUi();showPage('registryPage');const body=document.getElementById('registryBody');if(body)body.innerHTML='<tr><td colspan="12" class="empty-row">กำลังโหลดข้อมูล...</td></tr>';loadRegistry();}
+function openRegistryModule(moduleCode){
+ currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();registryState.items=[];registryState.filtered=[];registryState.page=1;applyRegistryModuleUi();showPage('registryPage');
+ const cached=getRegistryCache(currentRegistryModule),body=document.getElementById('registryBody'),status=document.getElementById('registryStatus');
+ if(cached?.length){registryState.items=cached;applyRegistryFilter();if(status)status.textContent=`แสดงข้อมูลล่าสุด ${cached.length} รายการ · กำลังตรวจสอบข้อมูลใหม่...`;}
+ else if(body)body.innerHTML='<tr><td colspan="12" class="empty-row">กำลังโหลดข้อมูล...</td></tr>';
+ loadRegistry({preserveCached:Boolean(cached?.length)});
+}
 function applyRegistryModuleUi(){
  const c=REGISTRY_MODULE_CONFIG[currentRegistryModule]||REGISTRY_MODULE_CONFIG.SSOCAC;const set=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text};
  set('registryModuleIcon',c.icon);set('registryModuleTitle',c.title);set('registryModuleSubtitle',c.subtitle);set('registryFooterTitle',c.footer);
@@ -733,24 +754,21 @@ function applyRegistryModuleUi(){
  document.getElementById('errorIntelligenceCard')?.classList.toggle('hidden',cpap);
  const head=document.querySelector('.registry-table .case-protocol-col');if(head)head.innerHTML=cpap?'เลขกำกับเบิก /<br>ประเภทบริการ':'Case Number /<br>Protocol';
 }
-async function loadRegistry(){
- const token=++registryLoadToken,moduleAtStart=currentRegistryModule;
+async function loadRegistry(options={}){
+ const token=++registryLoadToken,moduleAtStart=currentRegistryModule,preserveCached=Boolean(options.preserveCached);
  const status=document.getElementById('registryStatus');if(!status)return;
- const searchInput=document.getElementById('registrySearch');if(searchInput)searchInput.value='';
- registryState.items=[];registryState.filtered=[];registryState.page=1;
- const body=document.getElementById('registryBody');if(body)body.innerHTML='<tr><td colspan="12" class="empty-row">กำลังโหลดข้อมูล...</td></tr>';
- status.textContent='กำลังโหลดข้อมูล...';
+ const searchInput=document.getElementById('registrySearch');if(searchInput&&!preserveCached)searchInput.value='';
+ if(!preserveCached){registryState.items=[];registryState.filtered=[];registryState.page=1;const body=document.getElementById('registryBody');if(body)body.innerHTML='<tr><td colspan="12" class="empty-row">กำลังโหลดข้อมูล...</td></tr>';status.textContent='กำลังโหลดข้อมูล...';}
  try{
   const data=await apiRequest('listCases',{module:moduleAtStart,limit:5000});
   if(token!==registryLoadToken||moduleAtStart!==currentRegistryModule)return;
-  registryState.items=data.items||[];
-  applyRegistryFilter();
+  registryState.items=data.items||[];setRegistryCache(moduleAtStart,registryState.items);applyRegistryFilter();
   status.textContent=`เชื่อมต่อฐานข้อมูลแล้ว · ${registryState.items.length} รายการ`;
-  await hydrateRegistryErrorKnowledge();
+  hydrateRegistryErrorKnowledge();
  }catch(err){
   if(token!==registryLoadToken||moduleAtStart!==currentRegistryModule)return;
-  status.textContent=err.message;
-  if(body)body.innerHTML=`<tr><td colspan="12" class="empty-row">${escapeHtml(err.message)}</td></tr>`;
+  status.textContent=preserveCached?`แสดงข้อมูลล่าสุด · ตรวจสอบข้อมูลใหม่ไม่สำเร็จ: ${err.message}`:err.message;
+  if(!preserveCached){const body=document.getElementById('registryBody');if(body)body.innerHTML=`<tr><td colspan="12" class="empty-row">${escapeHtml(err.message)}</td></tr>`;}
  }
 }
 
@@ -859,7 +877,7 @@ function closeCaseModal(){const m=document.getElementById('caseModal');m.classLi
 async function saveCase(){
  const get=id=>document.getElementById(id).value.trim(),cpap=currentRegistryModule==='STCPAP';const payload={Case_ID:get('caseId'),Module_Code:currentRegistryModule,HN:get('caseHN'),VN:get('caseVN'),CID:get('caseCID'),Patient_Name:get('casePatientName'),Service_Date:get('caseServiceDate'),Coverage:get('caseCoverage'),Case_Status:get('caseStatus'),Assigned_To:get('caseAssigned'),Updated_By:get('caseUpdatedBy'),TFlag:registryState.selected?.TFlag||'',Session:get('caseSession'),Station:get('caseStation'),Work_Order_No:get('caseWorkOrder'),Remark:get('caseRemark')};
  if(cpap){payload.Claim_Control_No=get('caseSsoNo');payload.Service_Type=get('caseProtocol')||'CPAP';payload.Doctor_License=get('caseChemo');payload.Diagnosis_Code=get('caseDiagnosis')}else{payload.SSO_Case_No=get('caseSsoNo');payload.Protocol_Code=get('caseProtocol');payload.Chemo_Drug=get('caseChemo')}
- if(!payload.HN||!payload.Patient_Name||!payload.Service_Date){toast('ข้อมูลไม่ครบ','กรุณากรอก HN ชื่อผู้ป่วย และวันที่รับบริการ','warning');return}const btn=document.getElementById('caseSaveBtn');btn.disabled=true;btn.textContent='กำลังบันทึก...';try{await apiRequest('saveCase',{module:currentRegistryModule,item:payload});closeCaseModal();toast('บันทึกสำเร็จ',payload.Case_ID?'แก้ไขทะเบียนงานแล้ว':'สร้างทะเบียนงานใหม่แล้ว','success');await loadRegistry()}catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500)}finally{btn.disabled=false;btn.textContent='บันทึก'}
+ if(!payload.HN||!payload.Patient_Name||!payload.Service_Date){toast('ข้อมูลไม่ครบ','กรุณากรอก HN ชื่อผู้ป่วย และวันที่รับบริการ','warning');return}const btn=document.getElementById('caseSaveBtn');btn.disabled=true;btn.textContent='กำลังบันทึก...';try{await apiRequest('saveCase',{module:currentRegistryModule,item:payload});closeCaseModal();toast('บันทึกสำเร็จ',payload.Case_ID?'แก้ไขทะเบียนงานแล้ว':'สร้างทะเบียนงานใหม่แล้ว','success');clearRegistryCache(currentRegistryModule);await loadRegistry()}catch(err){toast('บันทึกไม่สำเร็จ',err.message,'error',6500)}finally{btn.disabled=false;btn.textContent='บันทึก'}
 }
 async function openCaseDetail(id){
  try{
@@ -942,7 +960,7 @@ function exportRegistryCsv(){
  toast('ส่งออกแล้ว',`ส่งออก ${rows.length} รายการตามผลการค้นหาและตัวกรองปัจจุบัน`,'success');
 }
 
-document.getElementById('registryReloadBtn')?.addEventListener('click',loadRegistry);document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registryStatusFilter')?.addEventListener('change',applyRegistryFilter);document.querySelectorAll('[data-registry-status]').forEach(card=>card.addEventListener('click',()=>{const select=document.getElementById('registryStatusFilter');if(select)select.value=card.dataset.registryStatus||'ALL';applyRegistryFilter()}));document.getElementById('registryResetFilterBtn')?.addEventListener('click',()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter'),sort=document.getElementById('registrySort');if(search)search.value='';if(status)status.value='ALL';if(sort)sort.value='newest';registryState.highlightCaseId='';applyRegistryFilter()});document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseKnowledgeCancel')?.addEventListener('click',closeCaseKnowledgeModal);document.getElementById('caseKnowledgeSave')?.addEventListener('click',saveCaseKnowledge);document.getElementById('caseDetailModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeCaseDetail()});document.getElementById('caseKnowledgeModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeCaseKnowledgeModal()});document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const kb=document.getElementById('caseKnowledgeModal');if(kb?.classList.contains('show')){closeCaseKnowledgeModal();return;}const detail=document.getElementById('caseDetailModal');if(detail?.classList.contains('show'))closeCaseDetail();});
+document.getElementById('registryReloadBtn')?.addEventListener('click',()=>{clearRegistryCache(currentRegistryModule);loadRegistry();});document.getElementById('addCaseBtn')?.addEventListener('click',()=>openCaseModal());document.getElementById('registrySearch')?.addEventListener('input',applyRegistryFilter);document.getElementById('registryStatusFilter')?.addEventListener('change',applyRegistryFilter);document.querySelectorAll('[data-registry-status]').forEach(card=>card.addEventListener('click',()=>{const select=document.getElementById('registryStatusFilter');if(select)select.value=card.dataset.registryStatus||'ALL';applyRegistryFilter()}));document.getElementById('registryResetFilterBtn')?.addEventListener('click',()=>{const search=document.getElementById('registrySearch'),status=document.getElementById('registryStatusFilter'),sort=document.getElementById('registrySort');if(search)search.value='';if(status)status.value='ALL';if(sort)sort.value='newest';registryState.highlightCaseId='';applyRegistryFilter()});document.getElementById('registrySort')?.addEventListener('change',applyRegistryFilter);document.getElementById('registryPageSize')?.addEventListener('change',renderRegistry);document.getElementById('registryCsvBtn')?.addEventListener('click',exportRegistryCsv);document.getElementById('caseModalClose')?.addEventListener('click',closeCaseModal);document.getElementById('caseModalCancel')?.addEventListener('click',closeCaseModal);document.getElementById('caseSaveBtn')?.addEventListener('click',saveCase);document.getElementById('caseKnowledgeCancel')?.addEventListener('click',closeCaseKnowledgeModal);document.getElementById('caseKnowledgeSave')?.addEventListener('click',saveCaseKnowledge);document.getElementById('caseDetailModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeCaseDetail()});document.getElementById('caseKnowledgeModal')?.addEventListener('click',e=>{if(e.target===e.currentTarget)closeCaseKnowledgeModal()});document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const kb=document.getElementById('caseKnowledgeModal');if(kb?.classList.contains('show')){closeCaseKnowledgeModal();return;}const detail=document.getElementById('caseDetailModal');if(detail?.classList.contains('show'))closeCaseDetail();});
 
 
 
@@ -1294,7 +1312,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);let zipSearchTimer=null;document.getElementById('zipTableSearch')?.addEventListener('input',()=>{clearTimeout(zipSearchTimer);zipSearchTimer=setTimeout(renderZipPreview,120)});document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.3.6 */
+/* Excel Import V4.3.7 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','สิทธิ','เลขกำกับเบิก','ว.แพทย์','รหัสวินิจฉัย','tflag','session','station','JobNo'];
@@ -1348,7 +1366,7 @@ async function handleExcelFile(file){
 }
 function stripImportMeta(x){const o={};Object.keys(x).forEach(k=>{if(!k.startsWith('_'))o[k]=x[k]});o._key=x._key;return o}
 function renderImportPreview(checking){const rows=excelImportState.rows,dup=rows.filter(x=>x._duplicate).length,invalid=rows.filter(x=>x._errors.length).length,ready=rows.length-invalid;document.getElementById('importSummary').innerHTML=`<div><span>ทั้งหมด</span><strong>${rows.length}</strong></div><div><span>พร้อมนำเข้า</span><strong>${ready}</strong></div><div><span>พบข้อมูลซ้ำ</span><strong>${checking?'…':dup}</strong></div><div><span>ข้อมูลไม่ครบ</span><strong>${invalid}</strong></div>`;document.getElementById('importPreviewBody').innerHTML=rows.map((x,i)=>{const status=x._errors.length?`<span class="import-badge invalid">${escapeHtml(x._errors.join(', '))}</span>`:checking?'<span class="import-badge checking">กำลังตรวจซ้ำ</span>':x._duplicate?`<span class="import-badge duplicate">ซ้ำกับ ${escapeHtml(x._duplicate.Case_ID)}</span>`:'<span class="import-badge new">รายการใหม่</span>';const action=x._errors.length?'<span class="meta">นำเข้าไม่ได้</span>':x._duplicate?`<select class="dup-action" data-import-index="${i}"><option value="skip" ${x._action==='skip'?'selected':''}>ข้ามรายการ</option><option value="update" ${x._action==='update'?'selected':''}>อัปเดตรายการเดิม</option><option value="new" ${x._action==='new'?'selected':''}>นำเข้าเป็นงานใหม่</option></select>`:'<span class="meta">นำเข้าเป็นงานใหม่</span>';return `<tr><td>${x._row}</td><td>${status}</td><td>${thDate(x.Service_Date)}</td><td><b>${escapeHtml(x.HN||'-')}</b><div class="subline">${escapeHtml(x.VN||'-')}</div></td><td>${escapeHtml(x.Patient_Name||'-')}</td><td>${escapeHtml((currentRegistryModule==='STCPAP'||currentRegistryModule==='STSLEEP')?(x.Claim_Control_No||'-'):(x.SSO_Case_No||'-'))}<div class="subline">${escapeHtml((currentRegistryModule==='STCPAP'||currentRegistryModule==='STSLEEP')?(x.Service_Type||'-'):(x.Protocol_Code||'-'))}</div></td><td>${action}</td></tr>`}).join('');document.querySelectorAll('[data-import-index]').forEach(el=>el.onchange=()=>{excelImportState.rows[Number(el.dataset.importIndex)]._action=el.value});document.getElementById('importConfirmBtn').disabled=checking||ready===0}
-async function confirmExcelImport(){const valid=excelImportState.rows.filter(x=>!x._errors.length);if(!valid.length)return;const btn=document.getElementById('importConfirmBtn');btn.disabled=true;btn.textContent='กำลังนำเข้า...';try{const data=await apiRequest('importCases',{module:currentRegistryModule,sourceFileName:excelImportState.fileName,rows:valid.map(x=>({...stripImportMeta(x),duplicateAction:x._action||'new'}))});document.getElementById('importResultBox').innerHTML=`<div class="result-icon">✅</div><h3>นำเข้า Excel เรียบร้อย</h3><div class="result-grid"><div><span>สำเร็จ</span><strong>${data.imported||0}</strong></div><div><span>อัปเดต</span><strong>${data.updated||0}</strong></div><div><span>ข้าม</span><strong>${data.skipped||0}</strong></div><div><span>ผิดพลาด</span><strong>${data.failed||0}</strong></div></div><p>รหัสชุดนำเข้า: ${escapeHtml(data.batchId||'-')}</p>`;showImportStep('result');await loadRegistry()}catch(err){toast('นำเข้าไม่สำเร็จ',err.message,'error',8000)}finally{btn.disabled=false;btn.textContent='ยืนยันนำเข้า'}}
+async function confirmExcelImport(){const valid=excelImportState.rows.filter(x=>!x._errors.length);if(!valid.length)return;const btn=document.getElementById('importConfirmBtn');btn.disabled=true;btn.textContent='กำลังนำเข้า...';try{const data=await apiRequest('importCases',{module:currentRegistryModule,sourceFileName:excelImportState.fileName,rows:valid.map(x=>({...stripImportMeta(x),duplicateAction:x._action||'new'}))});document.getElementById('importResultBox').innerHTML=`<div class="result-icon">✅</div><h3>นำเข้า Excel เรียบร้อย</h3><div class="result-grid"><div><span>สำเร็จ</span><strong>${data.imported||0}</strong></div><div><span>อัปเดต</span><strong>${data.updated||0}</strong></div><div><span>ข้าม</span><strong>${data.skipped||0}</strong></div><div><span>ผิดพลาด</span><strong>${data.failed||0}</strong></div></div><p>รหัสชุดนำเข้า: ${escapeHtml(data.batchId||'-')}</p>`;showImportStep('result');clearRegistryCache(currentRegistryModule);await loadRegistry()}catch(err){toast('นำเข้าไม่สำเร็จ',err.message,'error',8000)}finally{btn.disabled=false;btn.textContent='ยืนยันนำเข้า'}}
 document.getElementById('importCancelBtn')?.addEventListener('click',closeExcelImport);document.getElementById('importDoneBtn')?.addEventListener('click',closeExcelImport);document.getElementById('importChangeFileBtn')?.addEventListener('click',resetExcelImport);document.getElementById('excelChooseBtn')?.addEventListener('click',()=>document.getElementById('excelImportFile').click());document.getElementById('excelImportFile')?.addEventListener('change',e=>handleExcelFile(e.target.files[0]));document.getElementById('importConfirmBtn')?.addEventListener('click',confirmExcelImport);const drop=document.getElementById('excelDropZone');if(drop){['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener('drop',e=>handleExcelFile(e.dataTransfer.files[0]))}
 
 
@@ -1492,7 +1510,7 @@ function renderReplyImport(){
 async function saveReplyImport(){
   const items=replyImportState.matches.filter(x=>x.selected);if(!items.length){toast('ยังไม่มีรายการยืนยัน','กรุณาติ๊กรายการที่ต้องการบันทึก','warning');return}
   const btn=document.getElementById('replyImportSaveBtn');btn.disabled=true;btn.textContent='กำลังบันทึก...';
-  try{const data=await apiRequest('importReplyResults',{items,replyFileName:replyImportState.file?.name||'',replyEntryNames:replyImportState.sourceFiles,periodKey:replyImportState.meta?.Period_Key||'',replyNo:replyImportState.meta?.Reply_No||'',replyDate:replyImportState.meta?.Reply_Date||'',updatedBy:authState.user?.Display_Name||''});closeReplyImport();toast('บันทึกผลตอบกลับสำเร็จ',`อัปเดต ${data.updated||0} รายการ · เชื่อม Attempt เดิม ${data.linked||0} · ผล A ${data.resultA||0} · ผล C ${data.resultC||0} · Knowledge ${replyImportState.knowledgeKnown} รหัส · รหัสใหม่ ${replyImportState.knowledgeUnknown}`,'success',7500);await loadRegistry()}catch(err){toast('บันทึกผลไม่สำเร็จ',err.message,'error',7000)}finally{btn.disabled=false;btn.textContent='ยืนยันบันทึกผล'}
+  try{const data=await apiRequest('importReplyResults',{items,replyFileName:replyImportState.file?.name||'',replyEntryNames:replyImportState.sourceFiles,periodKey:replyImportState.meta?.Period_Key||'',replyNo:replyImportState.meta?.Reply_No||'',replyDate:replyImportState.meta?.Reply_Date||'',updatedBy:authState.user?.Display_Name||''});closeReplyImport();toast('บันทึกผลตอบกลับสำเร็จ',`อัปเดต ${data.updated||0} รายการ · เชื่อม Attempt เดิม ${data.linked||0} · ผล A ${data.resultA||0} · ผล C ${data.resultC||0} · Knowledge ${replyImportState.knowledgeKnown} รหัส · รหัสใหม่ ${replyImportState.knowledgeUnknown}`,'success',7500);clearRegistryCache(currentRegistryModule);await loadRegistry()}catch(err){toast('บันทึกผลไม่สำเร็จ',err.message,'error',7000)}finally{btn.disabled=false;btn.textContent='ยืนยันบันทึกผล'}
 }
 document.getElementById('replyImportCancelBtn')?.addEventListener('click',closeReplyImport);document.getElementById('replyImportChooseBtn')?.addEventListener('click',()=>document.getElementById('replyImportFile')?.click());document.getElementById('replyImportFile')?.addEventListener('change',e=>handleReplyImportFile(e.target.files?.[0]));document.getElementById('replyImportChangeBtn')?.addEventListener('click',resetReplyImport);document.getElementById('replyImportSaveBtn')?.addEventListener('click',saveReplyImport);document.getElementById('replyImportKnowledgeBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const q=[...new Set(replyImportState.matches.flatMap(x=>String(x.Error_Codes||'').split(',').map(v=>v.trim()).filter(Boolean)))].join(' ');const url=`${location.origin}${location.pathname}?page=knowledge&module=${encodeURIComponent(currentRegistryModule)}&q=${encodeURIComponent(q)}`;const w=window.open(url,'_blank','noopener,noreferrer');if(!w)toast('เบราว์เซอร์บล็อกแท็บใหม่','กรุณาอนุญาต Pop-up สำหรับเว็บไซต์นี้','warning',6000);});
 
@@ -1571,7 +1589,7 @@ document.addEventListener('click',e=>{
 });
 
 
-/* V4.3.6 Core scroll recovery: release body lock whenever no visible modal remains. */
+/* V4.3.7 Core scroll recovery: release body lock whenever no visible modal remains. */
 function recoverPageScroll(){
  const anyVisible=[...document.querySelectorAll('.modal.show')].some(m=>getComputedStyle(m).display!=='none');
  if(!anyVisible){document.body.classList.remove('modal-open');document.documentElement.style.overflow='';document.body.style.overflow='';}
@@ -1580,5 +1598,5 @@ document.addEventListener('click',()=>setTimeout(recoverPageScroll,0));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')setTimeout(recoverPageScroll,0)});
 setInterval(recoverPageScroll,1500);
 
-// V4.3.6 ZIP filter lifecycle
+// V4.3.7 ZIP filter lifecycle
 document.addEventListener('click',e=>{const p=document.getElementById('zipColumnFilterPopover');if(p&&!p.contains(e.target)&&!e.target.closest('[data-zip-filter-col]'))closeZipColumnFilter();});
