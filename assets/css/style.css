@@ -524,3 +524,34 @@ body.modal-open{overflow:hidden}
 
 /* V4.3.3 Knowledge Module Isolation */
 .knowledge-bulk-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.knowledge-bulk-tools select{min-width:130px}.knowledge-select{display:inline-flex;align-items:center;margin-right:4px}.knowledge-select input{width:16px;height:16px}.knowledge-compact-row summary{align-items:center}.knowledge-module-mini{min-width:72px;text-align:center}.case-knowledge-grid select{min-height:42px}
+
+/* ======================================================
+   V4.3.5 Knowledge UI + ZIP Row Tools Hotfix
+====================================================== */
+#knowledgePage .knowledge-compact-row>summary{
+  grid-template-columns:28px 72px 86px minmax(0,1fr) 118px 24px;
+  min-height:48px;
+}
+#knowledgePage .knowledge-select{display:flex;align-items:center;justify-content:center}
+#knowledgePage .knowledge-description{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#knowledgePage .knowledge-status-mini{white-space:nowrap;text-align:right}
+#knowledgePage .knowledge-compact-detail{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(180px,.55fr) minmax(180px,.55fr)}
+#knowledgePage .knowledge-edit-textarea{width:100%;min-height:72px;resize:vertical}
+#knowledgePage .knowledge-cause-textarea{background:#fff}
+@media(max-width:1100px){
+  #knowledgePage .knowledge-compact-row>summary{grid-template-columns:28px 68px 74px minmax(0,1fr) 104px 22px;gap:7px}
+  #knowledgePage .knowledge-compact-detail{grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+  #knowledgePage .knowledge-compact-row>summary{grid-template-columns:28px 64px minmax(0,1fr) 22px;grid-template-areas:'select code description chevron' 'select module status chevron'}
+  #knowledgePage .knowledge-select{grid-area:select}.knowledge-code-badge{grid-area:code}.knowledge-module-mini{grid-area:module}.knowledge-description{grid-area:description}.knowledge-status-mini{grid-area:status;text-align:left}.knowledge-chevron{grid-area:chevron}
+  #knowledgePage .knowledge-compact-detail{grid-template-columns:1fr}
+}
+.zip-row-btn.delete:not(:disabled){cursor:pointer;opacity:1;filter:none}
+.zip-row-btn.delete:disabled{cursor:not-allowed;opacity:.45}
+.zip-row-selected td{background:#e8f8f3!important}
