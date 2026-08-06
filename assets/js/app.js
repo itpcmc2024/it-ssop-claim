@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.3.7
+SSOP Toolkit Professional Edition V4.4.0
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -11,7 +11,7 @@ let currentRegistryModule='SSOCAC';
 let registryLoadToken=0;
 function isViewer(){return String(authState.user?.Role||'').toUpperCase()==='VIEWER';}
 function canWrite(){return !isViewer();}
-const MODULE_ACCESS_MAP={cancer:'SSOCAC',main:'MAIN',cross:'CROSS',cpap:'STCPAP',sleep:'STSLEEP',editor:'EDITOR',knowledge:'KNOWLEDGE',admin:'ADMIN'};
+const MODULE_ACCESS_MAP={cancer:'SSOCAC',main:'MAIN',cross:'CROSS',cpap:'STCPAP',sleep:'STSLEEP',editor:'EDITOR',ssip:'SSIP',knowledge:'KNOWLEDGE',admin:'ADMIN'};
 const KNOWLEDGE_MODULES=['MAIN','CROSS','SSOCAC','STCPAP','STSLEEP'];
 function canonicalKnowledgeModule(v){const x=String(v||'').trim().toUpperCase();const aliases={CANCER:'SSOCAC','CANCER CARE':'SSOCAC',CPAP:'STCPAP','SLEEP TEST':'STSLEEP','SLEEPTEST':'STSLEEP'};return KNOWLEDGE_MODULES.includes(x)?x:(aliases[x]||'SSOCAC');}
 function knowledgeModuleLabel(v){return ({MAIN:'Main',CROSS:'Cross',SSOCAC:'Cancer',STCPAP:'CPAP',STSLEEP:'Sleep Test'})[canonicalKnowledgeModule(v)]||v;}
@@ -20,17 +20,17 @@ function allowedModuleSet(){
  if(role==='ADMIN')return new Set(['ALL']);
  const raw=String(authState.user?.Allowed_Modules||'').trim().toUpperCase();
  const set=new Set(raw.split(/[;,|\s]+/).map(v=>v.trim()).filter(Boolean));
- set.add('EDITOR');
+ set.add('EDITOR');set.add('SSIP');
  return set;
 }
 function hasModuleAccess(name){
  const code=MODULE_ACCESS_MAP[String(name||'').toLowerCase()]||String(name||'').toUpperCase();
- if(code==='EDITOR')return true;
+ if(code==='EDITOR'||code==='SSIP')return true;
  if(code==='ADMIN')return String(authState.user?.Role||'').toUpperCase()==='ADMIN';
  const set=allowedModuleSet();
  return set.has('ALL')||set.has(code);
 }
-function moduleAccessLabel(name){const labels={cancer:'Cancer Care (SSOCAC)',main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test',editor:'SSO Editor',knowledge:'SSOP Knowledge Center',aipncipn:'เครื่องมือแก้ไขไฟล์ AIPN/CIPN',admin:'จัดการระบบ'};return labels[name]||name;}
+function moduleAccessLabel(name){const labels={cancer:'Cancer Care (SSOCAC)',main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test',editor:'SSOP Editor',knowledge:'SSOP Knowledge Center',ssip:'SSIP Editor (AIPN/CIPN)',admin:'จัดการระบบ'};return labels[name]||name;}
 window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),700);initializeAuthentication();setTimeout(()=>{const p=new URLSearchParams(location.search);if(p.get('page')==='knowledge'){showPage('knowledgePage');const module=p.get('module')||'ALL',q=p.get('q')||'';const input=document.getElementById('knowledgeSearchInput');const sel=document.getElementById('knowledgeModuleFilter');if(input)input.value=q;if(sel&&[...sel.options].some(o=>o.value===module))sel.value=module;loadKnowledge(q,module);}},350);});
 const aboutModal=document.getElementById('aboutModal');
 document.querySelectorAll('[data-open-about]').forEach(btn=>btn.addEventListener('click',()=>{aboutModal.classList.add('show');aboutModal.setAttribute('aria-hidden','false')}));
@@ -64,7 +64,6 @@ function goHome(){
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function openModule(name){
- if(name==='aipncipn'){setActiveModuleCard('');toast('เตรียมพัฒนา','เครื่องมือ AIPN/CIPN จะเริ่มพัฒนาในขั้นถัดไป','warning',4500);return;}
  if(!hasModuleAccess(name)){toast('ไม่มีสิทธิ์',`บัญชีนี้ไม่มีสิทธิ์ใช้งานโมดูล ${moduleAccessLabel(name)}`,'warning',5200);return;}
  setActiveModuleCard(name);
  if(name==='cancer'){openRegistryModule('SSOCAC');return;}
@@ -72,6 +71,7 @@ function openModule(name){
  if(name==='sleep'){openRegistryModule('STSLEEP');return;}
  if(name==='knowledge'){showPage('knowledgePage');loadKnowledge('','ALL');return;}
  if(name==='editor'){showPage('cancerPage');return;}
+ if(name==='ssip'){showPage('ssipPage');window.SSIPEditor?.activate();return;}
  if(name==='admin'){if(authState.user?.Role!=='ADMIN'){toast('ไม่มีสิทธิ์','เมนูนี้สำหรับ Admin เท่านั้น','warning');return;}showPage('adminPage');loadAdminPage();return;}
  const names={main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test'};
  showDialog('เตรียมพัฒนา',`${names[name]||'โมดูลนี้'} ถูกเตรียมปุ่มและโครงสร้างไว้แล้ว
@@ -598,7 +598,7 @@ document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportRe
    Cancer Care Registry V3.2.0
 ====================================================== */
 const registryState={items:[],filtered:[],page:1,pageSize:20,selected:null,errorKnowledge:new Map(),activeErrorCode:'',highlightCaseId:''};
-/* Core Stability V4.3.7: date-only values never pass through UTC. */
+/* Core Stability V4.4.0: date-only values never pass through UTC. */
 const DateEngine={
  parts(value){
   if(value===null||value===undefined||value==='')return null;
@@ -734,9 +734,9 @@ function clearRegistryCache(moduleCode){
  const key=String(moduleCode||'').toUpperCase();registryModuleCache.delete(key);try{sessionStorage.removeItem('ssopRegistryCache:'+key);}catch(_e){}
 }
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.3.7'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.3.7'},
- STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.3.7'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.4.0'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.4.0'},
+ STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.4.0'}
 };
 function openRegistryModule(moduleCode){
  currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();registryState.items=[];registryState.filtered=[];registryState.page=1;applyRegistryModuleUi();showPage('registryPage');
@@ -1312,7 +1312,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);let zipSearchTimer=null;document.getElementById('zipTableSearch')?.addEventListener('input',()=>{clearTimeout(zipSearchTimer);zipSearchTimer=setTimeout(renderZipPreview,120)});document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.3.7 */
+/* Excel Import V4.4.0 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','สิทธิ','เลขกำกับเบิก','ว.แพทย์','รหัสวินิจฉัย','tflag','session','station','JobNo'];
@@ -1540,7 +1540,7 @@ function clearAuthentication(){authState.token='';authState.user=null;localStora
 async function performLogin(){const username=document.getElementById('loginUsername').value.trim(),password=document.getElementById('loginPassword').value,btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='กำลังเข้าสู่ระบบ...';try{const data=await apiRequest('login',{username,password});authState.token=data.sessionToken;localStorage.setItem('ssopSessionToken',authState.token);applyAuthentication(data.user);document.getElementById('loginPassword').value='';}catch(err){document.getElementById('loginMessage').textContent=err.message}finally{btn.disabled=false;btn.textContent='เข้าสู่ระบบ'}}
 function applyRoleUi(){
  const viewer=isViewer();document.body.classList.toggle('role-viewer',viewer);
- // VIEWER ห้ามแก้ฐานทะเบียน แต่ใช้ SSO Editor แบบ Local Processing ได้
+ // VIEWER ห้ามแก้ฐานทะเบียน แต่ใช้ SSOP Editor แบบ Local Processing ได้
  ['importExcelBtn','openZipReaderBtn','openReplyImportBtn','addCaseBtn','registryKnowledgeBtn'].forEach(id=>document.getElementById(id)?.classList.toggle('hidden',viewer));
  document.getElementById('openCancerEditorBtn')?.classList.remove('hidden');
  document.querySelectorAll('[data-module="knowledge"]').forEach(el=>el.classList.remove('hidden'));
@@ -1589,7 +1589,7 @@ document.addEventListener('click',e=>{
 });
 
 
-/* V4.3.7 Core scroll recovery: release body lock whenever no visible modal remains. */
+/* V4.4.0 Core scroll recovery: release body lock whenever no visible modal remains. */
 function recoverPageScroll(){
  const anyVisible=[...document.querySelectorAll('.modal.show')].some(m=>getComputedStyle(m).display!=='none');
  if(!anyVisible){document.body.classList.remove('modal-open');document.documentElement.style.overflow='';document.body.style.overflow='';}
@@ -1598,5 +1598,8 @@ document.addEventListener('click',()=>setTimeout(recoverPageScroll,0));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')setTimeout(recoverPageScroll,0)});
 setInterval(recoverPageScroll,1500);
 
-// V4.3.7 ZIP filter lifecycle
+// V4.4.0 ZIP filter lifecycle
 document.addEventListener('click',e=>{const p=document.getElementById('zipColumnFilterPopover');if(p&&!p.contains(e.target)&&!e.target.closest('[data-zip-filter-col]'))closeZipColumnFilter();});
+
+// V4.4.0 shared local-processing helpers for SSIP Editor
+window.md5=md5;window.cp874Bytes=cp874Bytes;
