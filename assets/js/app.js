@@ -1540,7 +1540,7 @@ function clearAuthentication(){authState.token='';authState.user=null;localStora
 async function performLogin(){const username=document.getElementById('loginUsername').value.trim(),password=document.getElementById('loginPassword').value,btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='กำลังเข้าสู่ระบบ...';try{const data=await apiRequest('login',{username,password});authState.token=data.sessionToken;localStorage.setItem('ssopSessionToken',authState.token);applyAuthentication(data.user);document.getElementById('loginPassword').value='';}catch(err){document.getElementById('loginMessage').textContent=err.message}finally{btn.disabled=false;btn.textContent='เข้าสู่ระบบ'}}
 function applyRoleUi(){
  const viewer=isViewer();document.body.classList.toggle('role-viewer',viewer);
- // VIEWER ห้ามแก้ฐานทะเบียน แต่ใช้ SSO Editor แบบ Local Processing ได้
+ // VIEWER ห้ามแก้ฐานทะเบียน แต่ใช้ SSOP Editor แบบ Local Processing ได้
  ['importExcelBtn','openZipReaderBtn','openReplyImportBtn','addCaseBtn','registryKnowledgeBtn'].forEach(id=>document.getElementById(id)?.classList.toggle('hidden',viewer));
  document.getElementById('openCancerEditorBtn')?.classList.remove('hidden');
  document.querySelectorAll('[data-module="knowledge"]').forEach(el=>el.classList.remove('hidden'));
@@ -1601,5 +1601,5 @@ setInterval(recoverPageScroll,1500);
 // V4.3.7 ZIP filter lifecycle
 document.addEventListener('click',e=>{const p=document.getElementById('zipColumnFilterPopover');if(p&&!p.contains(e.target)&&!e.target.closest('[data-zip-filter-col]'))closeZipColumnFilter();});
 
-// V4.4.0 SSIP navigation
+// V4.4.1 SSIP navigation
 document.getElementById('ssipBackHomeBtn')?.addEventListener('click',goHome);
