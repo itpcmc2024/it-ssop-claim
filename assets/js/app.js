@@ -88,7 +88,7 @@ function showDialog(title,message,type='info',buttons=[{text:'ตกลง',valu
 
 const fieldMeta={
  BILLTRAN:[
-  ['Station','หมายเลขเครื่องหรือจุดบริการ'],['AuthCode','รหัสอนุมัติสิทธิหรือรหัสโครงการที่ผู้ใช้ต้องตรวจสอบก่อนส่ง','SSOCAC','important'],['DTTran','วันเวลาที่เกิดธุรกรรม'],['Hcode','รหัสสถานพยาบาล 5 หลัก'],['InvNo','เลขที่ใบแจ้งหนี้ และเป็นคีย์เชื่อมโยงไฟล์อื่น'],['BillNo','เลขที่ใบเสร็จรับเงิน'],['HN','เลขประจำตัวผู้ป่วยของโรงพยาบาล'],['MemberNo','Case Number ของผู้ป่วยที่ได้รับอนุมัติในระบบ SSO Cancer Care','Case Number','important'],['Amount','จำนวนเงินรวมสุทธิ'],['Paid','จำนวนเงินที่ผู้ป่วยจ่ายจริง'],['VerCode','รหัส Protocol/รหัสตรวจสอบที่ผู้ใช้ต้องตรวจสอบให้ตรงตามประเภทการเบิก','เช่น C0113','important'],['Tflag','ประเภทการส่งข้อมูล ต้องเลือกค่าให้ถูกต้องตามรอบและประเภทการส่ง','เช่น A หรือ E ตามระบบต้นทาง','important'],['PID','เลขบัตรประชาชนผู้ป่วย'],['Name','ชื่อผู้รับบริการ'],['Hmain','รหัสสถานพยาบาลหลัก'],['PayPlan','รหัสแผนการจ่าย/สิทธิ'],['ClaimAmt','ยอดเงินที่ขอเบิก'],['OtherPay','ยอดชำระจากแหล่งอื่น'],['AdditionalField','ฟิลด์เพิ่มเติมตามรุ่นของไฟล์ต้นฉบับ']
+  ['Station','หมายเลขเครื่องหรือจุดบริการ'],['AuthCode','รหัสอนุมัติสิทธิหรือรหัสโครงการที่ผู้ใช้ต้องตรวจสอบก่อนส่ง','SSOCAC','important'],['DTTran','วันเวลาที่เกิดธุรกรรม'],['Hcode','รหัสสถานพยาบาล 5 หลัก'],['InvNo','เลขที่ใบแจ้งหนี้ และเป็นคีย์เชื่อมโยงไฟล์อื่น'],['BillNo','เลขที่ใบเสร็จรับเงิน'],['HN','เลขประจำตัวผู้ป่วยของโรงพยาบาล'],['MemberNo','Case Number ของผู้ป่วยที่ได้รับอนุมัติในระบบ SSO Cancer Care','Case Number','important'],['Amount','จำนวนเงินรวมสุทธิ'],['Paid','จำนวนเงินที่ผู้ป่วยจ่ายจริง'],['VerCode','รหัส Protocol/รหัสตรวจสอบที่ผู้ใช้ต้องตรวจสอบให้ตรงตามประเภทการเบิก','เช่น C0113','important'],['Tflag','ประเภทการส่งข้อมูล ต้องเลือกค่าให้ถูกต้องตามรอบและประเภทการส่ง','เช่น A หรือ E ตามระบบต้นทาง','important'],['PID','เลขบัตรประชาชนผู้ป่วย'],['Name','ชื่อผู้รับบริการ'],['Hmain','รหัสสถานพยาบาลหลัก ห้ามเป็นค่าว่าง','ต้องมีค่า','important'],['PayPlan','รหัสแผนการจ่าย/สิทธิ ห้ามเป็นค่าว่าง','ต้องมีค่า','important'],['ClaimAmt','ยอดเงินที่ขอเบิก'],['OtherPay','ยอดชำระจากแหล่งอื่น'],['AdditionalField','ฟิลด์เพิ่มเติมตามรุ่นของไฟล์ต้นฉบับ']
  ],
  BillItems:[
   ['InvNo','เลขที่ใบแจ้งหนี้ ต้องตรงกับ BILLTRAN'],['SvDate','วันที่ให้บริการ'],['BillMuad','รหัสหมวดค่ารักษาพยาบาล เช่น 3 หรือ 5 สำหรับยา'],['LCCode','รหัสรายการภายใน/รหัสค่าใช้จ่ายของสถานพยาบาล'],['STDCode','รหัสมาตรฐานกลางตามที่กองทุนกำหนด'],['Description','ชื่อรายการค่ารักษาพยาบาล'],['Quantity','จำนวนชิ้นหรือปริมาณที่ใช้'],['UnitPrice','ราคาต่อหน่วย'],['ChargeAmt','จำนวนเงินที่เรียกเก็บจริง'],['ClaimUP','ราคาต่อหน่วยที่ขอเบิก'],['ClaimAmount','จำนวนเงินรวมที่ขอเบิก'],['SvRefID','รหัสอ้างอิงบริการ'],['ClaimCat','รายการที่เบิกเพิ่มในโครงการ SSOCAC ต้องระบุ OPR','OPR','important']
@@ -103,7 +103,7 @@ const fieldMeta={
   ['InvNo','เลขที่ใบแจ้งหนี้'],['SvID','รหัสอ้างอิงบริการ'],['Class','ประเภทข้อมูลบริการ'],['Hcode','รหัสสถานพยาบาล'],['HN','เลขประจำตัวผู้ป่วย'],['PID','เลขบัตรประชาชน'],['CareAccount','ลำดับ/บัญชีบริการ'],['TypeServ','ประเภทบริการ'],['Clinic','คลินิก'],['SubClinic','คลินิกย่อย'],['DateField','วันที่ตามโครงสร้างต้นทาง'],['Provider','ผู้ให้บริการ'],['ProviderType','ประเภทผู้ให้บริการ'],['BegDT','วันเวลาเริ่มบริการ'],['EndDT','วันเวลาสิ้นสุดบริการ'],['LCCode','รหัสบริการภายใน'],['CodeSet','ชุดรหัส'],['STDCode','รหัสมาตรฐาน'],['ChargeAmt','ยอดค่าใช้จ่าย'],['Completion','สถานะความสมบูรณ์'],['PrdSeCode','รหัสโครงการ สำหรับ SSOCAC ต้องเป็น SSOCAC','SSOCAC','important'],['ClaimCat','หมวดการเบิก']
  ],
  OPDx:[
-  ['Class','ประเภทข้อมูลบริการ'],['SvID','รหัสอ้างอิงบริการ'],['Sequence','ลำดับวินิจฉัย'],['CodeSet','ชุดรหัสวินิจฉัย'],['DiagnosisCode','รหัสวินิจฉัย'],['VerCode','รหัส Protocol การรักษามะเร็งตามอนุมัติ เช่น C0111','C0111','important']
+  ['Class','ประเภทข้อมูลบริการ'],['SvID','รหัสอ้างอิงบริการ'],['Sequence','ลำดับวินิจฉัย'],['CodeSet','ชุดรหัสวินิจฉัย'],['DiagnosisCode','รหัสวินิจฉัย; สำหรับ Cancer ต้องพบ Z511 อย่างน้อย 1 รายการ','Z511','important'],['VerCode','รหัส Protocol การรักษามะเร็งตามอนุมัติ เช่น C0111','C0111','important']
  ]
 };
 
@@ -123,8 +123,8 @@ const cpapFieldMeta={
   ['Tflag','ประเภทการส่งข้อมูล ดึงจาก Excel/ทะเบียน และยังแก้ไขได้','A หรือ E','important'],
   ['PID','เลขบัตรประชาชน 13 หลัก ต้องตรงกับทะเบียน'],
   ['Name','ชื่อผู้รับบริการ'],
-  ['Hmain','รหัสสถานพยาบาลหลัก'],
-  ['PayPlan','รหัสแผนการจ่ายหรือสิทธิ'],
+  ['Hmain','รหัสสถานพยาบาลหลัก ห้ามเป็นค่าว่าง','ต้องมีค่า','important'],
+  ['PayPlan','รหัสแผนการจ่ายหรือสิทธิ ห้ามเป็นค่าว่าง','ต้องมีค่า','important'],
   ['ClaimAmt','ยอดเงินที่ขอเบิกรวม ต้องสัมพันธ์กับผลรวม BillItems.ClaimAmount'],
   ['OtherPay','ยอดชำระจากแหล่งอื่น'],
   ['AdditionalField','ฟิลด์เพิ่มเติมตามรุ่นของแฟ้มต้นฉบับ']
@@ -147,7 +147,7 @@ const sleepFieldMeta={
  BILLTRAN:[
   ['Station','หมายเลขลำดับสถานีในงวดส่ง ใช้จับคู่กับทะเบียนและชื่อ ZIP','เช่น 11','important'],
   ['AuthCode','รหัสโครงการสำหรับการเบิก Sleep Test','STCPAP','important'],
-  ['DTTran','วันและเวลาที่เกิดธุรกรรมหรือวันที่รับบริการ'],['Hcode','รหัสสถานพยาบาล 5 หลัก'],['InvNo','เลขที่ใบแจ้งหนี้ ใช้เชื่อมโยงทุกแฟ้ม'],['BillNo','เลขที่ใบเสร็จรับเงิน ถ้ามี'],['HN','เลข HN ต้องตรงกับทะเบียน Sleep Test'],['MemberNo','เลขสมาชิกหรือเลขอ้างอิงตามโครงสร้างแฟ้ม'],['Amount','ยอดค่าบริการรวม ต้องสัมพันธ์กับ BillItems.ChargeAmt'],['Paid','จำนวนเงินที่ผู้ป่วยชำระจริง'],['VerCode','รหัสอนุมัติหรือรหัสอ้างอิงเพิ่มเติม ถ้ามี'],['Tflag','ประเภทการส่งข้อมูล ดึงจาก Excel/ทะเบียน','A หรือ E','important'],['PID','เลขบัตรประชาชน 13 หลัก'],['Name','ชื่อผู้รับบริการ'],['Hmain','รหัสสถานพยาบาลหลัก'],['PayPlan','รหัสแผนการจ่ายหรือสิทธิ'],['ClaimAmt','ยอดเงินที่ขอเบิกรวม ต้องสัมพันธ์กับ BillItems.ClaimAmount'],['OtherPay','ยอดชำระจากแหล่งอื่น'],['AdditionalField','ฟิลด์เพิ่มเติมตามรุ่นของแฟ้มต้นฉบับ']
+  ['DTTran','วันและเวลาที่เกิดธุรกรรมหรือวันที่รับบริการ'],['Hcode','รหัสสถานพยาบาล 5 หลัก'],['InvNo','เลขที่ใบแจ้งหนี้ ใช้เชื่อมโยงทุกแฟ้ม'],['BillNo','เลขที่ใบเสร็จรับเงิน ถ้ามี'],['HN','เลข HN ต้องตรงกับทะเบียน Sleep Test'],['MemberNo','เลขสมาชิกหรือเลขอ้างอิงตามโครงสร้างแฟ้ม'],['Amount','ยอดค่าบริการรวม ต้องสัมพันธ์กับ BillItems.ChargeAmt'],['Paid','จำนวนเงินที่ผู้ป่วยชำระจริง'],['VerCode','รหัสอนุมัติหรือรหัสอ้างอิงเพิ่มเติม ถ้ามี'],['Tflag','ประเภทการส่งข้อมูล ดึงจาก Excel/ทะเบียน','A หรือ E','important'],['PID','เลขบัตรประชาชน 13 หลัก'],['Name','ชื่อผู้รับบริการ'],['Hmain','รหัสสถานพยาบาลหลัก ห้ามเป็นค่าว่าง','ต้องมีค่า','important'],['PayPlan','รหัสแผนการจ่ายหรือสิทธิ ห้ามเป็นค่าว่าง','ต้องมีค่า','important'],['ClaimAmt','ยอดเงินที่ขอเบิกรวม ต้องสัมพันธ์กับ BillItems.ClaimAmount'],['OtherPay','ยอดชำระจากแหล่งอื่น'],['AdditionalField','ฟิลด์เพิ่มเติมตามรุ่นของแฟ้มต้นฉบับ']
  ],
  BillItems:[
   ['InvNo','เลขที่ใบแจ้งหนี้ ต้องตรงกับ BILLTRAN.InvNo'],['SvDate','วันที่ให้บริการ'],['BillMuad','หมวดค่ารักษาพยาบาล'],['LCCode','รหัสรายการภายในสถานพยาบาล'],['STDCode','รหัสมาตรฐาน Sleep Test: 51120 ชนิดที่ 1, 51121 ชนิดที่ 2','51120 / 51121','important'],['Description','ชื่อรายการตรวจ Sleep Test'],['Quantity','จำนวน'],['UnitPrice','ราคาต่อหน่วย'],['ChargeAmt','ยอดเรียกเก็บจริง'],['ClaimUP','ราคาต่อหน่วยที่ขอเบิก'],['ClaimAmount','ยอดที่ขอเบิกรายการนั้น'],['SvRefID','รหัสอ้างอิงบริการ'],['ClaimCat','หาก STDCode เป็น 51120 หรือ 51121 ต้องระบุ OPF','OPF','important']
@@ -1100,7 +1100,7 @@ function zipFieldMeta(section,index){
  const base=(fieldMeta[section]||[])[index];
  if(zipIsCpap()){
   const overrides={
-   BILLTRAN:{1:['AuthCode','รหัสโครงการสำหรับ CPAP ต้องเป็น STCPAP','STCPAP','important'],11:['Tflag','ประเภทการส่งข้อมูล ดึงจากทะเบียน SSOCPAP และยังแก้ไขเองได้','A หรือ E','important']},
+   BILLTRAN:{1:['AuthCode','รหัสโครงการสำหรับ CPAP ต้องเป็น STCPAP และระบบปรับให้อัตโนมัติ','STCPAP','important'],11:['Tflag','ประเภทการส่งข้อมูล ดึงจากทะเบียน SSOCPAP และยังแก้ไขเองได้','A หรือ E','important']},
    BillItems:{4:['STDCode','รหัสมาตรฐานรายการ CPAP/หน้ากาก เช่น 3012 หรือ 3013','3012 / 3013','important'],12:['ClaimCat','เมื่อ STDCode เป็น 3012 หรือ 3013 ต้องระบุ OPF','OPF','important']},
    OPServices:{2:['Class','ประเภทบริการ CPAP ต้องเป็น ED','ED','important'],11:['SvPID','เลขใบอนุญาตประกอบวิชาชีพแพทย์ (ว.แพทย์)','ว22858','important'],20:['SvTxCode','เลขกำกับเบิก ดึงจากทะเบียน SSOCPAP','เลขกำกับเบิก','important']},
    OPDx:{0:['Class','ประเภทข้อมูลวินิจฉัย CPAP ต้องเป็น ED และตรงกับ OPServices.Class','ED','important'],4:['DiagnosisCode','รหัสวินิจฉัย สามารถเว้นว่างใน Excel แล้วกรอกหรือแก้ไขภายหลังได้','เช่น G473','important']}
@@ -1109,7 +1109,7 @@ function zipFieldMeta(section,index){
  }
  if(zipIsSleep()){
   const overrides={
-   BILLTRAN:{1:['AuthCode','รหัสโครงการสำหรับ Sleep Test ต้องเป็น STCPAP','STCPAP','important'],11:['Tflag','ประเภทการส่งข้อมูล ดึงจากทะเบียน Sleep Test','A หรือ E','important']},
+   BILLTRAN:{1:['AuthCode','รหัสโครงการสำหรับ Sleep Test ต้องเป็น STCPAP และระบบปรับให้อัตโนมัติ','STCPAP','important'],11:['Tflag','ประเภทการส่งข้อมูล ดึงจากทะเบียน Sleep Test','A หรือ E','important']},
    BillItems:{4:['STDCode','รหัสมาตรฐาน Sleep Test: 51120 ชนิดที่ 1 หรือ 51121 ชนิดที่ 2','51120 / 51121','important'],12:['ClaimCat','เมื่อ STDCode เป็น 51120 หรือ 51121 ต้องระบุ OPF','OPF','important']},
    OPServices:{2:['Class','Class ของ OPServices ต้องตรงกับ OPDx.Class โดยคงค่าจากแฟ้มต้นฉบับ','ตัวอย่าง EC','important'],20:['SvTxCode','เลขกำกับเบิก ดึงจากทะเบียน Sleep Test','เลขกำกับเบิก','important']},
    OPDx:{0:['Class','Class ของ OPDx ต้องตรงกับ OPServices.Class','ตัวอย่าง EC','important'],4:['DiagnosisCode','รหัสวินิจฉัย ดึงจาก PDx.ICD10 ในทะเบียน และยังแก้ไขเองได้','เช่น G473','important']}
@@ -1119,9 +1119,12 @@ function zipFieldMeta(section,index){
  return base;
 }
 function zipImportantCols(section){
- if(zipIsCpap())return ({BILLTRAN:[1,11],BillItems:[4,12],OPServices:[2,11,20],OPDx:[0,4]})[section]||[];
- if(zipIsSleep())return ({BILLTRAN:[1,11],BillItems:[4,12],OPServices:[2,20],OPDx:[0,4]})[section]||[];
- return (sectionInfo[section]?.importantCols)||[];
+ if(zipIsCpap())return ({BILLTRAN:[1,11,14,15],BillItems:[4,12],OPServices:[2,11,20],OPDx:[0,4]})[section]||[];
+ if(zipIsSleep())return ({BILLTRAN:[1,11,14,15],BillItems:[4,12],OPServices:[2,20],OPDx:[0,4]})[section]||[];
+ const baseCols=(sectionInfo[section]?.importantCols)||[];
+ if(section==='BILLTRAN')return [...new Set([...baseCols,1,14,15])];
+ if(section==='OPDx')return [...new Set([...baseCols,4])];
+ return baseCols;
 }
 
 function zipFilterKey(){const item=currentZipItem();return `${item?.name||''}::${zipReaderState.activeSection||''}`;}
@@ -1270,17 +1273,42 @@ async function autoFillZipFromCase(){
 
 function validateZipActive(){
  const sec=zipReaderState.sections||{},problems=[],c=zipReaderState.caseItem,moduleCode=String(c?.Module_Code||'').toUpperCase(),cpap=moduleCode==='STCPAP',sleep=moduleCode==='STSLEEP';
+ const bill=sec.BILLTRAN||[];
+ const emptyRows=(rows,idx)=>rows.map((r,i)=>({r,i})).filter(x=>!String(x.r[idx]||'').trim());
+ const badRows=(rows,idx,expected)=>rows.map((r,i)=>({r,i})).filter(x=>String(x.r[idx]||'').trim().toUpperCase()!==expected);
+ const addBillCommon=(expectedAuth)=>{
+   if(!bill.length){problems.push('ไม่พบส่วน BILLTRAN');return;}
+   const badAuth=badRows(bill,1,expectedAuth);if(badAuth.length)problems.push(`BILLTRAN.AuthCode: ต้องเป็น ${expectedAuth} จำนวน ${badAuth.length} แถว`);
+   const emptyHmain=emptyRows(bill,14);if(emptyHmain.length)problems.push(`BILLTRAN.Hmain: ห้ามเป็นค่าว่าง จำนวน ${emptyHmain.length} แถว`);
+   const emptyPayPlan=emptyRows(bill,15);if(emptyPayPlan.length)problems.push(`BILLTRAN.PayPlan: ห้ามเป็นค่าว่าง จำนวน ${emptyPayPlan.length} แถว`);
+ };
  if(cpap||sleep){
-  const bill=sec.BILLTRAN||[];if(!bill.length)problems.push('ไม่พบส่วน BILLTRAN');else{if(bill.some(r=>String(r[1]||'').trim().toUpperCase()!=='STCPAP'))problems.push('BILLTRAN: AuthCode ต้องเป็น STCPAP');if(bill.some(r=>!String(r[11]||'').trim()))problems.push('BILLTRAN: TFlag ว่าง');}
-  const targetCodes=cpap?['3012','3013']:['51120','51121'];const bi=sec.BillItems||[];const target=bi.filter(r=>targetCodes.includes(String(r[4]||'').trim()));if(!target.length)problems.push(`BillItems: ไม่พบ STDCode ${targetCodes.join(' หรือ ')}`);else if(target.some(r=>String(r[12]||'').trim().toUpperCase()!=='OPF'))problems.push(`BillItems: รายการ STDCode ${targetCodes.join('/')} ต้องมี ClaimCat = OPF`);
+  addBillCommon('STCPAP');
+  if(bill.some(r=>!String(r[11]||'').trim()))problems.push('BILLTRAN.TFlag: ห้ามเป็นค่าว่าง');
+  const targetCodes=cpap?['3012','3013']:['51120','51121'];
+  const bi=sec.BillItems||[];
+  const target=bi.filter(r=>targetCodes.includes(String(r[4]||'').trim()));
+  if(!target.length)problems.push(`BillItems: ไม่พบ STDCode ${targetCodes.join(' หรือ ')}`);
+  const badClaim=badRows(bi,12,'OPF');
+  if(badClaim.length)problems.push(`BillItems.ClaimCat: ${cpap?'CPAP':'Sleep Test'} ต้องเป็น OPF ทุกรายการ พบไม่ถูกต้อง ${badClaim.length} แถว`);
   const ops=sec.OPServices||[];if(!ops.length)problems.push('ไม่พบส่วน OPServices');else{if(cpap&&ops.some(r=>String(r[2]||'').trim().toUpperCase()!=='ED'))problems.push('OPServices: Class ต้องเป็น ED');if(cpap&&ops.some(r=>!String(r[11]||'').trim()))problems.push('OPServices: SvPID/ว.แพทย์ ว่าง');if(ops.some(r=>!String(r[20]||'').trim()))problems.push('OPServices: SvTxCode/เลขกำกับเบิก ว่าง');}
   const dx=sec.OPDx||[];if(!dx.length)problems.push('ไม่พบส่วน OPDx');else if(cpap&&dx.some(r=>String(r[0]||'').trim().toUpperCase()!=='ED'))problems.push('OPDx: Class ต้องเป็น ED');
   if(sleep&&ops.length&&dx.length){const opClasses=[...new Set(ops.map(r=>String(r[2]||'').trim().toUpperCase()).filter(Boolean))];const dxClasses=[...new Set(dx.map(r=>String(r[0]||'').trim().toUpperCase()).filter(Boolean))];if(!opClasses.length)problems.push('OPServices: Class ว่าง');if(!dxClasses.length)problems.push('OPDx: Class ว่าง');if(opClasses.length&&dxClasses.length&&opClasses.some(x=>!dxClasses.includes(x)))problems.push('Sleep Test: OPServices.Class ต้องตรงกับ OPDx.Class');}
-  updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':`ตรวจสอบ ${cpap?'CPAP':'Sleep Test'} เรียบร้อย`,problems.length?problems.join('\n'):`ผ่านกฎสำคัญของ ${cpap?'SSOCPAP':'Sleep Test'} ระบบจะสร้าง Checksum ใหม่ให้ทุกไฟล์ที่แก้ไข และทุกฟิลด์ยังสามารถแก้ไขเองได้ก่อนสร้าง ZIP`,problems.length?'warning':'success');return;
+  updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':`ตรวจสอบ ${cpap?'CPAP':'Sleep Test'} เรียบร้อย`,problems.length?problems.join('\n'):`ผ่านกฎสำคัญของ ${cpap?'SSOCPAP':'Sleep Test'}: AuthCode = STCPAP, Hmain/PayPlan มีค่า และ BillItems.ClaimCat = OPF`,problems.length?'warning':'success');return;
  }
- const bill=sec.BILLTRAN||[];if(bill.some(r=>!(r[7]||'').trim()))problems.push('BILLTRAN: MemberNo/Case Number ว่าง');const terms=chemoDrugTerms(),chemoLabel=zipReaderState.caseItem?.Chemo_Drug||'';if(terms.length){const bi=sec.BillItems||[],matchedBi=bi.filter(r=>rowMatchesChemo(r,[3,4,5],terms)),badBi=matchedBi.filter(r=>(r[12]||'').trim().toUpperCase()!=='OPR');if(badBi.length)problems.push(`BillItems: รายการยา “${chemoLabel}” ที่ตรงกับทะเบียน ยังไม่ได้ระบุ ClaimCat = OPR จำนวน ${badBi.length} แถว`);const di=sec.DispensedItems||[],matchedDi=di.filter(r=>rowMatchesChemo(r,[2,3,5],terms)),badDi=matchedDi.filter(r=>(r[16]||'').trim().toUpperCase()!=='OPR');if(badDi.length)problems.push(`DispensedItems: รายการยา “${chemoLabel}” ที่ตรงกับทะเบียน ยังไม่ได้ระบุ ClaimCat = OPR จำนวน ${badDi.length} แถว`)}const ops=sec.OPServices||[];if(ops.some(r=>!r.some(v=>String(v||'').trim().toUpperCase()==='SSOCAC')))problems.push('OPServices: ไม่พบ SSOCAC ครบทุกแถว');const dx=sec.OPDx||[];if(dx.some(r=>!r.some(v=>/^C\d{4}$/i.test(String(v||'').trim()))))problems.push('OPDx: ไม่พบ Protocol C#### ครบทุกแถว');updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':'ตรวจสอบเรียบร้อย',problems.length?problems.join('\n'):'ข้อมูลตรงกับทะเบียนผู้ป่วย และไม่พบข้อผิดพลาดตามกฎ SSOCAC ที่ตั้งไว้ ระบบจะสร้าง Checksum ใหม่ให้ทุกไฟล์ที่แก้ไข',problems.length?'warning':'success')
+ // Cancer / SSOCAC
+ addBillCommon('SSOCAC');
+ if(bill.some(r=>!(r[7]||'').trim()))problems.push('BILLTRAN.MemberNo/Case Number: ห้ามเป็นค่าว่าง');
+ const bi=sec.BillItems||[];
+ const badCancerClaim=badRows(bi,12,'OPR');if(badCancerClaim.length)problems.push(`BillItems.ClaimCat: Cancer ต้องเป็น OPR ทุกรายการ พบไม่ถูกต้อง ${badCancerClaim.length} แถว`);
+ const terms=chemoDrugTerms(),chemoLabel=zipReaderState.caseItem?.Chemo_Drug||'';
+ if(terms.length){const matchedDi=(sec.DispensedItems||[]).filter(r=>rowMatchesChemo(r,[2,3,5],terms)),badDi=matchedDi.filter(r=>(r[16]||'').trim().toUpperCase()!=='OPR');if(badDi.length)problems.push(`DispensedItems: รายการยา “${chemoLabel}” ที่ตรงกับทะเบียน ยังไม่ได้ระบุ ClaimCat = OPR จำนวน ${badDi.length} แถว`)}
+ const ops=sec.OPServices||[];if(ops.some(r=>!r.some(v=>String(v||'').trim().toUpperCase()==='SSOCAC')))problems.push('OPServices: ไม่พบ SSOCAC ครบทุกแถว');
+ const dx=sec.OPDx||[];
+ if(dx.some(r=>!r.some(v=>/^C\d{4}$/i.test(String(v||'').trim()))))problems.push('OPDx: ไม่พบ Protocol C#### ครบทุกแถว');
+ const hasZ511=dx.some(r=>String(r[4]||'').trim().toUpperCase()==='Z511');if(!hasZ511)problems.push('OPDx.DiagnosisCode: Cancer ต้องมีรหัส Z511 อย่างน้อย 1 รายการ');
+ updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':'ตรวจสอบเรียบร้อย',problems.length?problems.join('\n'):'ข้อมูลผ่านกฎสำคัญ Cancer: AuthCode = SSOCAC, Hmain/PayPlan มีค่า, BillItems.ClaimCat = OPR และพบ Z511 ใน OPDx',problems.length?'warning':'success')
 }
-
 async function undoZipEntry(){
  const item=currentZipItem();if(!item)return;
  item.text=item.originalText;item.sections=parseZipSsopSections(item.originalText||'');item.modified=false;item.saved=false;item.savedText=null;item.autoChangedCells={};item.changeStats={cells:0,added:0,deleted:0};
@@ -1601,5 +1629,6 @@ setInterval(recoverPageScroll,1500);
 // V4.3.7 ZIP filter lifecycle
 document.addEventListener('click',e=>{const p=document.getElementById('zipColumnFilterPopover');if(p&&!p.contains(e.target)&&!e.target.closest('[data-zip-filter-col]'))closeZipColumnFilter();});
 
+// V4.4.6 Cross-module validation rules
 // V4.4.5 SSIP navigation
 document.getElementById('ssipBackHomeBtn')?.addEventListener('click',goHome);
