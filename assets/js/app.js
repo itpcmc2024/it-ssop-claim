@@ -11,26 +11,27 @@ let currentRegistryModule='SSOCAC';
 let registryLoadToken=0;
 function isViewer(){return String(authState.user?.Role||'').toUpperCase()==='VIEWER';}
 function canWrite(){return !isViewer();}
-const MODULE_ACCESS_MAP={cancer:'SSOCAC',main:'MAIN',cross:'CROSS',cpap:'STCPAP',sleep:'STSLEEP',editor:'EDITOR',knowledge:'KNOWLEDGE',admin:'ADMIN'};
+const MODULE_ACCESS_MAP={cancer:'SSOCAC',main:'MAIN',cross:'CROSS',cpap:'STCPAP',sleep:'STSLEEP',editor:'EDITOR',aipncipn:'SSIP',knowledge:'KNOWLEDGE',admin:'ADMIN'};
 const KNOWLEDGE_MODULES=['MAIN','CROSS','SSOCAC','STCPAP','STSLEEP','SSIP'];
 function canonicalKnowledgeModule(v){const x=String(v||'').trim().toUpperCase();const aliases={CANCER:'SSOCAC','CANCER CARE':'SSOCAC',CPAP:'STCPAP','SLEEP TEST':'STSLEEP','SLEEPTEST':'STSLEEP',AIPN:'SSIP',CIPN:'SSIP','SSIP EDITOR':'SSIP'};return KNOWLEDGE_MODULES.includes(x)?x:(aliases[x]||'SSOCAC');}
-function knowledgeModuleLabel(v){return ({MAIN:'Main',CROSS:'Cross',SSOCAC:'Cancer',STCPAP:'CPAP',STSLEEP:'Sleep Test',SSIP:'SSIP / AIPN-CIPN'})[canonicalKnowledgeModule(v)]||v;}
+function knowledgeModuleLabel(v){return ({MAIN:'Main',CROSS:'Cross',SSOCAC:'Cancer',STCPAP:'CPAP',STSLEEP:'Sleep Test',SSIP:'SSIP'})[canonicalKnowledgeModule(v)]||v;}
 function allowedModuleSet(){
  const role=String(authState.user?.Role||'').toUpperCase();
  if(role==='ADMIN')return new Set(['ALL']);
  const raw=String(authState.user?.Allowed_Modules||'').trim().toUpperCase();
  const set=new Set(raw.split(/[;,|\s]+/).map(v=>v.trim()).filter(Boolean));
  set.add('EDITOR');
+ set.add('SSIP');
  return set;
 }
 function hasModuleAccess(name){
  const code=MODULE_ACCESS_MAP[String(name||'').toLowerCase()]||String(name||'').toUpperCase();
- if(code==='EDITOR')return true;
+ if(code==='EDITOR'||code==='SSIP')return true;
  if(code==='ADMIN')return String(authState.user?.Role||'').toUpperCase()==='ADMIN';
  const set=allowedModuleSet();
  return set.has('ALL')||set.has(code);
 }
-function moduleAccessLabel(name){const labels={cancer:'Cancer Care (SSOCAC)',main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test',editor:'SSOP Editor',knowledge:'SSOP Knowledge Center',aipncipn:'เครื่องมือแก้ไขไฟล์ AIPN/CIPN',admin:'จัดการระบบ'};return labels[name]||name;}
+function moduleAccessLabel(name){const labels={cancer:'Cancer Care (SSOCAC)',main:'ประกันสังคม Main',cross:'ประกันสังคมข้ามเขต',cpap:'ประกันสังคม CPAP',sleep:'ประกันสังคม Sleep Test',editor:'SSOP Editor',knowledge:'SSO Knowledge Center',aipncipn:'SSIP Editor',admin:'จัดการระบบ'};return labels[name]||name;}
 window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),700);initializeAuthentication();setTimeout(()=>{const p=new URLSearchParams(location.search);if(p.get('page')==='knowledge'){showPage('knowledgePage');const module=p.get('module')||'ALL',q=p.get('q')||'';const input=document.getElementById('knowledgeSearchInput');const sel=document.getElementById('knowledgeModuleFilter');if(input)input.value=q;if(sel&&[...sel.options].some(o=>o.value===module))sel.value=module;loadKnowledge(q,module);}},350);});
 const aboutModal=document.getElementById('aboutModal');
 document.querySelectorAll('[data-open-about]').forEach(btn=>btn.addEventListener('click',()=>{aboutModal.classList.add('show');aboutModal.setAttribute('aria-hidden','false')}));
@@ -1576,7 +1577,7 @@ function bindAuthEvents(){
   document.getElementById('userModalClose')?.addEventListener('click',closeUserModal);
   document.getElementById('userModalCancel')?.addEventListener('click',closeUserModal);
 document.getElementById('userModulesAllBtn')?.addEventListener('click',()=>setUserModuleSelection('ALL'));
-document.getElementById('userModulesClearBtn')?.addEventListener('click',()=>setUserModuleSelection('EDITOR'));
+document.getElementById('userModulesClearBtn')?.addEventListener('click',()=>setUserModuleSelection('EDITOR,SSIP'));
   document.getElementById('userSaveBtn')?.addEventListener('click',saveSystemUser);
   document.getElementById('reloadConfigBtn')?.addEventListener('click',loadSystemConfig);
 }
@@ -1602,19 +1603,19 @@ function setUserModuleSelection(value){
  const all=raw==='ALL';
  const selected=new Set(raw.split(/[;,|\s]+/).map(v=>v.trim()).filter(Boolean));
  document.querySelectorAll('#userModules input[type=checkbox]').forEach(cb=>{
-   if(cb.value==='EDITOR'){cb.checked=true;return;}
+   if(cb.value==='EDITOR'||cb.value==='SSIP'){cb.checked=true;return;}
    cb.checked=all||selected.has(cb.value);
  });
 }
 function getUserModuleSelection(){
- const selected=[...document.querySelectorAll('#userModules input[type=checkbox]:checked')].map(cb=>cb.value).filter(v=>v!=='EDITOR');
- const allCodes=['SSOCAC','MAIN','CROSS','STCPAP','STSLEEP','KNOWLEDGE'];
+ const selected=[...document.querySelectorAll('#userModules input[type=checkbox]:checked')].map(cb=>cb.value).filter(v=>v!=='EDITOR'&&v!=='SSIP');
+ const allCodes=['MAIN','CROSS','SSOCAC','STCPAP','STSLEEP','KNOWLEDGE'];
  if(allCodes.every(code=>selected.includes(code)))return 'ALL';
- return ['EDITOR',...selected].join(',');
+ return ['EDITOR','SSIP',...selected].join(',');
 }
 function refreshModuleCardsForUser(){
  document.querySelectorAll('.module-card[data-module]').forEach(card=>{
-   const allowed=card.dataset.module==='aipncipn'||hasModuleAccess(card.dataset.module);
+   const allowed=hasModuleAccess(card.dataset.module);
    card.classList.toggle('module-no-access',!allowed);
    card.setAttribute('aria-disabled',allowed?'false':'true');
    card.title=allowed?'':`ไม่มีสิทธิ์ใช้งาน ${moduleAccessLabel(card.dataset.module)}`;
@@ -1646,6 +1647,6 @@ setInterval(recoverPageScroll,1500);
 // V4.3.7 ZIP filter lifecycle
 document.addEventListener('click',e=>{const p=document.getElementById('zipColumnFilterPopover');if(p&&!p.contains(e.target)&&!e.target.closest('[data-zip-filter-col]'))closeZipColumnFilter();});
 
-// V4.4.9 Cross-module validation rules
+// V4.5.0 Cross-module validation rules
 // V4.4.5 SSIP navigation
 document.getElementById('ssipBackHomeBtn')?.addEventListener('click',goHome);
