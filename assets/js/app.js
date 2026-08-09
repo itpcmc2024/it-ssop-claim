@@ -197,10 +197,19 @@ fileInput.addEventListener('change',e=>e.target.files[0]&&loadUniversalEditorInp
 ['dragleave','drop'].forEach(x=>dropZone.addEventListener(x,e=>{e.preventDefault();dropZone.style.background=''}));
 dropZone.addEventListener('drop',e=>e.dataTransfer.files[0]&&loadUniversalEditorInput(e.dataTransfer.files[0]));
 
+function isRecognizedSsopText(text){
+ const s=String(text||'');
+ const hasClaim=/<ClaimRec\b/i.test(s);
+ const recognized=/<(BILLTRAN|BillItems|Dispensing|DispensedItems|OPServices|OPDx)>[\s\S]*?<\/\1>/i.test(s);
+ const looksXmlIpd=/<\/?(AIPN|CIPN)\b/i.test(s);
+ return hasClaim&&recognized&&!looksXmlIpd;
+}
 async function loadFile(file){
  try{
+  if(!/\.(txt|bil|rep)$/i.test(file?.name||''))throw new Error('SSOP Editor รองรับเฉพาะแฟ้มข้อความ SSOP (.txt/.BIL/.REP) หรือ ZIP SSOP');
   const bytes=new Uint8Array(await file.arrayBuffer());
   const text=new TextDecoder('windows-874').decode(bytes).replace(/\u0000/g,'');
+  if(!isRecognizedSsopText(text))throw new Error('ไฟล์นี้ไม่เข้าโครงสร้าง SSOP (BILLTRAN / BillItems / BILLDISP / OPServices) กรุณาเลือกไฟล์ที่ถูกต้อง');
   state.file=file;state.fileName=file.name;state.originalText=text;state.doc=parseDocument(text);state.originalDoc=JSON.parse(JSON.stringify(state.doc));
   state.activeSection=Object.keys(state.doc.sections)[0]||'';state.selected.clear();
   document.getElementById('fileName').textContent=file.name;
@@ -1061,6 +1070,13 @@ async function handleZipFile(file){if(!file)return;if(!window.JSZip){toast('เ�
  for(const e of rawEntries){let logicalSections=[],text='';try{const buf=await e.async('arraybuffer');text=decodeSsopBuffer(buf);const parsed=parseZipSsopSections(text);logicalSections=Object.keys(parsed);logicalSections.forEach(x=>logicalPresent.add(x));verifyItems.push({name:e.name,text,sections:parsed});}catch(_e){}
   entries.push({name:e.name,size:e._data?.uncompressedSize||0,type:classifySsopFile(e.name),logicalSections,entry:e,text:text||null,originalText:text||null,sections:text?parseZipSsopSections(text):null,modified:false,saved:false,savedText:null,plainDelimiter:null,plainHasHeader:false,autoChangedCells:{},changeStats:{cells:0,added:0,deleted:0}});
  }
+ const requiredSsop=['BILLTRAN','BillItems','OPServices'];
+ const missingCore=requiredSsop.filter(x=>!logicalPresent.has(x));
+ const hasBillDisp=logicalPresent.has('Dispensing')||logicalPresent.has('DispensedItems');
+ if(missingCore.length||!hasBillDisp){
+  const miss=[...missingCore];if(!hasBillDisp)miss.push('BILLDISP (Dispensing/DispensedItems)');
+  throw new Error('ZIP นี้ไม่เข้าโครงสร้าง SSOP ที่รองรับ · ไม่พบ '+miss.join(', '));
+ }
  const verified=verifyZipAgainstSelectedCase(verifyItems,file.name);
  if(!verified.ok){throw new Error('ZIP ไม่ตรงกับแถวผู้ป่วยที่เลือก\n'+verified.mismatch.join('\n'));}
  chooseStep?.classList.add('hidden');workspace?.classList.remove('hidden');
@@ -1289,25 +1305,26 @@ function validateZipActive(){
   const bi=sec.BillItems||[];
   const target=bi.filter(r=>targetCodes.includes(String(r[4]||'').trim()));
   if(!target.length)problems.push(`BillItems: ไม่พบ STDCode ${targetCodes.join(' หรือ ')}`);
-  const badClaim=badRows(bi,12,'OPF');
-  if(badClaim.length)problems.push(`BillItems.ClaimCat: ${cpap?'CPAP':'Sleep Test'} ต้องเป็น OPF ทุกรายการ พบไม่ถูกต้อง ${badClaim.length} แถว`);
+  const badClaim=target.map(r=>({r,i:bi.indexOf(r)})).filter(x=>String(x.r[12]||'').trim().toUpperCase()!=='OPF');
+  if(badClaim.length)problems.push(`BillItems.ClaimCat: เฉพาะรายการ STDCode ${targetCodes.join('/')} ต้องเป็น OPF พบไม่ถูกต้อง ${badClaim.length} แถว`);
   const ops=sec.OPServices||[];if(!ops.length)problems.push('ไม่พบส่วน OPServices');else{if(cpap&&ops.some(r=>String(r[2]||'').trim().toUpperCase()!=='ED'))problems.push('OPServices: Class ต้องเป็น ED');if(cpap&&ops.some(r=>!String(r[11]||'').trim()))problems.push('OPServices: SvPID/ว.แพทย์ ว่าง');if(ops.some(r=>!String(r[20]||'').trim()))problems.push('OPServices: SvTxCode/เลขกำกับเบิก ว่าง');}
   const dx=sec.OPDx||[];if(!dx.length)problems.push('ไม่พบส่วน OPDx');else if(cpap&&dx.some(r=>String(r[0]||'').trim().toUpperCase()!=='ED'))problems.push('OPDx: Class ต้องเป็น ED');
   if(sleep&&ops.length&&dx.length){const opClasses=[...new Set(ops.map(r=>String(r[2]||'').trim().toUpperCase()).filter(Boolean))];const dxClasses=[...new Set(dx.map(r=>String(r[0]||'').trim().toUpperCase()).filter(Boolean))];if(!opClasses.length)problems.push('OPServices: Class ว่าง');if(!dxClasses.length)problems.push('OPDx: Class ว่าง');if(opClasses.length&&dxClasses.length&&opClasses.some(x=>!dxClasses.includes(x)))problems.push('Sleep Test: OPServices.Class ต้องตรงกับ OPDx.Class');}
-  updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':`ตรวจสอบ ${cpap?'CPAP':'Sleep Test'} เรียบร้อย`,problems.length?problems.join('\n'):`ผ่านกฎสำคัญของ ${cpap?'SSOCPAP':'Sleep Test'}: AuthCode = STCPAP, Hmain/PayPlan มีค่า และ BillItems.ClaimCat = OPF`,problems.length?'warning':'success');return;
+  updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':`ตรวจสอบ ${cpap?'CPAP':'Sleep Test'} เรียบร้อย`,problems.length?problems.join('\n'):`ผ่านกฎสำคัญของ ${cpap?'SSOCPAP':'Sleep Test'}: AuthCode = STCPAP, Hmain/PayPlan มีค่า และ ClaimCat = OPF เฉพาะรายการสิทธิที่กำหนด`,problems.length?'warning':'success');return;
  }
  // Cancer / SSOCAC
  addBillCommon('SSOCAC');
  if(bill.some(r=>!(r[7]||'').trim()))problems.push('BILLTRAN.MemberNo/Case Number: ห้ามเป็นค่าว่าง');
  const bi=sec.BillItems||[];
- const badCancerClaim=badRows(bi,12,'OPR');if(badCancerClaim.length)problems.push(`BillItems.ClaimCat: Cancer ต้องเป็น OPR ทุกรายการ พบไม่ถูกต้อง ${badCancerClaim.length} แถว`);
+ // Cancer: ไม่บังคับ ClaimCat = OPR ทุก BillItems.
+ // ให้ตรวจ/ปรับ OPR เฉพาะรายการที่เข้าเงื่อนไขรายการมะเร็งที่ระบบจับคู่ได้เท่านั้น.
  const terms=chemoDrugTerms(),chemoLabel=zipReaderState.caseItem?.Chemo_Drug||'';
  if(terms.length){const matchedDi=(sec.DispensedItems||[]).filter(r=>rowMatchesChemo(r,[2,3,5],terms)),badDi=matchedDi.filter(r=>(r[16]||'').trim().toUpperCase()!=='OPR');if(badDi.length)problems.push(`DispensedItems: รายการยา “${chemoLabel}” ที่ตรงกับทะเบียน ยังไม่ได้ระบุ ClaimCat = OPR จำนวน ${badDi.length} แถว`)}
  const ops=sec.OPServices||[];if(ops.some(r=>!r.some(v=>String(v||'').trim().toUpperCase()==='SSOCAC')))problems.push('OPServices: ไม่พบ SSOCAC ครบทุกแถว');
  const dx=sec.OPDx||[];
  if(dx.some(r=>!r.some(v=>/^C\d{4}$/i.test(String(v||'').trim()))))problems.push('OPDx: ไม่พบ Protocol C#### ครบทุกแถว');
  const hasZ511=dx.some(r=>String(r[4]||'').trim().toUpperCase()==='Z511');if(!hasZ511)problems.push('OPDx.DiagnosisCode: Cancer ต้องมีรหัส Z511 อย่างน้อย 1 รายการ');
- updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':'ตรวจสอบเรียบร้อย',problems.length?problems.join('\n'):'ข้อมูลผ่านกฎสำคัญ Cancer: AuthCode = SSOCAC, Hmain/PayPlan มีค่า, BillItems.ClaimCat = OPR และพบ Z511 ใน OPDx',problems.length?'warning':'success')
+ updateZipEditStatus(problems.length?`พบ ${problems.length} จุด`:'ตรวจผ่าน');showDialog(problems.length?'พบข้อมูลที่ต้องตรวจสอบ':'ตรวจสอบเรียบร้อย',problems.length?problems.join('\n'):'ข้อมูลผ่านกฎสำคัญ Cancer: AuthCode = SSOCAC, Hmain/PayPlan มีค่า และพบ Z511 ใน OPDx (ไม่บังคับ OPR ทุก BillItems)',problems.length?'warning':'success')
 }
 async function undoZipEntry(){
  const item=currentZipItem();if(!item)return;
@@ -1629,6 +1646,6 @@ setInterval(recoverPageScroll,1500);
 // V4.3.7 ZIP filter lifecycle
 document.addEventListener('click',e=>{const p=document.getElementById('zipColumnFilterPopover');if(p&&!p.contains(e.target)&&!e.target.closest('[data-zip-filter-col]'))closeZipColumnFilter();});
 
-// V4.4.6 Cross-module validation rules
+// V4.4.7 Cross-module validation rules
 // V4.4.5 SSIP navigation
 document.getElementById('ssipBackHomeBtn')?.addEventListener('click',goHome);
