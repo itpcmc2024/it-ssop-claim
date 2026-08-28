@@ -1,6 +1,6 @@
 /*
 ======================================================
-SSOP Toolkit Professional Edition V4.3.7
+PCMC-SSO Toolkit Professional Edition V4.5.2
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -162,7 +162,7 @@ const sleepFieldMeta={
   ['Class','ต้องตรงกับ OPServices.Class','เช่น EC','important'],['SvID','รหัสอ้างอิงบริการ ต้องพบใน OPServices.SvID'],['Sequence','ลำดับการวินิจฉัย'],['CodeSet','ชุดรหัสวินิจฉัย เช่น IT'],['DiagnosisCode','รหัสวินิจฉัย ดึงจาก PDx.ICD10 และแก้ไขได้','เช่น G473','important'],['VerCode','รหัสเพิ่มเติมตามโครงสร้างแฟ้ม ถ้ามี']
  ]
 };
-function selectedGuideModule(){const editor=document.getElementById('cancerPage')?.classList.contains('active');return editor?String(document.getElementById('replyModule')?.value||'SSOCAC').toUpperCase():String(currentRegistryModule||'SSOCAC').toUpperCase();}
+function selectedGuideModule(){const editor=document.getElementById('cancerPage')?.classList.contains('active');return editor?String(document.getElementById('editorModule')?.value||'SSOCAC').toUpperCase():String(currentRegistryModule||'SSOCAC').toUpperCase();}
 function activeGuideMeta(){const m=selectedGuideModule();return m==='STCPAP'?cpapFieldMeta:m==='STSLEEP'?sleepFieldMeta:fieldMeta;}
 
 const CPAP_ANNOUNCEMENT_URL='assets/docs/CHI67-A03.pdf';
@@ -286,7 +286,7 @@ function bindTooltips(){
  });
  function positionTip(e){const pad=14,w=380;let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-pad)x=e.clientX-w-14;if(y+180>innerHeight-pad)y=e.clientY-180;tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px'}
 }
-function activeEditorRuleModule(){return String(document.getElementById('replyModule')?.value||'SSOCAC').trim().toUpperCase();}
+function activeEditorRuleModule(){return String(document.getElementById('editorModule')?.value||'SSOCAC').trim().toUpperCase();}
 function editorRuleProfileLabel(module){return ({MAIN:'Main',CROSS:'Cross',SSOCAC:'Cancer Care',STCPAP:'CPAP',STSLEEP:'Sleep Test'})[String(module||'').toUpperCase()]||'SSOP';}
 function editorMetaForModule(module){return module==='STCPAP'?cpapFieldMeta:module==='STSLEEP'?sleepFieldMeta:fieldMeta;}
 function fieldIndexFor_(meta,section,name){return (meta?.[section]||[]).findIndex(x=>String(x?.[0]||'').toUpperCase()===String(name||'').toUpperCase());}
@@ -339,10 +339,24 @@ function renderDictionary(){
  const metaSource=activeGuideMeta();
  document.getElementById('dictionaryBody').innerHTML=order.map(sec=>{const rows=metaSource[sec]||[];return `<div class="dict-section"><h3>${escapeHtml(sec)}</h3><table class="dict-table"><thead><tr><th style="width:50px">ลำดับ</th><th style="width:180px">ชื่อฟิลด์</th><th>ความหมาย</th><th style="width:250px">เงื่อนไข/ตัวอย่าง</th></tr></thead><tbody>${rows.map((m,i)=>`<tr><td>${i+1}</td><td class="${m[3]==='important'?'dict-important':''}">${escapeHtml(m[0])}${m[3]==='important'?' ★':''}</td><td>${escapeHtml(m[1]||'')}</td><td>${escapeHtml(String(m[2]||'-'))}</td></tr>`).join('')}</tbody></table></div>`}).join('');
 }
-const dictionaryModal=document.getElementById('dictionaryModal');const openDictionary=()=>{const gm=selectedGuideModule(),cpap=gm==='STCPAP',sleep=gm==='STSLEEP';const title=dictionaryModal.querySelector('.modal-head strong');const meta=dictionaryModal.querySelector('.modal-head .meta');if(title)title.textContent=cpap?'📖 คู่มือฟิลด์ CPAP':sleep?'📖 คู่มือฟิลด์ Sleep Test':'📖 คู่มือฟิลด์ Cancer';if(meta)meta.textContent=cpap?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับการเบิกเครื่อง CPAP/หน้ากาก':sleep?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับ Sleep Test ชนิดที่ 1 และ 2':'คำอธิบายฟิลด์ เงื่อนไข และตัวอย่างสำหรับ Cancer';dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');renderDictionary();};document.getElementById('dictionaryBtn').onclick=openDictionary;
+const dictionaryModal=document.getElementById('dictionaryModal');const openDictionary=()=>{const gm=selectedGuideModule(),cpap=gm==='STCPAP',sleep=gm==='STSLEEP';const title=dictionaryModal.querySelector('.modal-head strong');const meta=dictionaryModal.querySelector('.modal-head .meta');if(title)title.textContent=cpap?'📖 คู่มือฟิลด์ CPAP':sleep?'📖 คู่มือฟิลด์ Sleep Test':gm==='SSOCAC'?'📖 คู่มือฟิลด์ Cancer':'📖 คู่มือฟิลด์ SSOP';if(meta)meta.textContent=cpap?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับการเบิกเครื่อง CPAP/หน้ากาก':sleep?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับ Sleep Test ชนิดที่ 1 และ 2':gm==='SSOCAC'?'คำอธิบายฟิลด์ เงื่อนไข และตัวอย่างสำหรับ Cancer':'คำอธิบายฟิลด์ SSOP พื้นฐานสำหรับ Main / Cross';dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');renderDictionary();};document.getElementById('dictionaryBtn').onclick=openDictionary;
 const replyModuleSelect=document.getElementById('replyModule');
-function syncEditorModuleUi(){const v=String(replyModuleSelect?.value||'SSOCAC').toUpperCase();const btn=document.getElementById('dictionaryBtn');if(btn){btn.dataset.guideModule=v;const labels={SSOCAC:'Cancer',STCPAP:'CPAP',STSLEEP:'Sleep Test',MAIN:'Main',CROSS:'Cross'};btn.textContent='📖 คู่มือฟิลด์ '+(labels[v]||'SSOP');}}
-replyModuleSelect?.addEventListener('change',()=>{syncEditorModuleUi();if(state.doc){renderSectionNote();renderTable();const problems=validateEditorModuleRules();renderHealthDashboard(problems);setStatus('เปลี่ยน Rule Profile เป็น '+editorRuleProfileLabel(activeEditorRuleModule()),'ok');}});syncEditorModuleUi();document.getElementById('registryDictionaryBtn')?.addEventListener('click',openDictionary);document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
+const editorModuleSelect=document.getElementById('editorModule');
+const EDITOR_RULE_SUMMARIES={
+ MAIN:{title:'กฎตรวจสอบ SSOP — Main',items:[['โครงสร้าง SSOP','ตรวจ Section และจำนวนคอลัมน์ให้สอดคล้องกัน'],['ความสัมพันธ์แฟ้ม','ตรวจ InvNo / PID / HN และโครงสร้างอ้างอิงพื้นฐาน โดยไม่ใช้กฎเฉพาะโครงการ'],['Local Processing','แก้ไขและส่งออกกลับเครื่องผู้ใช้เท่านั้น']]},
+ CROSS:{title:'กฎตรวจสอบ SSOP — Cross',items:[['โครงสร้าง SSOP','ตรวจ Section และจำนวนคอลัมน์ให้สอดคล้องกัน'],['ความสัมพันธ์แฟ้ม','ใช้กฎ SSOP พื้นฐานของงานข้ามเขต โดยไม่ใช้ Cancer/CPAP/Sleep Test'],['Local Processing','แก้ไขและส่งออกกลับเครื่องผู้ใช้เท่านั้น']]},
+ SSOCAC:{title:'กฎตรวจสอบ SSOP — Cancer Care',items:[['BILLTRAN.AuthCode','ต้องเป็น SSOCAC'],['BILLTRAN.Hmain / PayPlan','ต้องมีค่า'],['OPDx.DiagnosisCode','ต้องพบ Z511 อย่างน้อย 1 รายการ'],['ClaimCat = OPR','ตรวจเฉพาะรายการมะเร็งที่เข้าเงื่อนไข ไม่บังคับทุก BillItems']]},
+ STCPAP:{title:'กฎตรวจสอบ SSOP — CPAP',items:[['BILLTRAN.AuthCode','ต้องเป็น STCPAP'],['STDCode 3012 / 3013','เฉพาะรายการเป้าหมายต้อง ClaimCat = OPF'],['เพดานราคา','3012 ≤ 20,000 และ 3013 ≤ 4,000'],['OPServices','ตรวจ SvTxCode, SvPID และ Class = ED']]},
+ STSLEEP:{title:'กฎตรวจสอบ SSOP — Sleep Test',items:[['BILLTRAN.AuthCode','ต้องเป็น STCPAP'],['STDCode 51120 / 51121','เฉพาะรายการเป้าหมายต้อง ClaimCat = OPF'],['เพดานราคา','51120 ≤ 7,000 และ 51121 ≤ 6,000'],['Class Relation','ตรวจ OPDx.Class ให้สัมพันธ์กับ OPServices.Class']]}
+};
+function syncEditorModuleUi(){
+ const v=String(editorModuleSelect?.value||'SSOCAC').toUpperCase(),profile=EDITOR_RULE_SUMMARIES[v]||EDITOR_RULE_SUMMARIES.SSOCAC;
+ const btn=document.getElementById('dictionaryBtn');if(btn){btn.dataset.guideModule=v;const labels={SSOCAC:'Cancer',STCPAP:'CPAP',STSLEEP:'Sleep Test',MAIN:'SSOP Main',CROSS:'SSOP Cross'};btn.textContent='📖 คู่มือฟิลด์ '+(labels[v]||'SSOP');}
+ const status=document.getElementById('editorProfileStatus');if(status)status.textContent=editorRuleProfileLabel(v);
+ const title=document.getElementById('editorRuleTitle');if(title)title.textContent=profile.title;
+ const grid=document.getElementById('editorRuleGrid');if(grid)grid.innerHTML=profile.items.map(x=>`<div class="rule-item"><div class="rule-icon">!</div><div><strong>${escapeHtml(x[0])}</strong><small>${escapeHtml(x[1])}</small></div></div>`).join('');
+}
+editorModuleSelect?.addEventListener('change',()=>{syncEditorModuleUi();if(state.doc){renderSectionNote();renderTable();const problems=validateEditorModuleRules();renderHealthDashboard(problems);setStatus('เปลี่ยน Rule Profile เป็น '+editorRuleProfileLabel(activeEditorRuleModule()),'ok');}});syncEditorModuleUi();document.getElementById('registryDictionaryBtn')?.addEventListener('click',openDictionary);document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
 function md5(bytes){
  function cmn(q,a,b,x,s,t){return (((a+q+x+t)|0)<<s|((a+q+x+t)|0)>>>32-s)+b|0}function ff(a,b,c,d,x,s,t){return cmn((b&c)|(~b&d),a,b,x,s,t)}function gg(a,b,c,d,x,s,t){return cmn((b&d)|(c&~d),a,b,x,s,t)}function hh(a,b,c,d,x,s,t){return cmn(b^c^d,a,b,x,s,t)}function ii(a,b,c,d,x,s,t){return cmn(c^(b|~d),a,b,x,s,t)}
  const len=bytes.length,bit=len*8,n=((len+8>>6)+1)*16,w=new Int32Array(n);for(let i=0;i<len;i++)w[i>>2]|=bytes[i]<<((i%4)*8);w[len>>2]|=0x80<<((len%4)*8);w[n-2]=bit;
@@ -641,7 +655,7 @@ document.getElementById('exportKnowledgeBtn')?.addEventListener('click',exportRe
    Cancer Care Registry V3.2.0
 ====================================================== */
 const registryState={items:[],filtered:[],page:1,pageSize:20,selected:null,errorKnowledge:new Map(),activeErrorCode:'',highlightCaseId:''};
-/* Core Stability V4.3.7: date-only values never pass through UTC. */
+/* Core Stability V4.5.2: date-only values never pass through UTC. */
 const DateEngine={
  parts(value){
   if(value===null||value===undefined||value==='')return null;
@@ -777,9 +791,9 @@ function clearRegistryCache(moduleCode){
  const key=String(moduleCode||'').toUpperCase();registryModuleCache.delete(key);try{sessionStorage.removeItem('ssopRegistryCache:'+key);}catch(_e){}
 }
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'SSOP Toolkit · Cancer Care Registry Version 4.3.7'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'SSOP Toolkit · SSOCPAP Registry Version 4.3.7'},
- STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'SSOP Toolkit · Sleep Test Registry Version 4.3.7'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'PCMC-SSO Toolkit · Cancer Care Registry Version 4.5.2'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'PCMC-SSO Toolkit · SSOCPAP Registry Version 4.5.2'},
+ STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'PCMC-SSO Toolkit · Sleep Test Registry Version 4.5.2'}
 };
 function openRegistryModule(moduleCode){
  currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();registryState.items=[];registryState.filtered=[];registryState.page=1;applyRegistryModuleUi();showPage('registryPage');
@@ -1008,14 +1022,19 @@ document.getElementById('registryReloadBtn')?.addEventListener('click',()=>{clea
 
 
 /* ZIP Reader V3.2.1 — แยกข้อมูลเป็นคอลัมน์ตามโครงสร้าง SSOP */
-const zipReaderState={zip:null,file:null,entries:[],selected:null,rows:[],headers:[],sections:{},activeSection:'',caseItem:null,dirty:false,rowSelections:{},columnFilters:{},filterPopover:null,saving:false};
+const zipReaderState={zip:null,file:null,entries:[],selected:null,rows:[],headers:[],sections:{},activeSection:'',caseItem:null,moduleCode:'SSOCAC',profileLocked:true,dirty:false,rowSelections:{},columnFilters:{},filterPopover:null,saving:false};
 function openZipReader(caseId=''){
  zipReaderState.caseItem=caseId?registryState.items.find(x=>x.Case_ID===caseId)||null:null;
- const label=document.getElementById('zipReaderCaseText');
- const moduleCode=String(zipReaderState.caseItem?.Module_Code||'').toUpperCase();
- const title=document.getElementById('zipReaderTitle');if(title){const names={SSOCAC:'Cancer Care',STCPAP:'SSOCPAP',STSLEEP:'Sleep Test'};title.textContent=`🗜️ ZIP Reader — ${names[moduleCode]||'SSOP'}`;}
- const validateBtn=document.getElementById('zipValidateBtn');if(validateBtn)validateBtn.textContent='✓ ตรวจสอบข้อมูล';
- label.textContent=zipReaderState.caseItem?`${zipReaderState.caseItem.Case_ID} · HN ${zipReaderState.caseItem.HN||'-'} · VN ${zipReaderState.caseItem.VN||'-'} · ${zipReaderState.caseItem.Patient_Name||''} · Session ${zipReaderState.caseItem.Session||'-'} : Station ${zipReaderState.caseItem.Station||'-'}`:'โหมดแก้ไข ZIP อิสระ · แก้ไข บันทึกไฟล์ สร้าง MD5 และ ZIP กลับชื่อเดิมได้ โดยไม่เชื่อมข้อมูลทะเบียน';
+ const registryContext=document.getElementById('registryPage')?.classList.contains('active');
+ zipReaderState.moduleCode=String(zipReaderState.caseItem?.Module_Code||(registryContext?currentRegistryModule:'SSOCAC')||'SSOCAC').toUpperCase();
+ zipReaderState.profileLocked=Boolean(zipReaderState.caseItem||registryContext);
+ const label=document.getElementById('zipReaderCaseText'),moduleCode=zipReaderState.moduleCode;
+ const names={SSOCAC:'Cancer Care',STCPAP:'CPAP',STSLEEP:'Sleep Test',MAIN:'Main',CROSS:'Cross'};
+ const title=document.getElementById('zipReaderTitle');if(title)title.textContent=`🛠️ SSOP Editor — ${names[moduleCode]||'SSOP'}`;
+ const profileLabel=document.getElementById('zipProfileLabel');if(profileLabel)profileLabel.textContent=names[moduleCode]||'SSOP';
+ const profileLock=document.getElementById('zipProfileLock');if(profileLock)profileLock.textContent=zipReaderState.caseItem?'🔒 กำหนดจากทะเบียนผู้ป่วย':'🔒 กำหนดจากโมดูลทะเบียน';
+ const validateBtn=document.getElementById('zipValidateBtn');if(validateBtn)validateBtn.textContent=`✓ ตรวจ ${names[moduleCode]||'SSOP'}`;
+ label.textContent=zipReaderState.caseItem?`${zipReaderState.caseItem.Case_ID} · HN ${zipReaderState.caseItem.HN||'-'} · VN ${zipReaderState.caseItem.VN||'-'} · ${zipReaderState.caseItem.Patient_Name||''} · Session ${zipReaderState.caseItem.Session||'-'} : Station ${zipReaderState.caseItem.Station||'-'}`:`โหมด SSOP Editor ของ ${names[moduleCode]||'SSOP'} · เลือก ZIP ได้โดยไม่ผูกผู้ป่วย และ Rule Profile ถูกล็อกจากโมดูลทะเบียน`;
  resetZipReader();
  const autoBtn=document.getElementById('zipAutoFillBtn');if(autoBtn)autoBtn.classList.toggle('hidden',!zipReaderState.caseItem);
  const m=document.getElementById('zipReaderModal');m.classList.add('show');m.setAttribute('aria-hidden','false');
@@ -1322,7 +1341,7 @@ async function autoFillZipFromCase(){
 }
 
 function validateZipActive(){
- const sec=zipReaderState.sections||{},problems=[],c=zipReaderState.caseItem,moduleCode=String(c?.Module_Code||'').toUpperCase(),cpap=moduleCode==='STCPAP',sleep=moduleCode==='STSLEEP';
+ const sec=zipReaderState.sections||{},problems=[],c=zipReaderState.caseItem,moduleCode=String(zipReaderState.moduleCode||c?.Module_Code||'SSOCAC').toUpperCase(),cpap=moduleCode==='STCPAP',sleep=moduleCode==='STSLEEP';
  const bill=sec.BILLTRAN||[];
  const emptyRows=(rows,idx)=>rows.map((r,i)=>({r,i})).filter(x=>!String(x.r[idx]||'').trim());
  const badRows=(rows,idx,expected)=>rows.map((r,i)=>({r,i})).filter(x=>String(x.r[idx]||'').trim().toUpperCase()!==expected);
@@ -1391,7 +1410,7 @@ async function downloadEditedZip(){
 
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);let zipSearchTimer=null;document.getElementById('zipTableSearch')?.addEventListener('input',()=>{clearTimeout(zipSearchTimer);zipSearchTimer=setTimeout(renderZipPreview,120)});document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
-/* Excel Import V4.3.7 */
+/* Excel Import V4.5.2 */
 const excelImportState={file:null,rows:[],duplicates:{},fileName:'',sheetName:''};
 const EXCEL_HEADERS_CANCER=['วันที่มารับบริการ','HN','vn','เลขบัตรประชาชน','ชื่อ-นามสกุล','สิทธิการรักษา','ยา Chemo','Case No.','Protocal','TFlag','Session','Station','JobNo'];
 const EXCEL_HEADERS_CPAP=['วันที่รับบริการ','บัตรประชาชน','HN','VN','ชื่อ-นามสกุล','สิทธิ','เลขกำกับเบิก','ว.แพทย์','รหัสวินิจฉัย','tflag','session','station','JobNo'];
@@ -1668,7 +1687,7 @@ document.addEventListener('click',e=>{
 });
 
 
-/* V4.3.7 Core scroll recovery: release body lock whenever no visible modal remains. */
+/* V4.5.2 Core scroll recovery: release body lock whenever no visible modal remains. */
 function recoverPageScroll(){
  const anyVisible=[...document.querySelectorAll('.modal.show')].some(m=>getComputedStyle(m).display!=='none');
  if(!anyVisible){document.body.classList.remove('modal-open');document.documentElement.style.overflow='';document.body.style.overflow='';}
@@ -1677,7 +1696,7 @@ document.addEventListener('click',()=>setTimeout(recoverPageScroll,0));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')setTimeout(recoverPageScroll,0)});
 setInterval(recoverPageScroll,1500);
 
-// V4.3.7 ZIP filter lifecycle
+// V4.5.2 ZIP filter lifecycle
 document.addEventListener('click',e=>{const p=document.getElementById('zipColumnFilterPopover');if(p&&!p.contains(e.target)&&!e.target.closest('[data-zip-filter-col]'))closeZipColumnFilter();});
 
 // V4.5.0 Cross-module validation rules

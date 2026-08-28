@@ -575,3 +575,11 @@ body.modal-open{overflow:hidden}
 .zip-filter-actions{display:flex;justify-content:flex-end;gap:7px;border-top:1px solid #e3eeeb;padding-top:8px}
 .module-card[data-module="aipncipn"]{border-style:dashed}
 @media(max-width:760px){.error-work-queue{max-height:296px!important}.zip-column-filter-popover{width:min(92vw,300px)}}
+
+
+/* V4.5.2 SSOP Editor Rule Profile UX */
+.editor-profile-card{border:1px solid #cfe8e1;background:linear-gradient(135deg,#f8fffd,#f7fbff)}
+.editor-profile-row{align-items:flex-end;gap:16px}.editor-profile-field{min-width:220px}.editor-profile-field select{font-weight:700}
+.editor-profile-status{padding:10px 14px;border-radius:999px;background:#e4f5ef;border:1px solid #bfe3d7;font-weight:800;white-space:nowrap}
+.zip-profile-context{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin-bottom:12px;border:1px solid #cfe8e1;border-radius:12px;background:#f6fcfa}.zip-profile-context>div{display:flex;gap:10px;align-items:center}.profile-lock{font-size:12px;padding:6px 10px;border-radius:999px;background:#edf4ff;color:#35516e;font-weight:700}
+@media(max-width:760px){.editor-profile-row{align-items:stretch;flex-direction:column}.editor-profile-field{min-width:0}.editor-profile-status{align-self:flex-start}.zip-profile-context{align-items:flex-start;flex-direction:column}}

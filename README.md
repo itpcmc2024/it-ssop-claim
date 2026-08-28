@@ -204,3 +204,10 @@
 
 ### CPAP Excel JobNo
 ไฟล์นำเข้า CPAP ต้องมีหัวคอลัมน์ `JobNo` ซึ่งระบบจะบันทึกเป็น `Work_Order_No` ในชีต `Case_SSOCPAP`.
+
+
+## V4.5.2 — SSOP Editor Module Context Hotfix
+- SSOP Editor มี Rule Profile แยก Main / Cross / Cancer Care / CPAP / Sleep Test โดยไม่ใช้ selector ของไฟล์ตอบกลับ
+- ปุ่มทะเบียน “เปิด SSOP Editor” และ “แก้ไข ZIP” ล็อก Rule Profile ตามโมดูลทะเบียนอัตโนมัติ
+- เปลี่ยนชื่อระบบที่แสดงผลเป็น PCMC-SSO Toolkit
+- Production API URL คงค่าปัจจุบัน
