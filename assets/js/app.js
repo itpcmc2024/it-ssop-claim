@@ -227,12 +227,13 @@ function parseDocument(text){
  const claimOpen=(text.match(/<ClaimRec[^>]*>/)||['<ClaimRec System="OP" PayPlan="SS" Version="0.93" Prgs="HX">'])[0];
  return {lineEnding,claimOpen,header,sections};
 }
-function renderAll(){renderHeader();renderTabs();renderSectionNote();renderTable();validateSSOCAC();renderHealthDashboard([]);}
+function renderAll(){renderHeader();renderTabs();renderSectionNote();renderTable();validateEditorModuleRules();renderHealthDashboard([]);}
 function renderHeader(){const g=document.getElementById('headerGrid');g.innerHTML='';Object.entries(state.doc.header).forEach(([k,v])=>{const d=document.createElement('div');d.className='field';d.innerHTML=`<label>${k}</label><input data-header="${k}" value="${escapeAttr(v)}">`;g.appendChild(d)});g.querySelectorAll('input').forEach(i=>i.addEventListener('input',e=>{state.doc.header[e.target.dataset.header]=e.target.value;markChanged();updateChecksum()}));}
 function renderTabs(){const t=document.getElementById('tabs');t.innerHTML='';Object.keys(state.doc.sections).forEach(s=>{const b=document.createElement('button');b.className='tab '+(s===state.activeSection?'active':'');b.textContent=`${s} (${state.doc.sections[s].length})`;b.onclick=()=>{state.activeSection=s;state.selected.clear();renderTabs();renderSectionNote();renderTable()};t.appendChild(b)});}
 function renderSectionNote(){
  const info=sectionInfo[state.activeSection]||{title:state.activeSection,desc:'',format:'',important:[],importantCols:[]};
- const important=info.important.length?`<div><b>จุดเน้นสำคัญสำหรับ SSOCAC:</b> ${info.important.map(x=>`<span class="important-text">${escapeHtml(x)}</span>`).join(' • ')}</div>`:'';
+ const moduleLabel=editorRuleProfileLabel(activeEditorRuleModule());
+ const important=info.important.length?`<div><b>จุดเน้นสำคัญ (${escapeHtml(moduleLabel)}):</b> ${info.important.map(x=>`<span class="important-text">${escapeHtml(x)}</span>`).join(' • ')}</div>`:'';
  document.getElementById('sectionNote').innerHTML=`<div><strong>${escapeHtml(info.title)}</strong>${info.desc?' — '+escapeHtml(info.desc):''}</div>${important}`;
 }
 function renderTable(){
@@ -253,10 +254,10 @@ function buildText(){
  ['HCODE','HNAME','DATETIME','SESSNO','RECCOUNT'].forEach(k=>s+=`<${k}>${h[k]??''}</${k}>${le}`);s+=`</Header>${le}`;
  Object.entries(state.doc.sections).forEach(([name,rows])=>{s+=`<${name}>${le}`+rows.map(r=>r.join('|')).join(le)+le+`</${name}>${le}`});s+=`</ClaimRec>${le}`;return s;
 }
-function cp874Bytes(str){const dec=new TextDecoder('windows-874');const map=new Map();for(let i=0;i<256;i++){const ch=dec.decode(Uint8Array.of(i));if(ch&&ch!==' ')map.set(ch,i)}const out=[];for(const ch of str){if(map.has(ch))out.push(map.get(ch));else if(ch.charCodeAt(0)<128)out.push(ch.charCodeAt(0));else out.push(63)}return new Uint8Array(out)}
+function cp874Bytes(str){const dec=new TextDecoder('windows-874');const map=new Map();for(let i=0;i<256;i++){const ch=dec.decode(Uint8Array.of(i));if(ch&&ch!=='�')map.set(ch,i)}const out=[];for(const ch of str){if(map.has(ch))out.push(map.get(ch));else if(ch.charCodeAt(0)<128)out.push(ch.charCodeAt(0));else out.push(63)}return new Uint8Array(out)}
 function updateChecksum(){if(!state.doc)return;const bytes=cp874Bytes(buildText());document.getElementById('checksumPreview').value=md5(bytes);}
 function downloadFile(){const base=buildText(),sum=md5(cp874Bytes(base)),full=base+`<?EndNote Checksum="${sum}"?>`+state.doc.lineEnding,blob=new Blob([cp874Bytes(full)],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=document.getElementById('outputName').value||state.fileName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);setStatus('ดาวน์โหลดไฟล์เรียบร้อย','ok');toast('ดาวน์โหลดสำเร็จ',a.download+' ถูกสร้างเรียบร้อย','success')}
-function validate(){const problems=[];const ruleProblems=validateSSOCAC();Object.entries(state.doc.sections).forEach(([sec,rows])=>{if(!rows.length)problems.push(`${sec}: ไม่มีข้อมูล`);const n=rows[0]?.length||0;rows.forEach((r,i)=>{if(r.length!==n)problems.push(`${sec} แถว ${i+1}: จำนวนคอลัมน์ ${r.length} ไม่เท่ากับแถวแรก ${n}`)})});problems.push(...ruleProblems);renderHealthDashboard(problems);if(problems.length){setStatus(`พบ ${problems.length} จุด กรุณาตรวจสอบ`,'warn');showDialog('พบข้อมูลที่ต้องตรวจสอบ',problems.slice(0,30).map((x,i)=>`${i+1}. ${x}`).join('\n'),'warning')}else{setStatus('โครงสร้างข้อมูลปกติ พร้อมดาวน์โหลด','ok');showDialog('ตรวจสอบเรียบร้อย','ไม่พบข้อผิดพลาดตามกฎที่ตั้งไว้\nChecksum จะถูกสร้างใหม่อัตโนมัติ','success')}}
+function validate(){const problems=[];const ruleProblems=validateEditorModuleRules();Object.entries(state.doc.sections).forEach(([sec,rows])=>{if(!rows.length)problems.push(`${sec}: ไม่มีข้อมูล`);const n=rows[0]?.length||0;rows.forEach((r,i)=>{if(r.length!==n)problems.push(`${sec} แถว ${i+1}: จำนวนคอลัมน์ ${r.length} ไม่เท่ากับแถวแรก ${n}`)})});problems.push(...ruleProblems);renderHealthDashboard(problems);if(problems.length){setStatus(`พบ ${problems.length} จุด กรุณาตรวจสอบ`,'warn');showDialog('พบข้อมูลที่ต้องตรวจสอบ',problems.slice(0,30).map((x,i)=>`${i+1}. ${x}`).join('\n'),'warning')}else{setStatus('โครงสร้างข้อมูลปกติ พร้อมดาวน์โหลด','ok');showDialog('ตรวจสอบเรียบร้อย','ไม่พบข้อผิดพลาดตามกฎที่ตั้งไว้\nChecksum จะถูกสร้างใหม่อัตโนมัติ','success')}}
 function renderHealthDashboard(problems=[]){const box=document.getElementById('healthDashboard');if(!box)return;const sections=Object.keys(state.doc?.sections||{});const checksum=document.getElementById('checksumPreview').value;const cards=[{t:'ไฟล์ที่โหลด',v:state.fileName||'-',c:'info'},{t:'ส่วนข้อมูล',v:`${sections.length} ส่วน`,c:'info'},{t:'ผลตรวจสอบ',v:problems.length?`พบ ${problems.length} จุด`:'ผ่าน',c:problems.length?'bad':'good'},{t:'Checksum',v:checksum?'พร้อมสร้าง':'รอข้อมูล',c:checksum?'good':'info'}];box.innerHTML=cards.map(x=>`<div class="health-card ${x.c}"><div class="health-title">${escapeHtml(x.t)}</div><div class="health-value">${escapeHtml(x.v)}</div></div>`).join('')}
 function markChanged(){setStatus('มีข้อมูลถูกแก้ไข','warn')}function setStatus(t,c=''){const b=document.getElementById('statusBox');b.textContent=t;b.className='status '+c}
 function escapeHtml(s){return String(s).replace(/[&<>]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[x]))}function escapeAttr(s){return escapeHtml(s).replace(/"/g,'&quot;')}
@@ -285,20 +286,52 @@ function bindTooltips(){
  });
  function positionTip(e){const pad=14,w=380;let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-pad)x=e.clientX-w-14;if(y+180>innerHeight-pad)y=e.clientY-180;tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px'}
 }
-function validateSSOCAC(){
- const p=[],results=[];
+function activeEditorRuleModule(){return String(document.getElementById('replyModule')?.value||'SSOCAC').trim().toUpperCase();}
+function editorRuleProfileLabel(module){return ({MAIN:'Main',CROSS:'Cross',SSOCAC:'Cancer Care',STCPAP:'CPAP',STSLEEP:'Sleep Test'})[String(module||'').toUpperCase()]||'SSOP';}
+function editorMetaForModule(module){return module==='STCPAP'?cpapFieldMeta:module==='STSLEEP'?sleepFieldMeta:fieldMeta;}
+function fieldIndexFor_(meta,section,name){return (meta?.[section]||[]).findIndex(x=>String(x?.[0]||'').toUpperCase()===String(name||'').toUpperCase());}
+function cell_(row,idx){return idx>=0?String(row?.[idx]??'').trim():'';}
+function num_(v){const n=Number(String(v??'').replace(/,/g,'').trim());return Number.isFinite(n)?n:0;}
+function validateEditorModuleRules(){
+ const module=activeEditorRuleModule(),meta=editorMetaForModule(module),p=[],results=[];
  const add=(ok,title,detail)=>results.push({ok,title,detail});
- const bill=state.doc.sections.BILLTRAN||[];
- if(bill.length){const missing=bill.filter(r=>!(r[7]||'').trim()).length;add(!missing,'BILLTRAN · MemberNo',missing?`ว่าง ${missing} แถว — ต้องใส่ Case Number`:'พบ Case Number ครบทุกแถว');if(missing)p.push(`BILLTRAN: MemberNo ว่าง ${missing} แถว`)}
- const bi=state.doc.sections.BillItems||[];
- if(bi.length){const bad=bi.filter(r=>{const muad=(r[2]||'').trim();return ['3','5'].includes(muad)&&(r[12]||'').trim().toUpperCase()!=='OPR'}).length;add(!bad,'BillItems · ClaimCat',bad?`พบหมวด 3/5 ที่ ClaimCat ไม่ใช่ OPR จำนวน ${bad} แถว`:'หมวด 3/5 ระบุ OPR ครบ');if(bad)p.push(`BillItems: หมวด 3/5 ที่ ClaimCat ไม่ใช่ OPR ${bad} แถว`)}
- const di=state.doc.sections.DispensedItems||[];
- if(di.length){const idx=(fieldMeta.DispensedItems||[]).findIndex(x=>x[0]==='ClaimCat');const bad=di.filter(r=>(r[idx]||'').trim().toUpperCase()!=='OPR').length;add(!bad,'DispensedItems · ClaimCat',bad?`ClaimCat ไม่ใช่ OPR จำนวน ${bad} แถว`:'ระบุ OPR ครบทุกแถว');if(bad)p.push(`DispensedItems: ClaimCat ไม่ใช่ OPR ${bad} แถว`)}
- const ops=state.doc.sections.OPServices||[];
- if(ops.length){const has=ops.every(r=>r.some(v=>(v||'').trim().toUpperCase()==='SSOCAC'));add(has,'OPServices · PrdSeCode',has?'พบค่า SSOCAC ในทุกแถว':'ยังไม่พบค่า SSOCAC ครบทุกแถว กรุณาตรวจตำแหน่ง PrdSeCode');if(!has)p.push('OPServices: ยังไม่พบค่า SSOCAC ครบทุกแถว')}
- const opdx=state.doc.sections.OPDx||[];
- if(opdx.length){const has=opdx.every(r=>r.some(v=>/^C\d{4}$/i.test((v||'').trim())));add(has,'OPDx · VerCode',has?'พบ Protocol Code รูปแบบ C#### ครบทุกแถว':'ยังไม่พบ Protocol Code รูปแบบ C#### ครบทุกแถว');if(!has)p.push('OPDx: ยังไม่พบ VerCode/Protocol Code รูปแบบ C#### ครบทุกแถว')}
- const box=document.getElementById('ruleResults');box.innerHTML=results.map(x=>`<div class="validation-item ${x.ok?'good':'bad'}"><b>${x.ok?'✓':'✕'} ${escapeHtml(x.title)}</b> — ${escapeHtml(x.detail)}</div>`).join('');
+ const bill=state.doc?.sections?.BILLTRAN||[],bi=state.doc?.sections?.BillItems||[],ops=state.doc?.sections?.OPServices||[],opdx=state.doc?.sections?.OPDx||[];
+ const bAuth=fieldIndexFor_(meta,'BILLTRAN','AuthCode'),bHmain=fieldIndexFor_(meta,'BILLTRAN','Hmain'),bPay=fieldIndexFor_(meta,'BILLTRAN','PayPlan'),bMember=fieldIndexFor_(meta,'BILLTRAN','MemberNo');
+ const biStd=fieldIndexFor_(meta,'BillItems','STDCode'),biCat=fieldIndexFor_(meta,'BillItems','ClaimCat'),biCharge=fieldIndexFor_(meta,'BillItems','ChargeAmt');
+ const opsClass=fieldIndexFor_(meta,'OPServices','Class'),opsSvPid=fieldIndexFor_(meta,'OPServices','SvPID'),opsSvTx=fieldIndexFor_(meta,'OPServices','SvTxCode');
+ const dxClass=fieldIndexFor_(meta,'OPDx','Class'),dxCode=fieldIndexFor_(meta,'OPDx','DiagnosisCode');
+ const requiredNonBlank=(rows,idx,title)=>{if(idx<0||!rows.length)return;const missing=rows.filter(r=>!cell_(r,idx)).length;add(!missing,title,missing?`ว่าง ${missing} แถว`:'พบข้อมูลครบ');if(missing)p.push(`${title}: ว่าง ${missing} แถว`)};
+ if(module==='MAIN'||module==='CROSS'){
+   add(true,'Rule Profile',`${editorRuleProfileLabel(module)} — ตรวจโครงสร้าง SSOP พื้นฐาน จำนวนคอลัมน์ และความสมบูรณ์ของ Section โดยไม่ใช้กฎ Cancer/CPAP/Sleep Test`);
+ } else {
+   const expectedAuth=module==='SSOCAC'?'SSOCAC':'STCPAP';
+   if(bAuth>=0&&bill.length){const bad=bill.filter(r=>cell_(r,bAuth).toUpperCase()!==expectedAuth).length;add(!bad,'BILLTRAN · AuthCode',bad?`พบ ${bad} แถวที่ไม่ใช่ ${expectedAuth}`:`ถูกต้อง ${expectedAuth} ทุกแถว`);if(bad)p.push(`BILLTRAN: AuthCode ต้องเป็น ${expectedAuth} (${bad} แถว)`)}
+   requiredNonBlank(bill,bHmain,'BILLTRAN · Hmain');
+   requiredNonBlank(bill,bPay,'BILLTRAN · PayPlan');
+ }
+ if(module==='SSOCAC'){
+   requiredNonBlank(bill,bMember,'BILLTRAN · MemberNo');
+   if(dxCode>=0&&opdx.length){const found=opdx.some(r=>cell_(r,dxCode).toUpperCase()==='Z511');add(found,'OPDx · DiagnosisCode',found?'พบ Z511 อย่างน้อย 1 รายการ':'ไม่พบ Z511');if(!found)p.push('OPDx: Cancer Care ต้องมี DiagnosisCode Z511 อย่างน้อย 1 รายการ')}
+   add(true,'BillItems · ClaimCat','ไม่บังคับ OPR ทุกแถว — ให้กำหนด OPR เฉพาะรายการที่เข้าเงื่อนไขมะเร็งจริง');
+ }
+ if(module==='STCPAP'){
+   const targets={'3012':20000,'3013':4000};let catBad=0,rateBad=0,found=0;
+   bi.forEach(r=>{const code=cell_(r,biStd);if(!(code in targets))return;found++;if(cell_(r,biCat).toUpperCase()!=='OPF')catBad++;if(biCharge>=0&&num_(cell_(r,biCharge))>targets[code])rateBad++;});
+   add(!catBad,'BillItems · ClaimCat',catBad?`3012/3013 ที่ ClaimCat ไม่ใช่ OPF ${catBad} แถว`:`รายการ 3012/3013 ใช้ OPF ถูกต้อง${found?'':' (ยังไม่พบรายการ)'}`);if(catBad)p.push(`BillItems: 3012/3013 ต้องเป็น OPF (${catBad} แถว)`);
+   add(!rateBad,'BillItems · อัตรา CPAP',rateBad?`พบราคาสูงกว่าเพดาน 3012=20,000 หรือ 3013=4,000 จำนวน ${rateBad} แถว`:'ไม่พบรายการเกินเพดาน');if(rateBad)p.push(`BillItems: พบราคา CPAP/หน้ากากเกินเพดาน ${rateBad} แถว`);
+   requiredNonBlank(ops,opsSvTx,'OPServices · SvTxCode');requiredNonBlank(ops,opsSvPid,'OPServices · SvPID');
+   if(opsClass>=0&&ops.length){const bad=ops.filter(r=>cell_(r,opsClass).toUpperCase()!=='ED').length;add(!bad,'OPServices · Class',bad?`ไม่ใช่ ED ${bad} แถว`:'เป็น ED ทุกแถว');if(bad)p.push(`OPServices: Class ต้องเป็น ED (${bad} แถว)`)}
+   if(dxClass>=0&&opdx.length){const bad=opdx.filter(r=>cell_(r,dxClass).toUpperCase()!=='ED').length;add(!bad,'OPDx · Class',bad?`ไม่ใช่ ED ${bad} แถว`:'เป็น ED ทุกแถว');if(bad)p.push(`OPDx: Class ต้องเป็น ED (${bad} แถว)`)}
+ }
+ if(module==='STSLEEP'){
+   const targets={'51120':7000,'51121':6000};let catBad=0,rateBad=0,found=0;
+   bi.forEach(r=>{const code=cell_(r,biStd);if(!(code in targets))return;found++;if(cell_(r,biCat).toUpperCase()!=='OPF')catBad++;if(biCharge>=0&&num_(cell_(r,biCharge))>targets[code])rateBad++;});
+   add(!catBad,'BillItems · ClaimCat',catBad?`51120/51121 ที่ ClaimCat ไม่ใช่ OPF ${catBad} แถว`:`รายการ 51120/51121 ใช้ OPF ถูกต้อง${found?'':' (ยังไม่พบรายการ)'}`);if(catBad)p.push(`BillItems: 51120/51121 ต้องเป็น OPF (${catBad} แถว)`);
+   add(!rateBad,'BillItems · อัตรา Sleep Test',rateBad?`พบราคาสูงกว่าเพดาน 51120=7,000 หรือ 51121=6,000 จำนวน ${rateBad} แถว`:'ไม่พบรายการเกินเพดาน');if(rateBad)p.push(`BillItems: พบราคา Sleep Test เกินเพดาน ${rateBad} แถว`);
+   requiredNonBlank(ops,opsSvTx,'OPServices · SvTxCode');
+   if(opsClass>=0&&dxClass>=0&&ops.length&&opdx.length){const opClasses=new Set(ops.map(r=>cell_(r,opsClass).toUpperCase()).filter(Boolean));const bad=opdx.filter(r=>{const c=cell_(r,dxClass).toUpperCase();return c&&!opClasses.has(c)}).length;add(!bad,'OPDx ↔ OPServices · Class',bad?`Class ไม่สัมพันธ์กัน ${bad} แถว`:'Class สัมพันธ์กัน');if(bad)p.push(`Sleep Test: OPDx.Class ไม่ตรงกับ OPServices.Class ${bad} แถว`)}
+ }
+ const box=document.getElementById('ruleResults');if(box)box.innerHTML=`<div class="validation-profile"><b>Rule Profile: ${escapeHtml(editorRuleProfileLabel(module))}</b></div>`+results.map(x=>`<div class="validation-item ${x.ok?'good':'bad'}"><b>${x.ok?'✓':'✕'} ${escapeHtml(x.title)}</b> — ${escapeHtml(x.detail)}</div>`).join('');
  return p;
 }
 function renderDictionary(){
@@ -309,7 +342,7 @@ function renderDictionary(){
 const dictionaryModal=document.getElementById('dictionaryModal');const openDictionary=()=>{const gm=selectedGuideModule(),cpap=gm==='STCPAP',sleep=gm==='STSLEEP';const title=dictionaryModal.querySelector('.modal-head strong');const meta=dictionaryModal.querySelector('.modal-head .meta');if(title)title.textContent=cpap?'📖 คู่มือฟิลด์ CPAP':sleep?'📖 คู่มือฟิลด์ Sleep Test':'📖 คู่มือฟิลด์ Cancer';if(meta)meta.textContent=cpap?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับการเบิกเครื่อง CPAP/หน้ากาก':sleep?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับ Sleep Test ชนิดที่ 1 และ 2':'คำอธิบายฟิลด์ เงื่อนไข และตัวอย่างสำหรับ Cancer';dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');renderDictionary();};document.getElementById('dictionaryBtn').onclick=openDictionary;
 const replyModuleSelect=document.getElementById('replyModule');
 function syncEditorModuleUi(){const v=String(replyModuleSelect?.value||'SSOCAC').toUpperCase();const btn=document.getElementById('dictionaryBtn');if(btn){btn.dataset.guideModule=v;const labels={SSOCAC:'Cancer',STCPAP:'CPAP',STSLEEP:'Sleep Test',MAIN:'Main',CROSS:'Cross'};btn.textContent='📖 คู่มือฟิลด์ '+(labels[v]||'SSOP');}}
-replyModuleSelect?.addEventListener('change',syncEditorModuleUi);syncEditorModuleUi();document.getElementById('registryDictionaryBtn')?.addEventListener('click',openDictionary);document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
+replyModuleSelect?.addEventListener('change',()=>{syncEditorModuleUi();if(state.doc){renderSectionNote();renderTable();const problems=validateEditorModuleRules();renderHealthDashboard(problems);setStatus('เปลี่ยน Rule Profile เป็น '+editorRuleProfileLabel(activeEditorRuleModule()),'ok');}});syncEditorModuleUi();document.getElementById('registryDictionaryBtn')?.addEventListener('click',openDictionary);document.getElementById('dictionaryClose').onclick=()=>{dictionaryModal.classList.remove('show');dictionaryModal.setAttribute('aria-hidden','true')};dictionaryModal.onclick=e=>{if(e.target===dictionaryModal)document.getElementById('dictionaryClose').click()};document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dictionaryClose').click()});
 function md5(bytes){
  function cmn(q,a,b,x,s,t){return (((a+q+x+t)|0)<<s|((a+q+x+t)|0)>>>32-s)+b|0}function ff(a,b,c,d,x,s,t){return cmn((b&c)|(~b&d),a,b,x,s,t)}function gg(a,b,c,d,x,s,t){return cmn((b&d)|(c&~d),a,b,x,s,t)}function hh(a,b,c,d,x,s,t){return cmn(b^c^d,a,b,x,s,t)}function ii(a,b,c,d,x,s,t){return cmn(c^(b|~d),a,b,x,s,t)}
  const len=bytes.length,bit=len*8,n=((len+8>>6)+1)*16,w=new Int32Array(n);for(let i=0;i<len;i++)w[i>>2]|=bytes[i]<<((i%4)*8);w[len>>2]|=0x80<<((len%4)*8);w[n-2]=bit;

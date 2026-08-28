@@ -1,4 +1,4 @@
-# Pattern Excel สำหรับ V4.2.8
+# Pattern Excel สำหรับ V4.3.0
 
 ## TAB CPAP
 วันที่รับบริการ | บัตรประชาชน | HN | VN | ชื่อ-นามสกุล | สิทธิ | เลขกำกับเบิก | ว.แพทย์ | รหัสวินิจฉัย | tflag | session | station | JobNo
