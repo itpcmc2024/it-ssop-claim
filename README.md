@@ -211,3 +211,9 @@
 - ปุ่มทะเบียน “เปิด SSOP Editor” และ “แก้ไข ZIP” ล็อก Rule Profile ตามโมดูลทะเบียนอัตโนมัติ
 - เปลี่ยนชื่อระบบที่แสดงผลเป็น PCMC-SSO Toolkit
 - Production API URL คงค่าปัจจุบัน
+
+## V4.5.3 Cross Preflight Pilot
+- SSOP Editor: Rule Profile ถูกย้ายมาไว้เหนือ Drop Zone
+- Cross: ตรวจ ZIP หลายผู้ป่วยแบบข้ามไฟล์ พร้อม Error Radar, Filter, Search และปุ่มไปยังจุดแก้ไข
+- ตรวจ R04/R31/R33/R60, S14/S18/S19/S32/S33/S41, T01/T06/T15/T31/T33/T42/T44/T45/T51/T55
+- W04/W05/W07 เตือนเป็น Reference Rule จนกว่าจะเชื่อม Drugcatalog
