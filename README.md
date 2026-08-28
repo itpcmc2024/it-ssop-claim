@@ -217,3 +217,11 @@
 - Cross: ตรวจ ZIP หลายผู้ป่วยแบบข้ามไฟล์ พร้อม Error Radar, Filter, Search และปุ่มไปยังจุดแก้ไข
 - ตรวจ R04/R31/R33/R60, S14/S18/S19/S32/S33/S41, T01/T06/T15/T31/T33/T42/T44/T45/T51/T55
 - W04/W05/W07 เตือนเป็น Reference Rule จนกว่าจะเชื่อม Drugcatalog
+
+## V4.5.4 — Cross Workflow & MD5 UX Refinement
+- Cross reply module is locked to the active Rule Profile.
+- Cross field guide includes relationship-focused SSOP guidance.
+- Cross Preflight adds C07/C08 and remains extensible for future Error Codes.
+- Deterministic Error Codes support confirmed bulk correction.
+- Edited rows/cells are visually marked.
+- MD5 save behavior clearly distinguishes browser working copy from the ZIP saved to disk.

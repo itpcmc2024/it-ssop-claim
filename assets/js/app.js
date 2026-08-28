@@ -1,6 +1,6 @@
 /*
 ======================================================
-PCMC-SSO Toolkit Professional Edition V4.5.3
+PCMC-SSO Toolkit Professional Edition V4.5.4
 Copyright © 2026 PCMC By Kimhan
 All Rights Reserved.
 ======================================================
@@ -109,6 +109,42 @@ const fieldMeta={
  ]
 };
 
+const crossFieldMeta=(()=>{
+ const clone={};Object.entries(fieldMeta).forEach(([sec,rows])=>clone[sec]=rows.map(x=>[...x]));
+ const set=(sec,name,desc,example='',flag='')=>{const row=(clone[sec]||[]).find(x=>String(x[0]).toUpperCase()===String(name).toUpperCase());if(row){row[1]=desc;if(example!==undefined)row[2]=example;if(flag)row[3]=flag;}};
+ set('BILLTRAN','DTTran','วันเวลาที่เกิดธุรกรรม ใช้ตรวจสิทธิ ณ วันรักษา และเทียบกับ BillItems.SvDate','YYYY-MM-DD HH:mm:ss','important');
+ set('BILLTRAN','Hcode','รหัสสถานพยาบาลผู้ส่งข้อมูล ต้องตรงกับ ProviderID/Hcode ในแฟ้มที่เชื่อมด้วย InvNo','รหัสสถานพยาบาล','important');
+ set('BILLTRAN','InvNo','Primary key ของธุรกรรม ใช้เชื่อม BillItems, Dispensing และ OPServices และต้องไม่ซ้ำในชุดเดียวกัน','ต้องไม่ซ้ำ','important');
+ set('BILLTRAN','HN','HN หลักของ InvNo ต้องตรงกับ Dispensing.HN และ OPServices.HN','ใช้ตรวจ S32','important');
+ set('BILLTRAN','PID','PID หลักของ InvNo ต้องตรงกับ Dispensing.PID และ OPServices.PID','ใช้ตรวจ S33','important');
+ set('BILLTRAN','Hmain','รหัสสถานพยาบาลหลักของผู้ประกันตน ณ วันรักษา ห้ามว่าง; การยืนยัน C07 เต็มรูปแบบต้องเทียบฐานสิทธิ ณ DTTran','5 หลัก','important');
+ set('BILLTRAN','PayPlan','รหัสสิทธิ/แผนการจ่าย ห้ามว่าง และควรตรวจเทียบ master สิทธิล่าสุด','ต้องมีค่า','important');
+ set('BILLTRAN','Amount','ยอดค่ารักษารวมของ InvNo ต้องเท่ากับผลรวม BillItems.ChargeAmt','ใช้ตรวจ T33','important');
+ set('BILLTRAN','ClaimAmt','ยอดขอเบิกรวมของ InvNo ต้องเท่ากับผลรวม BillItems.ClaimAmount','ใช้ตรวจ T45','important');
+ set('BillItems','SvDate','วันที่บริการของรายการ ต้องสัมพันธ์กับ BILLTRAN.DTTran ของ InvNo เดียวกัน','ใช้ตรวจ T42','important');
+ set('BillItems','Quantity','จำนวนรายการ ต้องมากกว่า 0','ใช้ตรวจ T55','important');
+ set('BillItems','ClaimUP','ราคาเบิกได้ต่อหน่วย ใช้คำนวณ ClaimAmount = ClaimUP × Quantity','ใช้ตรวจ T44','important');
+ set('BillItems','ClaimAmount','ยอดขอเบิกรายการ ต้องเท่ากับ ClaimUP × Quantity และรวมกันต้องเท่ากับ BILLTRAN.ClaimAmt','ใช้ตรวจ T44/T45','important');
+ set('BillItems','SvRefID','รหัสอ้างอิงบริการ โดยเฉพาะหมวด 3/5 ต้องสัมพันธ์กับ OPServices.SvID','ใช้ตรวจ T15','important');
+ set('Dispensing','ProviderID','รหัสสถานพยาบาล ต้องตรงกับ BILLTRAN.Hcode ใน InvNo เดียวกัน','ใช้ตรวจ C08','important');
+ set('Dispensing','HN','HN ต้องตรงกับ BILLTRAN.HN ใน InvNo เดียวกัน','ใช้ตรวจ S32','important');
+ set('Dispensing','PID','PID ต้องตรงกับ BILLTRAN.PID ใน InvNo เดียวกัน','ใช้ตรวจ S33','important');
+ set('Dispensing','ChargeAmt','ยอดรวมราคาขาย ต้องสัมพันธ์กับผลรวม DispensedItems.ChargeAmt ตาม DispID','ใช้ตรวจ R04','important');
+ set('Dispensing','ClaimAmt','ยอดรวมขอเบิกยา ต้องสัมพันธ์กับ BillItems หมวดยาและผลรวม DispensedItems.ReimbAmt','ใช้ตรวจ R04/R33','important');
+ set('DispensedItems','HospDrgID','รหัสยาของโรงพยาบาล ใช้เชื่อม Drugcatalog สำหรับตรวจช่วงราคาและ TMT','ใช้ตรวจ W04/W05/W07','important');
+ set('DispensedItems','DrgID','รหัสยาอ้างอิงมาตรฐาน เช่น TMT ต้องตรงกับ Drugcatalog ของ HospDrgID','ใช้ตรวจ W07','important');
+ set('DispensedItems','Quantity','จำนวนยาที่จ่าย ต้องมากกว่า 0','ใช้ตรวจ R60','important');
+ set('OPServices','Hcode','รหัสสถานพยาบาล ต้องตรงกับ BILLTRAN.Hcode ใน InvNo เดียวกัน','ใช้ตรวจ C08','important');
+ set('OPServices','HN','HN ต้องตรงกับ BILLTRAN.HN','ใช้ตรวจ S32','important');
+ set('OPServices','PID','PID ต้องตรงกับ BILLTRAN.PID','ใช้ตรวจ S33','important');
+ set('OPServices','DateField','DTAppoint/วันที่ตามโครงสร้าง ต้องเป็นรูปแบบถูกต้องและไม่ขัดกับช่วงบริการ','ใช้ตรวจ S14','important');
+ set('OPServices','CodeSet','ชุดรหัสของหัตถการ/บริการ ต้องสัมพันธ์กับ STDCode/LCCode','ใช้ตรวจ S19/S41','important');
+ set('OPServices','STDCode','รหัสมาตรฐานบริการ ต้องสัมพันธ์กับ CodeSet และชนิดบริการ','ใช้ตรวจ S19/S41','important');
+ set('OPDx','CodeSet','ชุดรหัสวินิจฉัยต้องสัมพันธ์กับ DiagnosisCode','ใช้ตรวจ S18','important');
+ set('OPDx','DiagnosisCode','รหัสวินิจฉัย ต้องอยู่ใน codeset ที่ยอมรับ; การยืนยันเต็มรูปแบบต้องเทียบฐาน ICD/codeset','ใช้ตรวจ S18','important');
+ return clone;
+})();
+
 const cpapFieldMeta={
  BILLTRAN:[
   ['Station','หมายเลขลำดับสถานีในงวดส่ง ใช้จับคู่กับทะเบียนและชื่อ ZIP','เช่น 39','important'],
@@ -164,7 +200,7 @@ const sleepFieldMeta={
  ]
 };
 function selectedGuideModule(){const editor=document.getElementById('cancerPage')?.classList.contains('active');return editor?String(document.getElementById('editorModule')?.value||'SSOCAC').toUpperCase():String(currentRegistryModule||'SSOCAC').toUpperCase();}
-function activeGuideMeta(){const m=selectedGuideModule();return m==='STCPAP'?cpapFieldMeta:m==='STSLEEP'?sleepFieldMeta:fieldMeta;}
+function activeGuideMeta(){const m=selectedGuideModule();return m==='CROSS'?crossFieldMeta:m==='STCPAP'?cpapFieldMeta:m==='STSLEEP'?sleepFieldMeta:fieldMeta;}
 
 const CPAP_ANNOUNCEMENT_URL='assets/docs/CHI67-A03.pdf';
 const documentState={ANNOUNCEMENT:null,PROTOCOL:null};
@@ -289,7 +325,7 @@ function bindTooltips(){
 }
 function activeEditorRuleModule(){return String(document.getElementById('editorModule')?.value||'SSOCAC').trim().toUpperCase();}
 function editorRuleProfileLabel(module){return ({MAIN:'Main',CROSS:'Cross',SSOCAC:'Cancer Care',STCPAP:'CPAP',STSLEEP:'Sleep Test'})[String(module||'').toUpperCase()]||'SSOP';}
-function editorMetaForModule(module){return module==='STCPAP'?cpapFieldMeta:module==='STSLEEP'?sleepFieldMeta:fieldMeta;}
+function editorMetaForModule(module){return module==='CROSS'?crossFieldMeta:module==='STCPAP'?cpapFieldMeta:module==='STSLEEP'?sleepFieldMeta:fieldMeta;}
 function fieldIndexFor_(meta,section,name){return (meta?.[section]||[]).findIndex(x=>String(x?.[0]||'').toUpperCase()===String(name||'').toUpperCase());}
 function cell_(row,idx){return idx>=0?String(row?.[idx]??'').trim():'';}
 function num_(v){const n=Number(String(v??'').replace(/,/g,'').trim());return Number.isFinite(n)?n:0;}
@@ -341,12 +377,12 @@ function renderDictionary(){
  const metaSource=activeGuideMeta();
  document.getElementById('dictionaryBody').innerHTML=order.map(sec=>{const rows=metaSource[sec]||[];return `<div class="dict-section"><h3>${escapeHtml(sec)}</h3><table class="dict-table"><thead><tr><th style="width:50px">ลำดับ</th><th style="width:180px">ชื่อฟิลด์</th><th>ความหมาย</th><th style="width:250px">เงื่อนไข/ตัวอย่าง</th></tr></thead><tbody>${rows.map((m,i)=>`<tr><td>${i+1}</td><td class="${m[3]==='important'?'dict-important':''}">${escapeHtml(m[0])}${m[3]==='important'?' ★':''}</td><td>${escapeHtml(m[1]||'')}</td><td>${escapeHtml(String(m[2]||'-'))}</td></tr>`).join('')}</tbody></table></div>`}).join('');
 }
-const dictionaryModal=document.getElementById('dictionaryModal');const openDictionary=()=>{const gm=selectedGuideModule(),cpap=gm==='STCPAP',sleep=gm==='STSLEEP';const title=dictionaryModal.querySelector('.modal-head strong');const meta=dictionaryModal.querySelector('.modal-head .meta');if(title)title.textContent=cpap?'📖 คู่มือฟิลด์ CPAP':sleep?'📖 คู่มือฟิลด์ Sleep Test':gm==='SSOCAC'?'📖 คู่มือฟิลด์ Cancer':'📖 คู่มือฟิลด์ SSOP';if(meta)meta.textContent=cpap?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับการเบิกเครื่อง CPAP/หน้ากาก':sleep?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับ Sleep Test ชนิดที่ 1 และ 2':gm==='SSOCAC'?'คำอธิบายฟิลด์ เงื่อนไข และตัวอย่างสำหรับ Cancer':'คำอธิบายฟิลด์ SSOP พื้นฐานสำหรับ Main / Cross';dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');renderDictionary();};document.getElementById('dictionaryBtn').onclick=openDictionary;
+const dictionaryModal=document.getElementById('dictionaryModal');const openDictionary=()=>{const gm=selectedGuideModule(),cross=gm==='CROSS',cpap=gm==='STCPAP',sleep=gm==='STSLEEP';const title=dictionaryModal.querySelector('.modal-head strong');const meta=dictionaryModal.querySelector('.modal-head .meta');if(title)title.textContent=cross?'📖 คู่มือฟิลด์ SSOP Cross':cpap?'📖 คู่มือฟิลด์ CPAP':sleep?'📖 คู่มือฟิลด์ Sleep Test':gm==='SSOCAC'?'📖 คู่มือฟิลด์ Cancer':'📖 คู่มือฟิลด์ SSOP';if(meta)meta.textContent=cross?'อ้างอิงโครงสร้าง SSOP และแนวทาง Error ของ สกส. พร้อมจุดเชื่อม InvNo / HN / PID / SvID / DispID สำหรับ Cross Preflight':cpap?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับการเบิกเครื่อง CPAP/หน้ากาก':sleep?'คำอธิบายฟิลด์ เงื่อนไขสำคัญ และตัวอย่างจริงสำหรับ Sleep Test ชนิดที่ 1 และ 2':gm==='SSOCAC'?'คำอธิบายฟิลด์ เงื่อนไข และตัวอย่างสำหรับ Cancer':'คำอธิบายฟิลด์ SSOP พื้นฐานสำหรับ Main';dictionaryModal.classList.add('show');dictionaryModal.setAttribute('aria-hidden','false');renderDictionary();};document.getElementById('dictionaryBtn').onclick=openDictionary;
 const replyModuleSelect=document.getElementById('replyModule');
 const editorModuleSelect=document.getElementById('editorModule');
 const EDITOR_RULE_SUMMARIES={
  MAIN:{title:'กฎตรวจสอบ SSOP — Main',items:[['โครงสร้าง SSOP','ตรวจ Section และจำนวนคอลัมน์ให้สอดคล้องกัน'],['ความสัมพันธ์แฟ้ม','ตรวจ InvNo / PID / HN และโครงสร้างอ้างอิงพื้นฐาน โดยไม่ใช้กฎเฉพาะโครงการ'],['Local Processing','แก้ไขและส่งออกกลับเครื่องผู้ใช้เท่านั้น']]},
- CROSS:{title:'กฎตรวจสอบ SSOP — Cross',items:[['โครงสร้าง SSOP','ตรวจ Section และจำนวนคอลัมน์มาตรฐาน 19/13/18/19/22/6'],['Hmain / PayPlan','ห้ามว่าง และเตือนรายการที่เสี่ยง T06'],['Cross Preflight','สแกน R04/R31/R33/R60, S14/S18/S19/S32/S33/S41, T01/T15/T31/T33/T42/T44/T45/T51/T55'],['Drugcatalog','W04/W05/W07 แสดงเป็นกฎที่ต้องเชื่อมฐานอ้างอิงก่อนยืนยัน'],['Local Processing','ตรวจ กรอง ชี้จุด และแก้ไขใน Browser โดยไม่อัปโหลดข้อมูลผู้ป่วย']]},
+ CROSS:{title:'กฎตรวจสอบ SSOP — Cross',items:[['โครงสร้าง SSOP','ตรวจ Section และจำนวนคอลัมน์มาตรฐาน 19/13/18/19/22/6'],['Hmain / PayPlan','ห้ามว่าง และเตือนรายการที่เสี่ยง T06'],['Cross Preflight','สแกน C07/C08, R04/R31/R33/R60, S14/S18/S19/S32/S33/S41, T01/T15/T31/T33/T42/T44/T45/T51/T55'],['Drugcatalog','W04/W05/W07 แสดงเป็นกฎที่ต้องเชื่อมฐานอ้างอิงก่อนยืนยัน'],['Local Processing','ตรวจ กรอง ชี้จุด และแก้ไขใน Browser โดยไม่อัปโหลดข้อมูลผู้ป่วย']]},
  SSOCAC:{title:'กฎตรวจสอบ SSOP — Cancer Care',items:[['BILLTRAN.AuthCode','ต้องเป็น SSOCAC'],['BILLTRAN.Hmain / PayPlan','ต้องมีค่า'],['OPDx.DiagnosisCode','ต้องพบ Z511 อย่างน้อย 1 รายการ'],['ClaimCat = OPR','ตรวจเฉพาะรายการมะเร็งที่เข้าเงื่อนไข ไม่บังคับทุก BillItems']]},
  STCPAP:{title:'กฎตรวจสอบ SSOP — CPAP',items:[['BILLTRAN.AuthCode','ต้องเป็น STCPAP'],['STDCode 3012 / 3013','เฉพาะรายการเป้าหมายต้อง ClaimCat = OPF'],['เพดานราคา','3012 ≤ 20,000 และ 3013 ≤ 4,000'],['OPServices','ตรวจ SvTxCode, SvPID และ Class = ED']]},
  STSLEEP:{title:'กฎตรวจสอบ SSOP — Sleep Test',items:[['BILLTRAN.AuthCode','ต้องเป็น STCPAP'],['STDCode 51120 / 51121','เฉพาะรายการเป้าหมายต้อง ClaimCat = OPF'],['เพดานราคา','51120 ≤ 7,000 และ 51121 ≤ 6,000'],['Class Relation','ตรวจ OPDx.Class ให้สัมพันธ์กับ OPServices.Class']]}
@@ -354,6 +390,7 @@ const EDITOR_RULE_SUMMARIES={
 function syncEditorModuleUi(){
  const v=String(editorModuleSelect?.value||'SSOCAC').toUpperCase(),profile=EDITOR_RULE_SUMMARIES[v]||EDITOR_RULE_SUMMARIES.SSOCAC;
  const btn=document.getElementById('dictionaryBtn');if(btn){btn.dataset.guideModule=v;const labels={SSOCAC:'Cancer',STCPAP:'CPAP',STSLEEP:'Sleep Test',MAIN:'SSOP Main',CROSS:'SSOP Cross'};btn.textContent='📖 คู่มือฟิลด์ '+(labels[v]||'SSOP');}
+ const reply=document.getElementById('replyModule');if(reply){reply.value=v;reply.disabled=true;reply.title='ล็อกตาม Rule Profile ของ SSOP Editor';}const replyLock=document.getElementById('replyModuleLockNote');if(replyLock)replyLock.textContent='🔒 ล็อกตาม '+editorRuleProfileLabel(v);
  const status=document.getElementById('editorProfileStatus');if(status)status.textContent=editorRuleProfileLabel(v);
  const title=document.getElementById('editorRuleTitle');if(title)title.textContent=profile.title;
  const grid=document.getElementById('editorRuleGrid');if(grid)grid.innerHTML=profile.items.map(x=>`<div class="rule-item"><div class="rule-icon">!</div><div><strong>${escapeHtml(x[0])}</strong><small>${escapeHtml(x[1])}</small></div></div>`).join('');
@@ -793,9 +830,9 @@ function clearRegistryCache(moduleCode){
  const key=String(moduleCode||'').toUpperCase();registryModuleCache.delete(key);try{sessionStorage.removeItem('ssopRegistryCache:'+key);}catch(_e){}
 }
 const REGISTRY_MODULE_CONFIG={
- SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'PCMC-SSO Toolkit · Cancer Care Registry Version 4.5.3'},
- STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'PCMC-SSO Toolkit · SSOCPAP Registry Version 4.5.3'},
- STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'PCMC-SSO Toolkit · Sleep Test Registry Version 4.5.3'}
+ SSOCAC:{title:'ทะเบียนงาน Cancer Care',subtitle:'ทะเบียนผู้ป่วยหลัง Discharge สำหรับเตรียมข้อมูลส่งเบิก SSOCAC',icon:'🎗️',footer:'PCMC-SSO Toolkit · Cancer Care Registry Version 4.5.4'},
+ STCPAP:{title:'ทะเบียนงาน SSOCPAP',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิกเครื่อง CPAP และหน้ากาก ตามกฎ STCPAP',icon:'🫁',footer:'PCMC-SSO Toolkit · SSOCPAP Registry Version 4.5.4'},
+ STSLEEP:{title:'ทะเบียนงาน Sleep Test',subtitle:'ทะเบียนผู้ป่วยสำหรับเตรียมข้อมูลส่งเบิก Sleep Test ตามกฎ STCPAP',icon:'🌙',footer:'PCMC-SSO Toolkit · Sleep Test Registry Version 4.5.4'}
 };
 function openRegistryModule(moduleCode){
  currentRegistryModule=String(moduleCode||'SSOCAC').toUpperCase();registryState.items=[];registryState.filtered=[];registryState.page=1;applyRegistryModuleUi();showPage('registryPage');
@@ -1125,7 +1162,7 @@ async function handleZipFile(file){if(!file)return;if(!window.JSZip){toast('เ�
  chooseStep?.classList.remove('hidden');workspace?.classList.add('hidden');
  const zip=await JSZip.loadAsync(file);const rawEntries=Object.values(zip.files).filter(e=>!e.dir);const entries=[];const logicalPresent=new Set(),verifyItems=[];
  for(const e of rawEntries){let logicalSections=[],text='';try{const buf=await e.async('arraybuffer');text=decodeSsopBuffer(buf);const parsed=parseZipSsopSections(text);logicalSections=Object.keys(parsed);logicalSections.forEach(x=>logicalPresent.add(x));verifyItems.push({name:e.name,text,sections:parsed});}catch(_e){}
-  entries.push({name:e.name,size:e._data?.uncompressedSize||0,type:classifySsopFile(e.name),logicalSections,entry:e,text:text||null,originalText:text||null,sections:text?parseZipSsopSections(text):null,modified:false,saved:false,savedText:null,plainDelimiter:null,plainHasHeader:false,autoChangedCells:{},changeStats:{cells:0,added:0,deleted:0}});
+  entries.push({name:e.name,size:e._data?.uncompressedSize||0,type:classifySsopFile(e.name),logicalSections,entry:e,text:text||null,originalText:text||null,sections:text?parseZipSsopSections(text):null,modified:false,saved:false,savedText:null,plainDelimiter:null,plainHasHeader:false,autoChangedCells:{},editedCells:{},editedRows:{},changeStats:{cells:0,added:0,deleted:0}});
  }
  const requiredSsop=['BILLTRAN','BillItems','OPServices'];
  const missingCore=requiredSsop.filter(x=>!logicalPresent.has(x));
@@ -1145,7 +1182,7 @@ async function handleZipFile(file){if(!file)return;if(!window.JSZip){toast('เ�
  if(String(zipReaderState.moduleCode||'').toUpperCase()==='CROSS'){runCrossPreflight();}
  if(zipReaderState.caseItem){if(verified.warnings.length)toast('ตรวจเคสแล้ว มีข้อสังเกต',verified.warnings.join(' · '),'warning',8000);else toast('ตรวจสอบเคสตรงกัน',verified.lines.join(' · '),'success',5000);markZipLoadedForCase(file.name).catch(err=>{console.warn('markCaseZipLoaded failed',err);toast('อ่าน ZIP สำเร็จ','เปิดข้อมูลได้แล้ว แต่ยังอัปเดตสถานะทะเบียนไม่สำเร็จ: '+(err.message||'กรุณาลองสร้าง ZIP อีกครั้ง'),'warning',7000)})}
  }catch(err){resetZipReader();toast('ไม่อนุญาตให้เปิด ZIP',err.message||'ไฟล์ ZIP อาจเสียหายหรือไม่ตรงกับเคสที่เลือก','error',12000)}finally{const b=document.getElementById('zipChooseBtn');if(b){b.disabled=false;b.textContent='เลือกไฟล์ ZIP';}}}
-function renderZipFileList(){const wrap=document.getElementById('zipFileList');wrap.innerHTML=zipReaderState.entries.length?zipReaderState.entries.map(e=>`<button class="zip-file-item ${zipReaderState.selected===e.name?'active':''}" data-zip-entry="${escapeHtml(e.name)}"><span class="zip-file-icon">📄</span><span class="grow"><b>${escapeHtml(baseName(e.name))}</b><small>${escapeHtml(e.logicalSections.length?e.logicalSections.join(' + '):e.type)} · ${(e.size/1024).toFixed(1)} KB</small></span></button>`).join(''):'<div class="empty-row">ไม่พบไฟล์ภายใน ZIP</div>';wrap.querySelectorAll('[data-zip-entry]').forEach(b=>b.onclick=()=>selectZipEntry(b.dataset.zipEntry))}
+function renderZipFileList(){const wrap=document.getElementById('zipFileList');wrap.innerHTML=zipReaderState.entries.length?zipReaderState.entries.map(e=>`<button class="zip-file-item ${zipReaderState.selected===e.name?'active':''}" data-zip-entry="${escapeHtml(e.name)}"><span class="zip-file-icon">📄</span><span class="grow"><b>${escapeHtml(baseName(e.name))}</b><small>${escapeHtml(e.logicalSections.length?e.logicalSections.join(' + '):e.type)} · ${(e.size/1024).toFixed(1)} KB ${e.modified?'· ✏️ แก้ไขแล้ว':e.saved?'· ✓ บันทึกในงานแล้ว':''}</small></span></button>`).join(''):'<div class="empty-row">ไม่พบไฟล์ภายใน ZIP</div>';wrap.querySelectorAll('[data-zip-entry]').forEach(b=>b.onclick=()=>selectZipEntry(b.dataset.zipEntry))}
 async function selectZipEntry(name){const item=zipReaderState.entries.find(e=>e.name===name);if(!item)return;zipReaderState.selected=name;renderZipFileList();document.getElementById('zipPreviewTitle').textContent=baseName(name);document.getElementById('zipPreviewMeta').textContent=`${item.type} · กำลังอ่านข้อมูล...`;document.getElementById('zipPreviewBody').innerHTML='<tr><td class="empty-row">กำลังอ่านไฟล์...</td></tr>';try{const buf=await item.entry.async('arraybuffer');const text=item.text??decodeSsopBuffer(buf);if(item.text===null){item.text=text;item.originalText=text}const sections=item.sections??parseZipSsopSections(text);item.sections=sections;zipReaderState.sections=sections;zipReaderState.dirty=!!item.modified;updateZipEditStatus();const names=Object.keys(sections);const search=document.getElementById('zipTableSearch');search.disabled=false;search.value='';if(names.length){zipReaderState.activeSection=names[0];renderZipSectionTabs();selectZipSection(names[0])}else{const parsed=parseSsopText(text);const firstLine=String(text||'').replace(/^\uFEFF/,'').split(/\r?\n/).find(x=>x.trim()!=='')||'';item.plainDelimiter=detectDelimiter(firstLine)||'|';item.plainHasHeader=parsed.headers.some(h=>!/^คอลัมน์ \d+$/.test(h)&&h!=='ข้อความ');item.plainRows=parsed.rows;item.plainHeaders=parsed.headers;zipReaderState.activeSection='';zipReaderState.headers=item.plainHeaders;zipReaderState.rows=item.plainRows;renderZipSectionTabs();document.getElementById('zipPreviewMeta').textContent=`${item.type} · ${parsed.rows.length.toLocaleString('th-TH')} แถว · ${parsed.headers.length} คอลัมน์`;renderZipPreview()}}catch(err){document.getElementById('zipPreviewBody').innerHTML=`<tr><td class="empty-row">อ่านไฟล์ไม่ได้: ${escapeHtml(err.message)}</td></tr>`}}
 function renderZipSectionTabs(){const wrap=document.getElementById('zipSectionTabs');if(!wrap)return;const names=Object.keys(zipReaderState.sections||{});wrap.innerHTML=names.map(name=>`<button class="zip-section-tab ${zipReaderState.activeSection===name?'active':''}" data-zip-section="${escapeHtml(name)}">${escapeHtml(name)} <span>${zipReaderState.sections[name].length}</span></button>`).join('');wrap.querySelectorAll('[data-zip-section]').forEach(b=>b.onclick=()=>selectZipSection(b.dataset.zipSection))}
 function selectZipSection(section){zipReaderState.activeSection=section;const rows=zipReaderState.sections[section]||[];zipReaderState.rows=rows;zipReaderState.headers=sectionHeaders(section,rows);renderZipSectionTabs();const info=sectionInfo[section];document.getElementById('zipPreviewMeta').textContent=`${info?.title||section} · ${rows.length.toLocaleString('th-TH')} แถว · ${zipReaderState.headers.length} คอลัมน์`;renderZipPreview()}
@@ -1243,6 +1280,12 @@ function openZipColumnFilter(col,anchor){
 }
 function clearAllZipColumnFilters(){zipReaderState.columnFilters[zipFilterKey()]={};closeZipColumnFilter();renderZipPreview();}
 
+function markZipUserEdited_(item,section,row,col){
+ if(!item)return;if(!item.editedCells)item.editedCells={};if(!item.editedRows)item.editedRows={};const sec=section||'__PLAIN__';
+ if(!item.editedCells[sec])item.editedCells[sec]=new Set();if(!item.editedRows[sec])item.editedRows[sec]=new Set();item.editedCells[sec].add(`${row}|${col}`);item.editedRows[sec].add(row);
+}
+function zipRowWasEdited_(entry,section,rowIndex){const item=zipReaderState.entries.find(x=>x.name===entry);return !!item?.editedRows?.[section||'__PLAIN__']?.has(rowIndex);}
+function zipCellWasEdited_(item,section,row,col){return !!item?.editedCells?.[section||'__PLAIN__']?.has(`${row}|${col}`);}
 function renderZipPreview(){
  const q=(document.getElementById('zipTableSearch')?.value||'').trim().toLowerCase();
  const filtered=zipFilteredIndexedRows(q),rows=filtered.slice(0,500),filters=currentZipColumnFilters();
@@ -1251,8 +1294,8 @@ function renderZipPreview(){
  bindTooltips();
  document.querySelectorAll('[data-zip-filter-col]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openZipColumnFilter(Number(btn.dataset.zipFilterCol),btn)});
  const body=document.getElementById('zipPreviewBody');
- body.innerHTML=rows.length?rows.map(x=>`<tr data-zip-row-index="${x.i}" class="${selected.has(x.i)?'zip-row-selected':''}"><td class="zip-select-col"><input type="checkbox" data-zip-select-row="${x.i}" ${selected.has(x.i)?'checked':''} aria-label="เลือกแถว ${x.i+1}"></td><td>${x.i+1}</td>${zipReaderState.headers.map((_,c)=>`<td contenteditable="true" data-zip-row="${x.i}" data-zip-col="${c}" class="zip-edit-cell ${importantCols.includes(c)?'important-cell':''} ${currentZipItem()?.autoChangedCells?.[zipReaderState.activeSection]?.has(`${x.i}|${c}`)?'auto-filled':''}" title="${escapeAttr(x.r[c]??'')}">${escapeHtml(x.r[c]??'')}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${zipReaderState.headers.length+2}" class="empty-row">ไม่พบข้อมูลตามตัวกรอง</td></tr>`;
- body.querySelectorAll('[data-zip-row]').forEach(td=>td.addEventListener('input',()=>{const r=+td.dataset.zipRow,c=+td.dataset.zipCol;zipReaderState.rows[r][c]=td.textContent;markCurrentZipModified();td.classList.add('changed')}));
+ body.innerHTML=rows.length?rows.map(x=>{const item=currentZipItem(),edited=zipRowWasEdited_(item?.name||'',zipReaderState.activeSection,x.i);return `<tr data-zip-row-index="${x.i}" class="${selected.has(x.i)?'zip-row-selected':''} ${edited?'zip-row-edited':''}"><td class="zip-select-col"><input type="checkbox" data-zip-select-row="${x.i}" ${selected.has(x.i)?'checked':''} aria-label="เลือกแถว ${x.i+1}"></td><td>${x.i+1}${edited?'<span class="edit-mark" title="มีการแก้ไขแล้ว">●</span>':''}</td>${zipReaderState.headers.map((_,c)=>`<td contenteditable="true" data-zip-row="${x.i}" data-zip-col="${c}" class="zip-edit-cell ${importantCols.includes(c)?'important-cell':''} ${item?.autoChangedCells?.[zipReaderState.activeSection]?.has(`${x.i}|${c}`)?'auto-filled':''} ${zipCellWasEdited_(item,zipReaderState.activeSection,x.i,c)?'user-edited':''}" title="${escapeAttr(x.r[c]??'')}">${escapeHtml(x.r[c]??'')}</td>`).join('')}</tr>`}).join(''):`<tr><td colspan="${zipReaderState.headers.length+2}" class="empty-row">ไม่พบข้อมูลตามตัวกรอง</td></tr>`;
+ body.querySelectorAll('[data-zip-row]').forEach(td=>td.addEventListener('input',()=>{const r=+td.dataset.zipRow,c=+td.dataset.zipCol,item=currentZipItem();zipReaderState.rows[r][c]=td.textContent;markZipUserEdited_(item,zipReaderState.activeSection,r,c);markCurrentZipModified();td.classList.add('changed','user-edited');td.closest('tr')?.classList.add('zip-row-edited')}));
  body.querySelectorAll('[data-zip-select-row]').forEach(cb=>cb.addEventListener('change',()=>{const i=+cb.dataset.zipSelectRow;if(cb.checked)selected.add(i);else selected.delete(i);cb.closest('tr')?.classList.toggle('zip-row-selected',cb.checked);updateZipRowTools()}));
  const selectAll=document.getElementById('zipSelectAllRows');if(selectAll)selectAll.addEventListener('change',()=>{rows.forEach(x=>selectAll.checked?selected.add(x.i):selected.delete(x.i));renderZipPreview()});
  updateZipRowTools();
@@ -1271,11 +1314,11 @@ function rebuildZipEntry(item){
  text=text.replace(/<\?EndNote\s+CheckSum="[^"]*"\?>\s*$/i,'').replace(/<\?EndNote\s+Checksum="[^"]*"\?>\s*$/i,'');text=text.replace(/\s+$/,'')+ending;const sum=md5(cp874Bytes(text));return text+`<?EndNote Checksum="${sum}"?>`+ending;
 }
 async function saveZipItem(item,{silent=false}={}){
- if(!item||!item.modified)return false;const rebuilt=rebuildZipEntry(item);zipReaderState.zip.file(item.name,cp874Bytes(rebuilt));item.text=rebuilt;item.savedText=rebuilt;item.saved=true;item.modified=false;item.entry=zipReaderState.zip.file(item.name);if(!silent)toast('บันทึกไฟล์แล้ว',`${baseName(item.name)} ถูกเขียนกลับและสร้าง MD5 ใหม่แล้ว`,'success',4200);return true;
+ if(!item||!item.modified)return false;const rebuilt=rebuildZipEntry(item);zipReaderState.zip.file(item.name,cp874Bytes(rebuilt));item.text=rebuilt;item.savedText=rebuilt;item.lastMd5=(rebuilt.match(/<\?EndNote\s+Checksum="([^"]+)"\?>/i)||[])[1]||'';item.saved=true;item.modified=false;item.entry=zipReaderState.zip.file(item.name);if(!silent)toast('บันทึกในพื้นที่ทำงานแล้ว',`${baseName(item.name)} สร้าง MD5 ${item.lastMd5||'-'} แล้วใน ZIP ที่กำลังแก้ไขภายใน Browser · ยังไม่ได้เขียนทับไฟล์ต้นฉบับบนเครื่อง ให้กด “บันทึก ZIP ลงเครื่อง...” เพื่อได้ไฟล์จริง`,'success',7500);return true;
 }
 async function saveCurrentZipFile(){
  const item=currentZipItem();if(!item){toast('ยังไม่ได้เลือกไฟล์','กรุณาเลือกไฟล์ภายใน ZIP ก่อน','warning');return;}if(!item.modified){updateZipEditStatus('บันทึกแล้ว · ไม่มีข้อมูลเปลี่ยนแปลง');toast('ไม่มีข้อมูลเปลี่ยนแปลง','ไฟล์ปัจจุบันตรงกับข้อมูลที่บันทึกแล้ว','info');return;}
- try{zipReaderState.saving=true;updateZipEditStatus('กำลังบันทึกและสร้าง MD5...');await saveZipItem(item);zipReaderState.dirty=zipReaderState.entries.some(x=>x.modified);updateZipEditStatus('บันทึกแล้ว · MD5 ใหม่พร้อมใช้งาน');renderZipFileList();}catch(err){updateZipEditStatus('บันทึกไม่สำเร็จ');toast('บันทึกไฟล์ไม่สำเร็จ',err.message,'error',6500)}finally{zipReaderState.saving=false;}
+ try{zipReaderState.saving=true;updateZipEditStatus('กำลังบันทึกและสร้าง MD5...');await saveZipItem(item);zipReaderState.dirty=zipReaderState.entries.some(x=>x.modified);updateZipEditStatus(`บันทึกในงานแล้ว · MD5 ${item.lastMd5||'พร้อมใช้'} · ยังไม่เขียนทับไฟล์ต้นฉบับ`);renderZipFileList();const note=document.getElementById('zipSaveLocationNote');if(note)note.textContent='✓ บันทึก MD5 ใน ZIP ที่กำลังแก้ไขภายใน Browser แล้ว · ต้องกด “บันทึก ZIP ลงเครื่อง...” เพื่อสร้างไฟล์บนเครื่อง';}catch(err){updateZipEditStatus('บันทึกไม่สำเร็จ');toast('บันทึกไฟล์ไม่สำเร็จ',err.message,'error',6500)}finally{zipReaderState.saving=false;}
 }
 async function saveAllModifiedZipFiles(){let count=0;for(const item of zipReaderState.entries){if(item.modified){await saveZipItem(item,{silent:true});count++;}}zipReaderState.dirty=false;return count;}
 function zipChangeSummary(){return zipReaderState.entries.reduce((o,item)=>{const c=item.changeStats||{};o.cells+=c.cells||0;o.added+=c.added||0;o.deleted+=c.deleted||0;return o},{cells:0,added:0,deleted:0});}
@@ -1347,6 +1390,8 @@ async function autoFillZipFromCase(){
 
 
 const CROSS_RULE_GUIDE={
+ C07:{level:'Warning',title:'Hmain อาจไม่ถูกต้อง',solution:'ตรวจ BILLTRAN.Hmain ให้เป็นรหัสสถานพยาบาลหลักที่ถูกต้อง ณ BILLTRAN.DTTran; ระบบตรวจค่าว่าง/รูปแบบได้ แต่การยืนยันสิทธิจริงต้องเทียบฐานสิทธิผู้ประกันตนตามวันรักษา'},
+ C08:{level:'Error',title:'Hcode ใน InvNo เดียวกันไม่ตรงกัน',solution:'ใช้ InvNo เป็น key แล้วทำให้ BILLTRAN.Hcode, Dispensing.ProviderID และ OPServices.Hcode เป็นรหัสสถานพยาบาลเดียวกันตามข้อมูลจริง'},
  STRUCT:{level:'Error',title:'โครงสร้าง SSOP / จำนวนคอลัมน์ไม่ถูกต้อง',solution:'ตรวจ Section มาตรฐาน BILLTRAN, BillItems, Dispensing, DispensedItems, OPServices, OPDx และจำนวนคอลัมน์ให้เป็น 19, 13, 18, 19, 22, 6 ตามลำดับ ก่อนแก้ข้อมูลเชิงธุรกิจ'},
  R04:{level:'Error',title:'ยอด Dispensing / DispensedItems ไม่ตรงกัน',solution:'ตรวจ DispID เดียวกัน แล้วเทียบ Dispensing.ChargeAmt กับผลรวม DispensedItems.ChargeAmt และ Dispensing.ClaimAmt กับผลรวม DispensedItems.ReimbAmt จากนั้นแก้ยอดหรือรายการยาที่ขาด/เกิน'},
  R31:{level:'Error',title:'มีการเบิกค่ายาแต่ไม่มี BILLDISP',solution:'ตรวจ InvNo ที่มี BillItems หมวดยา 3/5 แล้วเพิ่ม Dispensing และ DispensedItems ให้ครบ หรือยกเลิกรายการค่ายาที่ไม่ควรเบิก'},
@@ -1396,7 +1441,7 @@ function scanCrossZip_(){
  Object.entries(expectedWidths).forEach(([name,width])=>{const rows=sec[name]||[];if(!rows.length)crossAddIssue_(issues,'STRUCT',{section:name,index:-1,entry:''},`ไม่พบ Section ${name}`);rows.forEach(o=>{if(o.row.length!==width)crossAddIssue_(issues,'STRUCT',o,`${name} แถว ${o.index+1}: ${o.row.length} คอลัมน์ (ควรเป็น ${width})`);});});
  const by=(rows,idx)=>{const m=new Map();rows.forEach(o=>{const k=String(o.row[idx]||'').trim();if(!k)return;if(!m.has(k))m.set(k,[]);m.get(k).push(o)});return m};
  const billByInv=by(bill,4),biByInv=by(bi,0),dispByInv=by(disp,2),opsByInv=by(ops,0),diByDisp=by(di,0),opsBySv=by(ops,1);
- bill.forEach(o=>{if(!String(o.row[14]||'').trim())crossAddIssue_(issues,'T06',o,'Hmain ว่าง',o.row[4]);if(!String(o.row[15]||'').trim())crossAddIssue_(issues,'T06',o,'PayPlan ว่าง',o.row[4]);});
+ bill.forEach(o=>{const hmain=String(o.row[14]||'').trim();if(!hmain)crossAddIssue_(issues,'T06',o,'Hmain ว่าง',o.row[4]);if(!String(o.row[15]||'').trim())crossAddIssue_(issues,'T06',o,'PayPlan ว่าง',o.row[4]);if(!hmain||!/^\d{5}$/.test(hmain))crossAddIssue_(issues,'C07',o,`InvNo ${o.row[4]||'-'}: Hmain = ${hmain||'(ว่าง)'} ต้องตรวจรหัสสถานพยาบาลหลัก ณ วันรักษา`,o.row[4]);});
  billByInv.forEach((arr,inv)=>{if(arr.length>1)arr.forEach(o=>crossAddIssue_(issues,'T01',o,`InvNo ${inv} พบ ${arr.length} ครั้งใน BILLTRAN`,inv));});
  bill.forEach(o=>{
   const inv=String(o.row[4]||'').trim();const rows=biByInv.get(inv)||[];
@@ -1424,7 +1469,7 @@ function scanCrossZip_(){
    const charge=crossNum_(r[9]),claim=crossNum_(r[10]),sumCharge=items.reduce((a,x)=>a+(crossNum_(x.row[11])||0),0),sumClaim=items.reduce((a,x)=>a+(crossNum_(x.row[13])||0),0);
    if((charge!==null&&Math.abs(charge-sumCharge)>0.01)||(claim!==null&&Math.abs(claim-sumClaim)>0.01))crossAddIssue_(issues,'R04',o,`DispID ${dispId}: Charge ${charge??'-'} / รวมรายการ ${sumCharge.toFixed(2)}, Claim ${claim??'-'} / รวมรายการ ${sumClaim.toFixed(2)}`,inv||dispId);
   }
-  const b=(billByInv.get(inv)||[])[0];if(b){if(String(r[3]||'').trim()&&String(b.row[6]||'').trim()&&String(r[3]).trim()!==String(b.row[6]).trim())crossAddIssue_(issues,'S32',o,`InvNo ${inv}: Dispensing.HN ${r[3]} ≠ BILLTRAN.HN ${b.row[6]}`,inv);if(String(r[4]||'').trim()&&String(b.row[12]||'').trim()&&String(r[4]).trim()!==String(b.row[12]).trim())crossAddIssue_(issues,'S33',o,`InvNo ${inv}: Dispensing.PID ไม่ตรง BILLTRAN.PID`,inv);}
+  const b=(billByInv.get(inv)||[])[0];if(b){if(String(r[0]||'').trim()&&String(b.row[3]||'').trim()&&String(r[0]).trim()!==String(b.row[3]).trim())crossAddIssue_(issues,'C08',o,`InvNo ${inv}: Dispensing.ProviderID ${r[0]} ≠ BILLTRAN.Hcode ${b.row[3]}`,inv);if(String(r[3]||'').trim()&&String(b.row[6]||'').trim()&&String(r[3]).trim()!==String(b.row[6]).trim())crossAddIssue_(issues,'S32',o,`InvNo ${inv}: Dispensing.HN ${r[3]} ≠ BILLTRAN.HN ${b.row[6]}`,inv);if(String(r[4]||'').trim()&&String(b.row[12]||'').trim()&&String(r[4]).trim()!==String(b.row[12]).trim())crossAddIssue_(issues,'S33',o,`InvNo ${inv}: Dispensing.PID ไม่ตรง BILLTRAN.PID`,inv);}
  });
  di.forEach(o=>{const q=crossNum_(o.row[9]);if(q===null||q<=0)crossAddIssue_(issues,'R60',o,`DispID ${o.row[0]}: Quantity = ${String(o.row[9]||'(ว่าง)')}`,o.row[0]);});
  bill.forEach(o=>{
@@ -1434,7 +1479,7 @@ function scanCrossZip_(){
  });
  ops.forEach(o=>{
   const r=o.row,inv=String(r[0]||'').trim(),b=(billByInv.get(inv)||[])[0];
-  if(b){if(String(r[4]||'').trim()&&String(b.row[6]||'').trim()&&String(r[4]).trim()!==String(b.row[6]).trim())crossAddIssue_(issues,'S32',o,`InvNo ${inv}: OPServices.HN ${r[4]} ≠ BILLTRAN.HN ${b.row[6]}`,inv);if(String(r[5]||'').trim()&&String(b.row[12]||'').trim()&&String(r[5]).trim()!==String(b.row[12]).trim())crossAddIssue_(issues,'S33',o,`InvNo ${inv}: OPServices.PID ไม่ตรง BILLTRAN.PID`,inv);}
+  if(b){if(String(r[3]||'').trim()&&String(b.row[3]||'').trim()&&String(r[3]).trim()!==String(b.row[3]).trim())crossAddIssue_(issues,'C08',o,`InvNo ${inv}: OPServices.Hcode ${r[3]} ≠ BILLTRAN.Hcode ${b.row[3]}`,inv);if(String(r[4]||'').trim()&&String(b.row[6]||'').trim()&&String(r[4]).trim()!==String(b.row[6]).trim())crossAddIssue_(issues,'S32',o,`InvNo ${inv}: OPServices.HN ${r[4]} ≠ BILLTRAN.HN ${b.row[6]}`,inv);if(String(r[5]||'').trim()&&String(b.row[12]||'').trim()&&String(r[5]).trim()!==String(b.row[12]).trim())crossAddIssue_(issues,'S33',o,`InvNo ${inv}: OPServices.PID ไม่ตรง BILLTRAN.PID`,inv);}
   const dt=String(r[10]||'').trim();if(dt&&(!/^\d{4}-\d{2}-\d{2}$/.test(dt)||(crossDate_(r[13])&&dt<crossDate_(r[13]))))crossAddIssue_(issues,'S14',o,`InvNo ${inv}: DTAppoint/DateField = ${dt} ไม่ถูกต้องหรือก่อนวันบริการ`,inv);
   const cls=String(r[2]||'').trim().toUpperCase();if(cls==='OP'&&!String(r[15]||'').trim()&&!String(r[17]||'').trim())crossAddIssue_(issues,'S41',o,`InvNo ${inv}: Class=OP แต่ LCCode/STDCode ว่าง`,inv);
   const codeSet=String(r[16]||'').trim(),std=String(r[17]||'').trim();if((codeSet&&!std)||(!codeSet&&std))crossAddIssue_(issues,'S19',o,`InvNo ${inv}: CodeSet=${codeSet||'(ว่าง)'} / STDCode=${std||'(ว่าง)'}`,inv);
@@ -1443,20 +1488,36 @@ function scanCrossZip_(){
  ['W04','W05','W07'].forEach(code=>crossAddIssue_(issues,code,null,'กฎนี้ยังตรวจยืนยันไม่ได้จนกว่าจะเชื่อม Drugcatalog/ช่วงวันที่ราคา'));
  return issues;
 }
+const CROSS_BULK_FIXABLE=new Set(['C08','S32','S33','R04','T33','T44','T45']);
+function findZipOrigin_(issue){const item=zipReaderState.entries.find(x=>x.name===issue.entry),rows=item?.sections?.[issue.section]||[];return {item,row:rows[issue.rowIndex]||null};}
+function setCrossBulkCell_(item,section,row,col,value){if(!item||!row)return false;while(row.length<=col)row.push('');const next=String(value??'');if(String(row[col]??'')===next)return false;row[col]=next;item.modified=true;item.changeStats=item.changeStats||{cells:0,added:0,deleted:0};item.changeStats.cells=(item.changeStats.cells||0)+1;markZipUserEdited_(item,section,(item.sections?.[section]||[]).indexOf(row),col);return true;}
+function crossSectionIndex_(){const sec=collectZipSectionsWithOrigin_(),by=(rows,idx)=>{const m=new Map();(rows||[]).forEach(o=>{const k=String(o.row[idx]||'').trim();if(!m.has(k))m.set(k,[]);m.get(k).push(o)});return m};return {sec,billByInv:by(sec.BILLTRAN,4),biByInv:by(sec.BillItems,0),diByDisp:by(sec.DispensedItems,0)};}
+async function bulkFixSelectedCrossCode_(){const code=document.getElementById('crossIssueCodeFilter')?.value||'ALL';if(!CROSS_BULK_FIXABLE.has(code)){toast('ยังไม่รองรับการแก้อัตโนมัติทั้งหมด','เลือก Error Code ที่ระบบคำนวณค่าแก้ไขได้อย่างปลอดภัย เช่น C08, S32, S33, R04, T33, T44 หรือ T45','warning',6000);return;}const issues=(zipReaderState.crossIssues||[]).filter(x=>x.code===code&&x.entry);if(!issues.length)return;const ok=await showDialog('แก้รายการทั้งหมดของ '+code,`พบ ${issues.length} จุด ระบบจะใช้ค่าที่คำนวณจาก key เดียวกันแก้ทุกจุดของ Error Code ${code}\\n\\nก่อนบันทึกจริงยังสามารถตรวจและ Undo ไฟล์แต่ละไฟล์ได้`,'warning',[{text:'ยกเลิก',value:false,className:'soft'},{text:'แก้ทั้งหมด',value:true,className:'primary'}]);if(!ok)return;const ix=crossSectionIndex_();let changed=0;
+ for(const issue of issues){const {item,row}=findZipOrigin_(issue);if(!item||!row)continue;const inv=String(issue.key||'').trim(),bill=(ix.billByInv.get(inv)||[])[0]?.row;
+  if(code==='S32'&&bill){const col=issue.section==='Dispensing'?3:issue.section==='OPServices'?4:-1;if(col>=0&&setCrossBulkCell_(item,issue.section,row,col,bill[6]))changed++;}
+  else if(code==='S33'&&bill){const col=issue.section==='Dispensing'?4:issue.section==='OPServices'?5:-1;if(col>=0&&setCrossBulkCell_(item,issue.section,row,col,bill[12]))changed++;}
+  else if(code==='C08'&&bill){const col=issue.section==='Dispensing'?0:issue.section==='OPServices'?3:-1;if(col>=0&&setCrossBulkCell_(item,issue.section,row,col,bill[3]))changed++;}
+  else if(code==='T33'&&issue.section==='BILLTRAN'){const sum=(ix.biByInv.get(inv)||[]).reduce((a,x)=>a+(crossNum_(x.row[8])||0),0);if(setCrossBulkCell_(item,'BILLTRAN',row,8,sum.toFixed(2)))changed++;}
+  else if(code==='T45'&&issue.section==='BILLTRAN'){const sum=(ix.biByInv.get(inv)||[]).reduce((a,x)=>a+(crossNum_(x.row[10])||0),0);if(setCrossBulkCell_(item,'BILLTRAN',row,16,sum.toFixed(2)))changed++;}
+  else if(code==='T44'&&issue.section==='BillItems'){const q=crossNum_(row[6]),up=crossNum_(row[9]);if(q!==null&&up!==null&&setCrossBulkCell_(item,'BillItems',row,10,(q*up).toFixed(2)))changed++;}
+  else if(code==='R04'&&issue.section==='Dispensing'){const dispId=String(row[1]||'').trim(),items=ix.diByDisp.get(dispId)||[],charge=items.reduce((a,x)=>a+(crossNum_(x.row[11])||0),0),claim=items.reduce((a,x)=>a+(crossNum_(x.row[13])||0),0);if(setCrossBulkCell_(item,'Dispensing',row,9,charge.toFixed(2)))changed++;if(setCrossBulkCell_(item,'Dispensing',row,10,claim.toFixed(2)))changed++;}
+ }
+ zipReaderState.dirty=zipReaderState.entries.some(x=>x.modified);const current=currentZipItem();if(current){zipReaderState.sections=current.sections||{};zipReaderState.rows=zipReaderState.sections[zipReaderState.activeSection]||zipReaderState.rows;}runCrossPreflight();renderZipPreview();renderZipFileList();updateZipEditStatus(changed?`แก้ ${code} อัตโนมัติ ${changed} ช่อง · ยังไม่ได้บันทึก MD5`:'ไม่พบค่าที่เปลี่ยน');toast('แก้ Error Code ทั้งหมดแล้ว',`${code}: เปลี่ยน ${changed} ช่อง · ตรวจผล Preflight ใหม่แล้ว กรุณาตรวจความถูกต้องก่อนบันทึก`,'success',6500);
+}
 function renderCrossPreflight_(){
  const panel=document.getElementById('crossPreflight');if(!panel)return;
  const issues=zipReaderState.crossIssues||[];panel.classList.toggle('hidden',String(zipReaderState.moduleCode||'').toUpperCase()!=='CROSS');if(panel.classList.contains('hidden'))return;
  const codeSel=document.getElementById('crossIssueCodeFilter'),q=String(document.getElementById('crossIssueSearch')?.value||'').trim().toLowerCase(),selected=codeSel?.value||'ALL';
  const codes=[...new Set(issues.map(x=>x.code))].sort();if(codeSel){const prior=codeSel.value;codeSel.innerHTML='<option value="ALL">ทุก Error Code</option>'+codes.map(c=>`<option value="${c}">${c} · ${CROSS_RULE_GUIDE[c]?.title||''}</option>`).join('');codeSel.value=codes.includes(prior)?prior:'ALL';}
- const active=document.getElementById('crossIssueCodeFilter')?.value||selected;
+ const active=document.getElementById('crossIssueCodeFilter')?.value||selected;const bulkBtn=document.getElementById('crossBulkFixBtn');if(bulkBtn){bulkBtn.disabled=!CROSS_BULK_FIXABLE.has(active);bulkBtn.textContent=CROSS_BULK_FIXABLE.has(active)?`✨ แก้ ${active} ทั้งหมด`:'✨ เลือก Code ที่แก้ทั้งหมดได้';}
  const filtered=issues.filter(x=>(active==='ALL'||x.code===active)&&(!q||`${x.code} ${x.detail} ${x.solution} ${x.key}`.toLowerCase().includes(q)));
  const counts={Error:0,Warning:0,Reference:0};issues.forEach(x=>counts[x.level]=(counts[x.level]||0)+1);
  document.getElementById('crossPreflightStats').innerHTML=`<div><b>${issues.length}</b><span>จุดที่ควรตรวจ</span></div><div><b>${counts.Error||0}</b><span>Error</span></div><div><b>${counts.Warning||0}</b><span>Warning</span></div><div><b>${counts.Reference||0}</b><span>ต้องใช้ฐานอ้างอิง</span></div>`;
- document.getElementById('crossIssueBody').innerHTML=filtered.length?filtered.slice(0,500).map((x,i)=>`<tr><td><b>${x.code}</b></td><td><span class="cross-level ${x.level.toLowerCase()}">${x.level}</span></td><td>${escapeHtml(x.section||'-')}${x.rowIndex>=0?` แถว ${x.rowIndex+1}`:''}<br><small>${escapeHtml(x.entry?baseName(x.entry):'ฐานอ้างอิง')}</small></td><td>${escapeHtml(x.detail)}</td><td>${escapeHtml(x.solution)}</td><td>${x.entry?`<button class="soft mini" data-cross-jump="${issues.indexOf(x)}">ไปแก้จุดนี้</button>`:'<span class="meta">ต้องเชื่อมฐานอ้างอิง</span>'}</td></tr>`).join(''):'<tr><td colspan="6" class="empty-row">ไม่พบรายการตามตัวกรอง</td></tr>';
+ document.getElementById('crossIssueBody').innerHTML=filtered.length?filtered.slice(0,500).map((x,i)=>`<tr><td><b>${x.code}</b></td><td><span class="cross-level ${x.level.toLowerCase()}">${x.level}</span></td><td>${escapeHtml(x.section||'-')}${x.rowIndex>=0?` แถว ${x.rowIndex+1}`:''}<br><small>${escapeHtml(x.entry?baseName(x.entry):'ฐานอ้างอิง')}</small></td><td>${escapeHtml(x.detail)}</td><td>${escapeHtml(x.solution)}</td><td>${x.entry?`${zipRowWasEdited_(x.entry,x.section,x.rowIndex)?'<span class="cross-edited-badge">✓ มีการแก้ไข</span> ':''}<button class="soft mini" data-cross-jump="${issues.indexOf(x)}">${zipRowWasEdited_(x.entry,x.section,x.rowIndex)?'กลับไปดู':'ไปแก้จุดนี้'}</button>`:'<span class="meta">ต้องเชื่อมฐานอ้างอิง</span>'}</td></tr>`).join(''):'<tr><td colspan="6" class="empty-row">ไม่พบรายการตามตัวกรอง</td></tr>';
  document.querySelectorAll('[data-cross-jump]').forEach(b=>b.onclick=()=>jumpToCrossIssue_(issues[Number(b.dataset.crossJump)]));
 }
 async function jumpToCrossIssue_(issue){
- if(!issue)return;await selectZipEntry(issue.entry);if(issue.section&&zipReaderState.sections[issue.section])selectZipSection(issue.section);
+ if(!issue)return;zipReaderState.activeCrossIssue={entry:issue.entry,section:issue.section,rowIndex:issue.rowIndex,code:issue.code};await selectZipEntry(issue.entry);if(issue.section&&zipReaderState.sections[issue.section])selectZipSection(issue.section);
  const search=document.getElementById('zipTableSearch');if(search){search.value=issue.key||'';renderZipPreview();}
  setTimeout(()=>{const row=document.querySelector(`[data-zip-row-index="${issue.rowIndex}"]`)?.closest('tr');if(row){row.scrollIntoView({behavior:'smooth',block:'center'});row.classList.add('cross-highlight');setTimeout(()=>row.classList.remove('cross-highlight'),3500)}},120);
 }
@@ -1507,7 +1568,7 @@ function validateZipActive(){
 }
 async function undoZipEntry(){
  const item=currentZipItem();if(!item)return;
- item.text=item.originalText;item.sections=parseZipSsopSections(item.originalText||'');item.modified=false;item.saved=false;item.savedText=null;item.autoChangedCells={};item.changeStats={cells:0,added:0,deleted:0};
+ item.text=item.originalText;item.sections=parseZipSsopSections(item.originalText||'');item.modified=false;item.saved=false;item.savedText=null;item.autoChangedCells={};item.editedCells={};item.editedRows={};item.changeStats={cells:0,added:0,deleted:0};
  zipReaderState.zip.file(item.name,cp874Bytes(item.originalText||''));item.entry=zipReaderState.zip.file(item.name);
  Object.keys(zipReaderState.rowSelections).filter(k=>k.startsWith(`${item.name}::`)).forEach(k=>delete zipReaderState.rowSelections[k]);zipReaderState.sections=item.sections;zipReaderState.dirty=zipReaderState.entries.some(x=>x.modified);
  const names=Object.keys(item.sections);if(names.length)selectZipSection(names[0]);else{const parsed=parseSsopText(item.originalText||'');item.plainRows=parsed.rows;item.plainHeaders=parsed.headers;zipReaderState.activeSection='';zipReaderState.rows=parsed.rows;zipReaderState.headers=parsed.headers;renderZipPreview()}
@@ -1528,13 +1589,13 @@ async function downloadEditedZip(){
   const summary=zipChangeSummary();const changed=zipReaderState.entries.filter(x=>x.modified).length;
   if(changed){const ok=await showDialog('ยืนยันสร้าง ZIP',`ระบบจะบันทึกไฟล์ที่แก้ไข ${changed} ไฟล์ และสร้าง MD5 ใหม่ก่อน ZIP\n\nแก้ไขเซลล์ ${summary.cells} ครั้ง\nเพิ่ม ${summary.added} แถว\nลบ ${summary.deleted} แถว`,'info',[{text:'ยกเลิก',value:false,className:'soft'},{text:'บันทึกและสร้าง ZIP',value:true,className:'primary'}]);if(!ok)return;}
   updateZipEditStatus('กำลังบันทึกทุกไฟล์และสร้าง ZIP...');await saveAllModifiedZipFiles();
-  const blob=await zipReaderState.zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=zipReaderState.file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
-  let tracked=false;if(zipReaderState.caseItem){await recordGeneratedZip(zipReaderState.caseItem,a.download);tracked=true;zipReaderState.caseItem.Case_Status='รอตรวจสอบ';const local=registryState.items.find(x=>x.Case_ID===zipReaderState.caseItem.Case_ID);if(local)local.Case_Status='รอตรวจสอบ';applyRegistryFilter();renderRegistryStats();}
-  updateZipEditStatus('บันทึกแล้ว · สร้าง ZIP เรียบร้อย');toast('สร้าง ZIP สำเร็จ',tracked?`บันทึกไฟล์ที่แก้ไข สร้าง MD5 ใหม่ ดาวน์โหลด ${a.download} และบันทึกประวัติแล้ว`:`บันทึกไฟล์ที่แก้ไข สร้าง MD5 ใหม่ และดาวน์โหลด ${a.download} แล้ว`,'success',7000);
+  const blob=await zipReaderState.zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});let savedName=zipReaderState.file.name,saveMode='ดาวน์โหลดผ่าน Browser';if(window.showSaveFilePicker){try{const handle=await window.showSaveFilePicker({suggestedName:savedName,types:[{description:'ZIP file',accept:{'application/zip':['.zip']}}]});const writable=await handle.createWritable();await writable.write(blob);await writable.close();savedName=handle.name||savedName;saveMode='บันทึกไปยังตำแหน่งที่ผู้ใช้เลือก';}catch(err){if(err?.name==='AbortError'){updateZipEditStatus('ยกเลิกการบันทึก ZIP');return;}throw err;}}else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=savedName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);}
+  let tracked=false;if(zipReaderState.caseItem){await recordGeneratedZip(zipReaderState.caseItem,savedName);tracked=true;zipReaderState.caseItem.Case_Status='รอตรวจสอบ';const local=registryState.items.find(x=>x.Case_ID===zipReaderState.caseItem.Case_ID);if(local)local.Case_Status='รอตรวจสอบ';applyRegistryFilter();renderRegistryStats();}
+  updateZipEditStatus('บันทึกแล้ว · สร้าง ZIP เรียบร้อย');toast('สร้าง ZIP สำเร็จ',tracked?`สร้าง MD5 ใหม่และ${saveMode}: ${savedName} · บันทึกประวัติแล้ว`:`สร้าง MD5 ใหม่และ${saveMode}: ${savedName}`,'success',8000);const note=document.getElementById('zipSaveLocationNote');if(note)note.textContent=`✓ สร้างไฟล์ ${savedName} แล้ว · ${saveMode}`;
  }catch(err){updateZipEditStatus('สร้าง ZIP ไม่สำเร็จ');toast('สร้าง ZIP ไม่สำเร็จ',err.message,'error',7000)}
 }
 
-document.getElementById('crossRunPreflightBtn')?.addEventListener('click',runCrossPreflight);document.getElementById('crossIssueCodeFilter')?.addEventListener('change',renderCrossPreflight_);document.getElementById('crossIssueSearch')?.addEventListener('input',renderCrossPreflight_);
+document.getElementById('crossRunPreflightBtn')?.addEventListener('click',runCrossPreflight);document.getElementById('crossBulkFixBtn')?.addEventListener('click',bulkFixSelectedCrossCode_);document.getElementById('crossIssueCodeFilter')?.addEventListener('change',renderCrossPreflight_);document.getElementById('crossIssueSearch')?.addEventListener('input',renderCrossPreflight_);
 document.getElementById('zipChooseBtn')?.addEventListener('click',()=>document.getElementById('zipFileInput').click());document.getElementById('zipFileInput')?.addEventListener('change',e=>handleZipFile(e.target.files?.[0]));document.getElementById('zipChangeBtn')?.addEventListener('click',resetZipReader);let zipSearchTimer=null;document.getElementById('zipTableSearch')?.addEventListener('input',()=>{clearTimeout(zipSearchTimer);zipSearchTimer=setTimeout(renderZipPreview,120)});document.getElementById('zipAutoFillBtn')?.addEventListener('click',autoFillZipFromCase);document.getElementById('zipSaveFileBtn')?.addEventListener('click',saveCurrentZipFile);document.getElementById('zipValidateBtn')?.addEventListener('click',validateZipActive);document.getElementById('zipUndoBtn')?.addEventListener('click',undoZipEntry);document.getElementById('zipAddRowBtn')?.addEventListener('click',addZipRow);document.getElementById('zipDeleteRowsBtn')?.addEventListener('click',deleteSelectedZipRows);document.getElementById('zipDownloadBtn')?.addEventListener('click',downloadEditedZip);const zipDrop=document.getElementById('zipDropZone');if(zipDrop){['dragenter','dragover'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>zipDrop.addEventListener(ev,e=>{e.preventDefault();zipDrop.classList.remove('dragover')}));zipDrop.addEventListener('drop',e=>handleZipFile(e.dataTransfer.files?.[0]))}
 
 /* Excel Import V4.5.2 */
