@@ -225,3 +225,6 @@
 - Deterministic Error Codes support confirmed bulk correction.
 - Edited rows/cells are visually marked.
 - MD5 save behavior clearly distinguishes browser working copy from the ZIP saved to disk.
+
+## V4.5.5 — Cross Focus Fix Desk
+Cross Editor เพิ่ม Focus Fix Desk, การแทนค่าซ้ำตาม Error Code, ปุ่มชี้เซลล์เป้าหมายโดยตรง และ Custom Rule Manager สำหรับเพิ่มกฎตรวจระดับฟิลด์โดยไม่ต้อง Build เวอร์ชันใหม่ กฎ Custom สามารถ Export/Import JSON ได้ และเก็บใน Browser เครื่องผู้ใช้เท่านั้น

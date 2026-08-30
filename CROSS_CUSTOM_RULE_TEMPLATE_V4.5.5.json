@@ -1,0 +1,14 @@
+[
+  {
+    "id": 455001,
+    "enabled": true,
+    "code": "C99",
+    "section": "BILLTRAN",
+    "field": "Hmain",
+    "operator": "EQUALS",
+    "value": "HA0000009",
+    "level": "Warning",
+    "title": "ตัวอย่าง Hmain ที่ต้องเปลี่ยน",
+    "solution": "ตรวจสิทธิจริงก่อน แล้วใช้ Replace by Value เพื่อแทนค่าที่ถูกต้องทุกจุด"
+  }
+]
