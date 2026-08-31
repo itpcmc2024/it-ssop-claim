@@ -238,3 +238,9 @@ Cross Editor เพิ่ม Focus Fix Desk, การแทนค่าซ้�
 
 ## V4.5.7
 Selective Resubmit สำหรับ Main/Cross, Safe Auto Repair และ Knowledge Seed เชื่อม SSO Knowledge Center.
+
+## V4.5.8 — Unified SSOP Repair Workflow
+- Cross Auto Fix แสดง Logic ก่อนแก้ทุกครั้ง
+- แยก Auto Fix (ระบบคำนวณ) ออกจาก Guided Replace (ผู้ใช้กำหนดค่า)
+- Rule Manager มีคำแนะนำ 4 ขั้นตอนและเชื่อม SSO Knowledge Center
+- Toolbar SSOP Editor ทุกโมดูลใช้ลำดับเดียวกัน: แก้/เติม → ตรวจ → MD5 → ZIP
