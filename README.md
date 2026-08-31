@@ -244,3 +244,8 @@ Selective Resubmit สำหรับ Main/Cross, Safe Auto Repair และ Kno
 - แยก Auto Fix (ระบบคำนวณ) ออกจาก Guided Replace (ผู้ใช้กำหนดค่า)
 - Rule Manager มีคำแนะนำ 4 ขั้นตอนและเชื่อม SSO Knowledge Center
 - Toolbar SSOP Editor ทุกโมดูลใช้ลำดับเดียวกัน: แก้/เติม → ตรวจ → MD5 → ZIP
+
+
+## V4.5.9 — Version Sync, Knowledge Enrichment & R31 Guided Repair
+
+ดู `RELEASE_NOTES_V4.5.9.md`
