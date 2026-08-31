@@ -1,0 +1,29 @@
+{
+  "schema": "PCMC_SSO_CROSS_KNOWLEDGE_PACK_V1",
+  "module": "CROSS",
+  "knowledge": [
+    {
+      "ErrorCode": "CXX",
+      "Description": "คำอธิบาย Error",
+      "Cause": "สาเหตุ",
+      "Solution": "แนวทางแก้ที่เข้าใจง่าย",
+      "RelatedFile": "BILLTRAN",
+      "RelatedField": "Hmain",
+      "Tips": "อ้างอิงเอกสารทางการ/ตรวจข้อมูลจริงก่อนแก้",
+      "Active": true
+    }
+  ],
+  "rules": [
+    {
+      "code": "CXX",
+      "section": "BILLTRAN",
+      "field": "Hmain",
+      "operator": "EMPTY",
+      "value": "",
+      "level": "Warning",
+      "title": "คำอธิบายกฎ",
+      "solution": "ปล่อยว่างได้ ระบบจะใช้ Solution จาก Knowledge Base",
+      "enabled": true
+    }
+  ]
+}

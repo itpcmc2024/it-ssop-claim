@@ -228,3 +228,9 @@
 
 ## V4.5.5 — Cross Focus Fix Desk
 Cross Editor เพิ่ม Focus Fix Desk, การแทนค่าซ้ำตาม Error Code, ปุ่มชี้เซลล์เป้าหมายโดยตรง และ Custom Rule Manager สำหรับเพิ่มกฎตรวจระดับฟิลด์โดยไม่ต้อง Build เวอร์ชันใหม่ กฎ Custom สามารถ Export/Import JSON ได้ และเก็บใน Browser เครื่องผู้ใช้เท่านั้น
+
+
+## V4.5.6 — Filter Totals & Knowledge-assisted Cross Rules
+
+- ตาราง ZIP แสดงผลรวมคอลัมน์การเงินตาม Search/Filter ปัจจุบัน
+- Cross Rule Manager เชื่อม Knowledge Base และรองรับ Research Request → Knowledge Pack → Import โดยไม่ต้อง Build เวอร์ชันใหม่
