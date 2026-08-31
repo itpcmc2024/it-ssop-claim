@@ -234,3 +234,7 @@ Cross Editor เพิ่ม Focus Fix Desk, การแทนค่าซ้�
 
 - ตาราง ZIP แสดงผลรวมคอลัมน์การเงินตาม Search/Filter ปัจจุบัน
 - Cross Rule Manager เชื่อม Knowledge Base และรองรับ Research Request → Knowledge Pack → Import โดยไม่ต้อง Build เวอร์ชันใหม่
+
+
+## V4.5.7
+Selective Resubmit สำหรับ Main/Cross, Safe Auto Repair และ Knowledge Seed เชื่อม SSO Knowledge Center.

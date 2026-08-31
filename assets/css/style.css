@@ -606,3 +606,7 @@ body.modal-open{overflow:hidden}
 .cross-rule-code-row{display:flex;gap:6px}.cross-rule-code-row input{min-width:0;flex:1}.cross-rule-kb-status{font-size:11px;color:#6c7775;margin-top:5px;line-height:1.35}.cross-rule-kb-status.ok{color:#16725f}.cross-rule-kb-status.missing{color:#a55b1f}
 .cross-knowledge-workflow{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px;border:1px solid #c9ddd8;background:#f7fbfa;border-radius:14px;margin:10px 0}.cross-knowledge-workflow .row{flex-wrap:wrap}
 .cross-kb-badge{display:inline-block;margin-top:4px;padding:2px 6px;border-radius:999px;background:#e5f5ef;color:#17624f;font-weight:700;white-space:nowrap}
+/* V4.5.7 Cross selective export */
+.zip-subset-modal{max-width:1180px;width:min(1180px,96vw)}
+.subset-export-controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.subset-export-controls .grow{flex:1 1 320px}.subset-actions{margin:10px 0}.zip-subset-table-wrap{max-height:46vh}.zip-subset-table-wrap td{vertical-align:middle}.subset-output-grid{display:grid;grid-template-columns:180px 180px minmax(280px,1fr);gap:12px;align-items:end;margin-top:12px;padding:12px;border:1px solid #cfe2dd;border-radius:14px;background:#f6fbfa}.subset-preview{display:flex;flex-direction:column;gap:4px}.subset-preview span{font-size:12px;color:#5d7772}.cross-only.hidden{display:none!important}
+@media(max-width:760px){.subset-output-grid{grid-template-columns:1fr}.subset-export-controls{align-items:stretch;flex-direction:column}}

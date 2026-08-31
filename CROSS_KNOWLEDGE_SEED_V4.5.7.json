@@ -1,0 +1,27 @@
+{
+  "schema": "PCMC_SSO_CROSS_KNOWLEDGE_PACK_V1",
+  "version": "4.5.7",
+  "module": "CROSS",
+  "note": "ตัวอย่างบางส่วน; ในระบบ V4.5.7 มี Built-in Knowledge Seed ครบชุดสำหรับ Code ที่รองรับ",
+  "knowledge": [
+    {
+      "ErrorCode": "C07",
+      "Description": "รหัสสถานพยาบาลหลัก (Hmain) ไม่ถูกต้อง",
+      "Cause": "Hmain ว่าง หรือระบุรหัสสถานพยาบาลผู้รักษาแทนสถานพยาบาลหลักของผู้ประกันตน ณ วันรักษา",
+      "Solution": "ตรวจสิทธิผู้ประกันตน ณ BILLTRAN.DTTran แล้วแก้ BILLTRAN.Hmain เป็นรหัสสถานพยาบาลหลัก 5 หลักที่ถูกต้อง ห้ามเดาจาก Hcode ของผู้รักษา",
+      "RelatedFile": "BILLTRAN",
+      "RelatedField": "Hmain",
+      "Tips": "C07 เป็น Error ไม่ใช่ Warning. อ้างอิงคู่มือ SSOP ของ สกส."
+    },
+    {
+      "ErrorCode": "R04",
+      "Description": "ยอดเบิกของ Dispensing และ DispensedItems ไม่ตรงกัน",
+      "Cause": "ยอดหัวใบสั่งยาไม่เท่ากับผลรวมรายการย่อยใน DispID เดียวกัน",
+      "Solution": "Dispensing.ChargeAmt = ผลรวม DispensedItems.ChargeAmt และ Dispensing.ClaimAmt = ผลรวม DispensedItems.ReimbAmt. ตรวจรายการยาที่ขาด/เกินก่อนบันทึก",
+      "RelatedFile": "BILLDISP",
+      "RelatedField": "ChargeAmt / ClaimAmt / ReimbAmt",
+      "Tips": "Safe Auto Fix ปรับยอดหัวจากผลรวมรายการย่อยและไม่ลบรายการ Reimb=0 อัตโนมัติ"
+    }
+  ],
+  "rules": []
+}
